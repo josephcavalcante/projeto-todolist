@@ -79,3 +79,26 @@ public interface INotificacaoService {
 - Email, SMS, Push, etc.
 
 ## Implementação das Melhorias
+
+### ✅ Concluído
+
+1. **Interfaces Criadas (ISP + DIP)**
+   - `ITarefaRepository` - Operações de persistência
+   - `IValidadorTarefa` - Validações específicas
+   - `IRelatorioService` - Geração de relatórios
+
+2. **Validador Implementado (SRP)**
+   - `ValidadorTarefa` - Responsabilidade única de validação
+   - Separação clara das regras de negócio
+
+3. **TarefaService Refatorado (SRP + DIP)**
+   - Usa `IValidadorTarefa` em vez de validação inline
+   - Responsabilidade focada em coordenação
+   - Dependência de abstração, não implementação
+
+### 🔄 Próximos Passos
+
+1. Implementar `TarefaRepository` usando `ITarefaRepository`
+2. Refatorar `ToDoList` para usar as interfaces
+3. Implementar `RelatorioService`
+4. Aplicar Factory Pattern para extensibilidade (OCP)
