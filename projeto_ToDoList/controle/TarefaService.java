@@ -1,22 +1,30 @@
 package controle;
 
 import modelo.Tarefa;
+import interfaces.IValidadorTarefa;
+import validadores.ValidadorTarefa;
 import java.time.LocalDate;
 import java.util.List;
 
-// gerenciamento das tarefas vindas da interface
+/**
+ * Serviço para gerenciamento de tarefas
+ * Princípio SRP: Responsabilidade única de coordenar operações de tarefa
+ * Princípio DIP: Depende de abstração (IValidadorTarefa)
+ */
 public class TarefaService {
     private ManipuladorDeTarefas gerenciador;
+    private IValidadorTarefa validador;
 
     public TarefaService(ManipuladorDeTarefas manipulador) {
-        this.gerenciador = manipulador; // armazenamento da referência
+        this.gerenciador = manipulador;
+        this.validador = new ValidadorTarefa();
     }
 
     // criação de tarefa nova
     public boolean cadastrar(String titulo, String descricao, LocalDate deadline, int prioridade) {
-        // validação da existência do título
-        if(titulo == null || titulo.trim().equals("")) { // sem espaço no if
-            return false; // título obrigatório
+        // validação usando validador dedicado
+        if(!validador.validarTitulo(titulo)) {
+            return false;
         }
         try {
             // instanciação da tarefa com data atual
