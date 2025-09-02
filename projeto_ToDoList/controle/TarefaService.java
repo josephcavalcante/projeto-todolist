@@ -2,7 +2,9 @@ package controle;
 
 import modelo.Tarefa;
 import interfaces.IValidadorTarefa;
+import interfaces.ITarefaRepository;
 import validadores.ValidadorTarefa;
+import repositorios.TarefaRepository;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -12,11 +14,11 @@ import java.util.List;
  * Princípio DIP: Depende de abstração (IValidadorTarefa)
  */
 public class TarefaService {
-    private ManipuladorDeTarefas gerenciador;
+    private ITarefaRepository repositorio;
     private IValidadorTarefa validador;
 
     public TarefaService(ManipuladorDeTarefas manipulador) {
-        this.gerenciador = manipulador;
+        this.repositorio = new TarefaRepository(manipulador);
         this.validador = new ValidadorTarefa();
     }
 
@@ -29,7 +31,7 @@ public class TarefaService {
         try {
             // instanciação da tarefa com data atual
             Tarefa novaTarefa = new Tarefa(titulo.trim(), descricao.trim(), LocalDate.now(), deadline, prioridade);
-            gerenciador.adicionarTarefa(novaTarefa);
+            repositorio.salvar(novaTarefa);
             return true; // operação bem-sucedida
         } catch (Exception ex) {
             return false; // falha na operação
@@ -52,7 +54,7 @@ public class TarefaService {
             // construção da tarefa atualizada
             Tarefa tarefaEditada = new Tarefa(novoTitulo.trim(), novaDescricao.trim(), tarefaVelha.getDataCadastro(), novoDeadline, novaPrioridade);
             tarefaEditada.setPercentual(novoPercentual); // definição do percentual
-            gerenciador.editarTarefa(tarefaVelha, tarefaEditada);
+            repositorio.atualizar(tarefaVelha, tarefaEditada);
             return true;
         } catch (Exception erro) {
             return false; // falha na edição
@@ -64,7 +66,7 @@ public class TarefaService {
         try {
             Tarefa tarefaParaRemover = buscarPorTitulo(titulo);
             if (tarefaParaRemover != null) {
-                gerenciador.removerTarefa(tarefaParaRemover);
+                repositorio.remover(tarefaParaRemover);
                 return true; // exclusão realizada
             }
             return false; // tarefa não localizada
@@ -75,13 +77,6 @@ public class TarefaService {
 
     // busca de tarefa por título
     public Tarefa buscarPorTitulo(String titulo) {
-        List<Tarefa> listaTarefas = gerenciador.listarTarefas();
-        int contador = 0; // TODO: usar depois pra estatisticas
-        // iteração sobre todas as tarefas
-        for (Tarefa t : listaTarefas) {
-            contador++; // incrementa contador
-            if(t.getTitulo().equalsIgnoreCase(titulo)) { return t; } // inline
-        }
-        return null; // tarefa inexistente
+        return repositorio.buscarPorTitulo(titulo);
     }
 }
