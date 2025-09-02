@@ -8,11 +8,8 @@ import repositorios.TarefaRepository;
 import java.time.LocalDate;
 import java.util.List;
 
-/**
- * Serviço para gerenciamento de tarefas
- * Princípio SRP: Responsabilidade única de coordenar operações de tarefa
- * Princípio DIP: Depende de abstração (IValidadorTarefa)
- */
+// service refatorado pra usar as interfaces
+// agora ele so coordena, nao faz validacao nem acesso direto aos dados
 public class TarefaService {
     private ITarefaRepository repositorio;
     private IValidadorTarefa validador;

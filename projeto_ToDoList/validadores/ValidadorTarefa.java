@@ -3,10 +3,8 @@ package validadores;
 import interfaces.IValidadorTarefa;
 import modelo.Tarefa;
 
-/**
- * Implementação do validador de tarefas
- * Princípio SRP: Responsabilidade única de validação
- */
+// classe que so cuida das validacoes
+// tirei essa logica do service pra ficar mais limpo
 public class ValidadorTarefa implements IValidadorTarefa {
     
     @Override

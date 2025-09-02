@@ -6,11 +6,8 @@ import controle.ManipuladorDeTarefas;
 import java.time.LocalDate;
 import java.util.List;
 
-/**
- * Implementação do repositório de tarefas
- * Princípio SRP: Responsabilidade única de persistência
- * Princípio DIP: Implementa abstração ITarefaRepository
- */
+// implementacao do repositorio
+// aqui fica toda a logica de acesso aos dados
 public class TarefaRepository implements ITarefaRepository {
     private ManipuladorDeTarefas manipulador;
     
