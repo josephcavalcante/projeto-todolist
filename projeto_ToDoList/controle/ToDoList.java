@@ -4,7 +4,9 @@ import modelo.Tarefa;
 import modelo.Subtarefa;
 import modelo.Usuario;
 import persistencia.Persistencia;
-import relatorios.GeradorDeRelatorios;
+import servicos.RelatorioService;
+import servicos.UsuarioService;
+import interfaces.IRelatorioService;
 import comunicacao.Mensageiro;
 
 import java.time.LocalDate;
@@ -15,16 +17,17 @@ import java.util.List;
 public class ToDoList {
     private ManipuladorDeTarefas gerenciadorTarefas;
     private Persistencia salvaDados;
-    private Usuario usuarioAtual;
     private TarefaService serviceTarefas;
     private SubtarefaService serviceSubs;
+    private IRelatorioService relatorioService;
+    private UsuarioService usuarioService;
     private static final String ARQUIVO_DADOS = "todolist.dat"; // arquivo onde salva
 
     // construtor - inicializa tudo
     public ToDoList() {
         this.gerenciadorTarefas = new ManipuladorDeTarefas();
         this.salvaDados = new Persistencia();
-        this.usuarioAtual = new Usuario("Usuário", "projetopoo00@gmail.com"); // email fixo
+        this.usuarioService = new UsuarioService();
         
         // tenta carregar dados salvos
         carregarDados();
@@ -32,6 +35,7 @@ public class ToDoList {
         // cria os services
         this.serviceTarefas = new TarefaService(gerenciadorTarefas);
         this.serviceSubs = new SubtarefaService(gerenciadorTarefas, serviceTarefas);
+        this.relatorioService = new RelatorioService();
     }
 
     // carrega os dados do arquivo
