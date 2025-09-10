@@ -46,7 +46,7 @@ public class ToDoList {
                 this.gerenciadorTarefas = dadosCarregados; // substitui o vazio
                 // se tem usuario salvo, usa ele
                 if (dadosCarregados.getUsuario() != null) {
-                    this.usuarioAtual = dadosCarregados.getUsuario();
+                    this.usuarioService = new UsuarioService(dadosCarregados.getUsuario());
                 }
             }
         } catch (Exception erro) {
@@ -57,7 +57,7 @@ public class ToDoList {
     // salva tudo no arquivo
     public void salvarDados() {
         try {
-            gerenciadorTarefas.setUsuario(usuarioAtual); // inclui o usuario
+            gerenciadorTarefas.setUsuario(usuarioService.obterUsuario()); // inclui o usuario
             salvaDados.salvarManipulador(gerenciadorTarefas, ARQUIVO_DADOS);
         } catch (Exception ex) {
             System.out.println("Erro ao salvar dados: " + ex.getMessage());
@@ -122,22 +122,16 @@ public class ToDoList {
 
     // criação de PDF com tarefas do dia
     public boolean gerarRelatorioPDF(LocalDate data) {
-        try {
-            List<Tarefa> tarefasDoDia = listarTarefasPorData(data);
-            GeradorDeRelatorios.gerarRelatorioPDF(tarefasDoDia, data);
-            return true; // sucesso na operação
-        } catch (Exception erro) {
-            System.out.println("Erro ao gerar relatório PDF: " + erro.getMessage());
-            return false; // falha na operação
-        }
+        List<Tarefa> tarefasDoDia = listarTarefasPorData(data);
+        return relatorioService.gerarPDF(tarefasDoDia, data);
     }
 
     // envio de email com relatório diário
     public boolean enviarRelatorioEmail(LocalDate data) {
         try {
             List<Tarefa> tarefas = listarTarefasPorData(data);
-            GeradorDeRelatorios.gerarRelatorioPDF(tarefas, data);
-            Mensageiro.enviarEmail(usuarioAtual.getEmail(), "Relatório de tarefas do dia " + data);
+            relatorioService.gerarPDF(tarefas, data);
+            Mensageiro.enviarEmail(usuarioService.obterEmail(), "Relatório de tarefas do dia " + data);
             return true;
         } catch (Exception ex) {
             System.out.println("Erro ao enviar e-mail: " + ex.getMessage());
@@ -147,26 +141,20 @@ public class ToDoList {
 
     // geração de planilha Excel mensal
     public boolean gerarRelatorioExcel(int mes, int ano) {
-        try {
-            List<Tarefa> todasTarefas = listarTodasTarefas();
-            GeradorDeRelatorios.gerarRelatorioExcel(todasTarefas, mes, ano);
-            return true;
-        } catch (Exception erro) {
-            System.out.println("Erro ao gerar relatório Excel: " + erro.getMessage());
-            return false;
-        }
+        List<Tarefa> todasTarefas = listarTodasTarefas();
+        return relatorioService.gerarExcel(todasTarefas, mes, ano);
     }
 
     // ========== DADOS DO USUÁRIO ==========
 
     // pega usuário logado
     public Usuario obterUsuario() {
-        return usuarioAtual;
+        return usuarioService.obterUsuario();
     }
 
     // alteração do nome do usuário (email permanece fixo)
     public void setNomeUsuario(String novoNome) {
-        this.usuarioAtual.setNome(novoNome);
+        usuarioService.alterarNome(novoNome);
         salvarDados(); // persistência da alteração
     }
 

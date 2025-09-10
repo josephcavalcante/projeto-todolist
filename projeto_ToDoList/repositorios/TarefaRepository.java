@@ -1,10 +1,11 @@
 package repositorios;
 
-import interfaces.ITarefaRepository;
-import modelo.Tarefa;
-import controle.ManipuladorDeTarefas;
 import java.time.LocalDate;
 import java.util.List;
+
+import controle.ManipuladorDeTarefas;
+import interfaces.ITarefaRepository;
+import modelo.Tarefa;
 
 // implementacao do repositorio
 // aqui fica toda a logica de acesso aos dados
