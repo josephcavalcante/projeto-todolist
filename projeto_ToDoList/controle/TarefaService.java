@@ -14,6 +14,13 @@ public class TarefaService {
     private ITarefaRepository repositorio;
     private IValidadorTarefa validador;
 
+    // construtor com injecao de dependencia - DIP completo
+    public TarefaService(ITarefaRepository repositorio, IValidadorTarefa validador) {
+        this.repositorio = repositorio;
+        this.validador = validador;
+    }
+    
+    // construtor de compatibilidade
     public TarefaService(ManipuladorDeTarefas manipulador) {
         this.repositorio = new TarefaRepository(manipulador);
         this.validador = new ValidadorTarefa();
