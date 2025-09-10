@@ -2,9 +2,11 @@ package servicos;
 
 import modelo.Usuario;
 
+import interfaces.IUsuarioService;
+
 // service pra gerenciar dados do usuario
 // tirei essa responsabilidade da classe principal
-public class UsuarioService {
+public class UsuarioService implements IUsuarioService {
     private Usuario usuario;
     
     public UsuarioService() {

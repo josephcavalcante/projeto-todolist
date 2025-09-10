@@ -3,39 +3,47 @@ package controle;
 import modelo.Tarefa;
 import modelo.Subtarefa;
 import modelo.Usuario;
-import persistencia.Persistencia;
 import servicos.RelatorioService;
 import servicos.UsuarioService;
 import interfaces.IRelatorioService;
+import interfaces.IUsuarioService;
+import controllers.TarefaController;
+import controllers.PersistenciaController;
 import comunicacao.Mensageiro;
 
 import java.time.LocalDate;
 import java.util.List;
 
-// classe principal do sistema
-// faz a orquestracao de tudo
+// facade principal do sistema - so coordena controllers
+// nao acessa dados diretamente mais
 public class ToDoList {
-    private ManipuladorDeTarefas gerenciadorTarefas;
-    private Persistencia salvaDados;
+    private ManipuladorDeTarefas gerenciadorTarefas; // ainda precisa pra compatibilidade
     private TarefaService serviceTarefas;
     private SubtarefaService serviceSubs;
     private IRelatorioService relatorioService;
-    private UsuarioService usuarioService;
-    private static final String ARQUIVO_DADOS = "todolist.dat"; // arquivo onde salva
+    private IUsuarioService usuarioService;
+    private TarefaController tarefaController;
+    private PersistenciaController persistenciaController;
 
-    // construtor - inicializa tudo
+    // construtor - inicializa controllers e services
     public ToDoList() {
-        this.gerenciadorTarefas = new ManipuladorDeTarefas();
-        this.salvaDados = new Persistencia();
+        // inicializa controllers
+        this.persistenciaController = new PersistenciaController();
         this.usuarioService = new UsuarioService();
         
-        // tenta carregar dados salvos
-        carregarDados();
+        // carrega dados usando controller
+        this.gerenciadorTarefas = persistenciaController.carregarDados();
         
-        // cria os services
+        // se tem usuario salvo, usa ele
+        if (gerenciadorTarefas.getUsuario() != null) {
+            this.usuarioService = new UsuarioService(gerenciadorTarefas.getUsuario());
+        }
+        
+        // cria services e controllers
         this.serviceTarefas = new TarefaService(gerenciadorTarefas);
         this.serviceSubs = new SubtarefaService(gerenciadorTarefas, serviceTarefas);
         this.relatorioService = new RelatorioService();
+        this.tarefaController = new TarefaController(serviceTarefas);
     }
 
     // carrega os dados do arquivo
