@@ -46,47 +46,47 @@ public class ToDoList {
         this.tarefaController = new TarefaController(serviceTarefas);
     }
 
-    // carrega os dados do arquivo
-    private void carregarDados() {
-        try {
-            ManipuladorDeTarefas dadosCarregados = salvaDados.carregarManipulador(ARQUIVO_DADOS);
-            if (dadosCarregados != null) {
-                this.gerenciadorTarefas = dadosCarregados; // substitui o vazio
-                // se tem usuario salvo, usa ele
-                if (dadosCarregados.getUsuario() != null) {
-                    this.usuarioService = new UsuarioService(dadosCarregados.getUsuario());
-                }
-            }
-        } catch (Exception erro) {
-            System.out.println("Arquivo de dados não encontrado. Iniciando com dados vazios.");
-        }
-    }
-
-    // salva tudo no arquivo
+    // salva usando controller de persistencia
     public void salvarDados() {
-        try {
-            gerenciadorTarefas.setUsuario(usuarioService.obterUsuario()); // inclui o usuario
-            salvaDados.salvarManipulador(gerenciadorTarefas, ARQUIVO_DADOS);
-        } catch (Exception ex) {
-            System.out.println("Erro ao salvar dados: " + ex.getMessage());
-        }
+        persistenciaController.salvarDados(gerenciadorTarefas, usuarioService);
     }
 
-    // ========== GESTÃO DE TAREFAS ==========
+    // ========== GESTÃO DE TAREFAS - USANDO CONTROLLER ==========
 
     // inclusão de tarefa nova no sistema
-    public void adicionarTarefa(Tarefa tarefa) {
-        gerenciadorTarefas.adicionarTarefa(tarefa);
-        salvarDados(); // gravação automática
+    public boolean adicionarTarefa(String titulo, String descricao, LocalDate deadline, int prioridade) {
+        boolean sucesso = tarefaController.adicionarTarefa(titulo, descricao, deadline, prioridade);
+        if (sucesso) salvarDados();
+        return sucesso;
     }
 
     // remoção de tarefa do sistema
+    public boolean removerTarefa(String titulo) {
+        boolean sucesso = tarefaController.removerTarefa(titulo);
+        if (sucesso) salvarDados();
+        return sucesso;
+    }
+
+    // edição de tarefa existente
+    public boolean editarTarefa(String tituloAntigo, String novoTitulo, String novaDescricao, 
+                               LocalDate novoDeadline, int novaPrioridade, double novoPercentual) {
+        boolean sucesso = tarefaController.editarTarefa(tituloAntigo, novoTitulo, novaDescricao, 
+                                                       novoDeadline, novaPrioridade, novoPercentual);
+        if (sucesso) salvarDados();
+        return sucesso;
+    }
+    
+    // metodos de compatibilidade - ainda precisam pras telas
+    public void adicionarTarefa(Tarefa tarefa) {
+        gerenciadorTarefas.adicionarTarefa(tarefa);
+        salvarDados();
+    }
+    
     public void removerTarefa(Tarefa tarefa) {
         gerenciadorTarefas.removerTarefa(tarefa);
         salvarDados();
     }
-
-    // edição de tarefa existente
+    
     public void editarTarefa(Tarefa antiga, Tarefa nova) {
         gerenciadorTarefas.editarTarefa(antiga, nova);
         salvarDados();
@@ -183,8 +183,8 @@ public class ToDoList {
         return serviceSubs;
     }
 
-    // localização de tarefa por título
+    // localização de tarefa por título - usando controller
     public Tarefa buscarTarefaPorTitulo(String titulo) {
-        return serviceTarefas.buscarPorTitulo(titulo);
+        return tarefaController.buscarTarefa(titulo);
     }
 } 
