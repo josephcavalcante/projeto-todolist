@@ -16,16 +16,37 @@ import controllers.TarefaController;
 import controllers.SubtarefaController;
 import controllers.PersistenciaController;
 
-// factory pra criar os services - GRASP Creator + OCP
-// facilita criacao e permite trocar implementacoes
+/**
+ * Factory responsável pela criação e configuração de services e controllers.
+ * <p>
+ * Centraliza a criação de objetos e injeção de dependências, seguindo os padrões
+ * GRASP Creator e Factory Method. Facilita a manutenção e permite trocar
+ * implementações sem afetar o código cliente (OCP).
+ * </p>
+ * 
+ * @author Projeto ToDoList
+ * @version 2.0
+ * @since 2.0
+ */
 public class ServiceFactory {
     
+    /**
+     * Cria uma instância de TarefaService com suas dependências injetadas.
+     * 
+     * @param manipulador manipulador de tarefas para o repositório
+     * @return instância configurada de TarefaService
+     */
     public static TarefaService criarTarefaService(ManipuladorDeTarefas manipulador) {
         ITarefaRepository repositorio = new TarefaRepository(manipulador);
         IValidadorTarefa validador = new ValidadorTarefa();
         return new TarefaService(repositorio, validador);
     }
     
+    /**
+     * Cria uma instância de RelatorioService.
+     * 
+     * @return instância de RelatorioService
+     */
     public static IRelatorioService criarRelatorioService() {
         return new RelatorioService();
     }

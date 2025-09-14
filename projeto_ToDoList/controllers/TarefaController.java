@@ -5,8 +5,18 @@ import controle.services.TarefaService;
 import java.time.LocalDate;
 import java.util.List;
 
-// controller especifico pra tarefas - SRP aplicado
-// so coordena operacoes de tarefa, nada mais
+/**
+ * Controller responsável por coordenar operações relacionadas a tarefas.
+ * <p>
+ * Atua como uma camada de coordenação entre a interface do usuário e os services,
+ * seguindo o padrão GRASP Controller. Mantém baixo acoplamento delegando
+ * a lógica de negócio para o TarefaService.
+ * </p>
+ * 
+ * @author Projeto ToDoList
+ * @version 2.0
+ * @since 2.0
+ */
 public class TarefaController {
     private TarefaService tarefaService;
     

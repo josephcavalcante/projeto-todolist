@@ -8,25 +8,57 @@ import repositorios.TarefaRepository;
 import java.time.LocalDate;
 import java.util.List;
 
-// service refatorado pra usar as interfaces
-// agora ele so coordena, nao faz validacao nem acesso direto aos dados
+/**
+ * Service responsável pela lógica de negócio das tarefas.
+ * <p>
+ * Centraliza as operações de CRUD de tarefas, aplicando validações e 
+ * coordenando com o repositório de dados. Segue o padrão Service Layer.
+ * </p>
+ * 
+ * @author Projeto ToDoList
+ * @version 2.0
+ * @since 1.1
+ */
 public class TarefaService {
     private ITarefaRepository repositorio;
     private IValidadorTarefa validador;
 
-    // construtor com injecao de dependencia - DIP completo
+    /**
+     * Construtor com injeção de dependência (DIP).
+     * 
+     * @param repositorio implementação do repositório de tarefas
+     * @param validador implementação do validador de tarefas
+     */
     public TarefaService(ITarefaRepository repositorio, IValidadorTarefa validador) {
         this.repositorio = repositorio;
         this.validador = validador;
     }
     
-    // construtor de compatibilidade
+    /**
+     * Construtor de compatibilidade com versão anterior.
+     * 
+     * @param manipulador manipulador de tarefas legado
+     * @deprecated Use o construtor com injeção de dependência
+     */
+    @Deprecated
     public TarefaService(ManipuladorDeTarefas manipulador) {
         this.repositorio = new TarefaRepository(manipulador);
         this.validador = new ValidadorTarefa();
     }
 
-    // criação de tarefa nova
+    /**
+     * Cadastra uma nova tarefa no sistema.
+     * <p>
+     * Valida os dados de entrada e, se válidos, cria e salva a tarefa.
+     * A data de cadastro é definida automaticamente como a data atual.
+     * </p>
+     * 
+     * @param titulo título da tarefa (obrigatório)
+     * @param descricao descrição detalhada da tarefa
+     * @param deadline data limite para conclusão
+     * @param prioridade nível de prioridade (1-5)
+     * @return true se a tarefa foi cadastrada com sucesso, false caso contrário
+     */
     public boolean cadastrar(String titulo, String descricao, LocalDate deadline, int prioridade) {
         // validação usando validador dedicado
         if(!validador.validarTitulo(titulo)) {
@@ -42,7 +74,17 @@ public class TarefaService {
         }
     }
 
-    // edição de tarefa existente
+    /**
+     * Edita uma tarefa existente.
+     * 
+     * @param tituloAntigo título atual da tarefa a ser editada
+     * @param novoTitulo novo título da tarefa
+     * @param novaDescricao nova descrição da tarefa
+     * @param novoDeadline nova data limite
+     * @param novaPrioridade nova prioridade
+     * @param novoPercentual novo percentual de conclusão
+     * @return true se a edição foi bem-sucedida, false caso contrário
+     */
     public boolean editar(String tituloAntigo, String novoTitulo, String novaDescricao, LocalDate novoDeadline, int novaPrioridade, double novoPercentual) {
         // verificação do novo título
         if (novoTitulo == null || novoTitulo.trim().length() == 0) {
@@ -65,7 +107,12 @@ public class TarefaService {
         }
     }
 
-    // remoção de tarefa
+    /**
+     * Exclui uma tarefa do sistema.
+     * 
+     * @param titulo título da tarefa a ser excluída
+     * @return true se a exclusão foi bem-sucedida, false caso contrário
+     */
     public boolean excluir(String titulo) {
         try {
             Tarefa tarefaParaRemover = buscarPorTitulo(titulo);
@@ -79,7 +126,12 @@ public class TarefaService {
         }
     }
 
-    // busca de tarefa por título
+    /**
+     * Busca uma tarefa pelo título.
+     * 
+     * @param titulo título da tarefa a ser buscada
+     * @return a tarefa encontrada ou null se não existir
+     */
     public Tarefa buscarPorTitulo(String titulo) {
         return repositorio.buscarPorTitulo(titulo);
     }
