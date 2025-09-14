@@ -2,10 +2,11 @@ package controle;
 
 import modelo.Tarefa;
 import modelo.Subtarefa;
+import interfaces.ISubtarefaService;
 import java.util.List;
 
-// administração das subtarefas
-public class SubtarefaService {
+// administração das subtarefas - implementa interface
+public class SubtarefaService implements ISubtarefaService {
     private ManipuladorDeTarefas controlador;
     private TarefaService servicoTarefas;
 
@@ -68,5 +69,15 @@ public class SubtarefaService {
         } catch (Exception e) {
             return false; // falha na edição
         }
+    }
+    
+    // listagem de subtarefas - metodo da interface
+    @Override
+    public List<Subtarefa> listar(String tituloTarefa) {
+        Tarefa tarefa = servicoTarefas.buscarPorTitulo(tituloTarefa);
+        if (tarefa != null) {
+            return controlador.listarSubtarefas(tarefa);
+        }
+        return List.of(); // lista vazia se tarefa nao existe
     }
 }

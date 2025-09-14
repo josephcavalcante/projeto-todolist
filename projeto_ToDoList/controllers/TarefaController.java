@@ -30,4 +30,20 @@ public class TarefaController {
     public Tarefa buscarTarefa(String titulo) {
         return tarefaService.buscarPorTitulo(titulo);
     }
+    
+    // metodos de listagem - delegacao pro repository
+    public List<Tarefa> listarTodasTarefas() {
+        // TODO: implementar no TarefaService
+        return null; // temporario
+    }
+    
+    public List<Tarefa> listarTarefasPorData(LocalDate data) {
+        // TODO: implementar no TarefaService  
+        return null; // temporario
+    }
+    
+    public List<Tarefa> listarTarefasCriticas() {
+        // TODO: implementar no TarefaService
+        return null; // temporario
+    }
 }
