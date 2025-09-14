@@ -3,12 +3,13 @@ package controle;
 import modelo.Tarefa;
 import modelo.Subtarefa;
 import modelo.Usuario;
-import servicos.RelatorioService;
-import servicos.UsuarioService;
 import interfaces.IRelatorioService;
 import interfaces.IUsuarioService;
+import interfaces.ISubtarefaService;
 import controllers.TarefaController;
+import controllers.SubtarefaController;
 import controllers.PersistenciaController;
+import factories.ServiceFactory;
 import comunicacao.Mensageiro;
 
 import java.time.LocalDate;
@@ -19,31 +20,33 @@ import java.util.List;
 public class ToDoList {
     private ManipuladorDeTarefas gerenciadorTarefas; // ainda precisa pra compatibilidade
     private TarefaService serviceTarefas;
-    private SubtarefaService serviceSubs;
+    private ISubtarefaService serviceSubs;
     private IRelatorioService relatorioService;
     private IUsuarioService usuarioService;
     private TarefaController tarefaController;
+    private SubtarefaController subtarefaController;
     private PersistenciaController persistenciaController;
 
-    // construtor - inicializa controllers e services
+    // construtor - usa factory pra criar dependencias (DIP completo)
     public ToDoList() {
-        // inicializa controllers
-        this.persistenciaController = new PersistenciaController();
-        this.usuarioService = new UsuarioService();
+        // inicializa usando factory
+        this.persistenciaController = ServiceFactory.criarPersistenciaController();
+        this.usuarioService = ServiceFactory.criarUsuarioService();
         
         // carrega dados usando controller
         this.gerenciadorTarefas = persistenciaController.carregarDados();
         
         // se tem usuario salvo, usa ele
         if (gerenciadorTarefas.getUsuario() != null) {
-            this.usuarioService = new UsuarioService(gerenciadorTarefas.getUsuario());
+            this.usuarioService = new servicos.UsuarioService(gerenciadorTarefas.getUsuario());
         }
         
-        // cria services e controllers
-        this.serviceTarefas = new TarefaService(gerenciadorTarefas);
-        this.serviceSubs = new SubtarefaService(gerenciadorTarefas, serviceTarefas);
-        this.relatorioService = new RelatorioService();
-        this.tarefaController = new TarefaController(serviceTarefas);
+        // cria services e controllers usando factory
+        this.serviceTarefas = ServiceFactory.criarTarefaService(gerenciadorTarefas);
+        this.serviceSubs = ServiceFactory.criarSubtarefaService(gerenciadorTarefas, serviceTarefas);
+        this.relatorioService = ServiceFactory.criarRelatorioService();
+        this.tarefaController = ServiceFactory.criarTarefaController(gerenciadorTarefas);
+        this.subtarefaController = ServiceFactory.criarSubtarefaController(gerenciadorTarefas, serviceTarefas);
     }
 
     // salva usando controller de persistencia
@@ -107,21 +110,38 @@ public class ToDoList {
         return gerenciadorTarefas.listarTarefasCriticas();
     }
 
-    // ========== CONTROLE DE SUBTAREFAS ==========
+    // ========== CONTROLE DE SUBTAREFAS - USANDO CONTROLLER ==========
 
-    // adição de subtarefa numa tarefa
+    // adição de subtarefa usando controller
+    public boolean adicionarSubtarefa(String tituloTarefa, String titulo, String descricao, double percentual) {
+        boolean sucesso = subtarefaController.adicionarSubtarefa(tituloTarefa, titulo, descricao, percentual);
+        if (sucesso) salvarDados();
+        return sucesso;
+    }
+
+    // exclusão de subtarefa usando controller
+    public boolean removerSubtarefa(String tituloTarefa, String titulo) {
+        boolean sucesso = subtarefaController.removerSubtarefa(tituloTarefa, titulo);
+        if (sucesso) salvarDados();
+        return sucesso;
+    }
+
+    // listagem das subtarefas usando controller
+    public List<Subtarefa> listarSubtarefas(String tituloTarefa) {
+        return subtarefaController.listarSubtarefas(tituloTarefa);
+    }
+    
+    // metodos de compatibilidade - ainda precisam pras telas
     public void adicionarSubtarefa(Tarefa tarefa, Subtarefa subtarefa) {
         gerenciadorTarefas.adicionarSubtarefa(tarefa, subtarefa);
         salvarDados();
     }
-
-    // exclusão de subtarefa
+    
     public void removerSubtarefa(Tarefa tarefa, Subtarefa subtarefa) {
         gerenciadorTarefas.removerSubtarefa(tarefa, subtarefa);
         salvarDados();
     }
-
-    // listagem das subtarefas de uma tarefa
+    
     public List<Subtarefa> listarSubtarefas(Tarefa tarefa) {
         return gerenciadorTarefas.listarSubtarefas(tarefa);
     }
@@ -179,7 +199,7 @@ public class ToDoList {
     }
 
     // pega service de subtarefas
-    public SubtarefaService obterSubtarefaService() {
+    public ISubtarefaService obterSubtarefaService() {
         return serviceSubs;
     }
 
