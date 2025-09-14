@@ -1,8 +1,8 @@
 package factories;
 
 import controle.ManipuladorDeTarefas;
-import controle.TarefaService;
-import controle.SubtarefaService;
+import controle.services.TarefaService;
+import controle.services.SubtarefaService;
 import interfaces.ITarefaRepository;
 import interfaces.IValidadorTarefa;
 import interfaces.IRelatorioService;
@@ -10,8 +10,8 @@ import interfaces.IUsuarioService;
 import interfaces.ISubtarefaService;
 import repositorios.TarefaRepository;
 import validadores.ValidadorTarefa;
-import servicos.RelatorioService;
-import servicos.UsuarioService;
+import controle.services.RelatorioService;
+import controle.services.UsuarioService;
 import controllers.TarefaController;
 import controllers.SubtarefaController;
 import controllers.PersistenciaController;

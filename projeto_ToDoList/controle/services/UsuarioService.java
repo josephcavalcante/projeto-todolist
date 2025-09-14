@@ -1,4 +1,4 @@
-package servicos;
+package controle.services;
 
 import modelo.Usuario;
 

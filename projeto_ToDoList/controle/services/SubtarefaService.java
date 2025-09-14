@@ -1,4 +1,4 @@
-package controle;
+package controle.services;
 
 import modelo.Tarefa;
 import modelo.Subtarefa;

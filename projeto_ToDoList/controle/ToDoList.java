@@ -38,7 +38,7 @@ public class ToDoList {
         
         // se tem usuario salvo, usa ele
         if (gerenciadorTarefas.getUsuario() != null) {
-            this.usuarioService = new servicos.UsuarioService(gerenciadorTarefas.getUsuario());
+            this.usuarioService = new controle.services.UsuarioService(gerenciadorTarefas.getUsuario());
         }
         
         // cria services e controllers usando factory

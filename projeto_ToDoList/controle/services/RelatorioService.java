@@ -1,4 +1,4 @@
-package servicos;
+package controle.services;
 
 import interfaces.IRelatorioService;
 import modelo.Tarefa;

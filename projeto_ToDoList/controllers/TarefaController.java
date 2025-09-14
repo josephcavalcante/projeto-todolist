@@ -1,7 +1,7 @@
 package controllers;
 
 import modelo.Tarefa;
-import controle.TarefaService;
+import controle.services.TarefaService;
 import java.time.LocalDate;
 import java.util.List;
 
