@@ -4,15 +4,32 @@ import modelo.Usuario;
 
 import interfaces.IUsuarioService;
 
-// service pra gerenciar dados do usuario
-// tirei essa responsabilidade da classe principal
+/**
+ * Service responsável pela gestão de dados do usuário.
+ * <p>
+ * Centraliza operações relacionadas ao usuário do sistema, aplicando
+ * o princípio SRP (Single Responsibility Principle).
+ * </p>
+ * 
+ * @author Projeto ToDoList
+ * @version 2.0
+ * @since 2.0
+ */
 public class UsuarioService implements IUsuarioService {
     private Usuario usuario;
     
+    /**
+     * Construtor padrão que cria um usuário com dados padrão.
+     */
     public UsuarioService() {
         this.usuario = new Usuario("Usuário", "projetopoo00@gmail.com");
     }
     
+    /**
+     * Construtor que inicializa com um usuário existente.
+     * 
+     * @param usuario usuário a ser gerenciado pelo service
+     */
     public UsuarioService(Usuario usuario) {
         this.usuario = usuario;
     }

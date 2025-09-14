@@ -5,7 +5,17 @@ import modelo.Subtarefa;
 import interfaces.ISubtarefaService;
 import java.util.List;
 
-// administração das subtarefas - implementa interface
+/**
+ * Service responsável pela administração de subtarefas.
+ * <p>
+ * Gerencia operações CRUD de subtarefas, coordenando com o TarefaService
+ * para localização das tarefas pai. Aplica princípios SRP e DIP.
+ * </p>
+ * 
+ * @author Projeto ToDoList
+ * @version 2.0
+ * @since 1.0
+ */
 public class SubtarefaService implements ISubtarefaService {
     private ManipuladorDeTarefas controlador;
     private TarefaService servicoTarefas;

@@ -3,8 +3,17 @@ package validadores;
 import interfaces.IValidadorTarefa;
 import modelo.Tarefa;
 
-// classe que so cuida das validacoes
-// tirei essa logica do service pra ficar mais limpo
+/**
+ * Implementação simples do validador de tarefas.
+ * <p>
+ * Fornece validações básicas para tarefas, seguindo o princípio SRP.
+ * Pode ser substituída por implementações mais rigorosas via padrão Strategy.
+ * </p>
+ * 
+ * @author Projeto ToDoList
+ * @version 2.0
+ * @since 1.1
+ */
 public class ValidadorTarefa implements IValidadorTarefa {
     
     @Override

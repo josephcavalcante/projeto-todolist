@@ -15,8 +15,18 @@ import comunicacao.Mensageiro;
 import java.time.LocalDate;
 import java.util.List;
 
-// facade principal do sistema - so coordena controllers
-// nao acessa dados diretamente mais
+/**
+ * Classe principal que atua como Facade do sistema ToDoList.
+ * <p>
+ * Coordena operações através de controllers especializados, mantendo
+ * baixo acoplamento e alta coesão. Aplica os princípios SOLID e GRASP,
+ * servindo como ponto de entrada único para o sistema.
+ * </p>
+ * 
+ * @author Projeto ToDoList
+ * @version 2.0
+ * @since 1.0
+ */
 public class ToDoList {
     private ManipuladorDeTarefas gerenciadorTarefas; // ainda precisa pra compatibilidade
     private TarefaService serviceTarefas;
@@ -27,7 +37,13 @@ public class ToDoList {
     private SubtarefaController subtarefaController;
     private PersistenciaController persistenciaController;
 
-    // construtor - usa factory pra criar dependencias (DIP completo)
+    /**
+     * Construtor que inicializa o sistema usando ServiceFactory.
+     * <p>
+     * Aplica injeção de dependência através da factory, seguindo
+     * o princípio DIP (Dependency Inversion Principle).
+     * </p>
+     */
     public ToDoList() {
         // inicializa usando factory
         this.persistenciaController = ServiceFactory.criarPersistenciaController();

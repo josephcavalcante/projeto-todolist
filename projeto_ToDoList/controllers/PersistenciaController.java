@@ -4,12 +4,24 @@ import controle.ManipuladorDeTarefas;
 import persistencia.Persistencia;
 import interfaces.IUsuarioService;
 
-// controller especifico pra persistencia - SRP
-// so cuida de salvar e carregar dados
+/**
+ * Controller responsável por coordenar operações de persistência.
+ * <p>
+ * Gerencia o carregamento e salvamento de dados, aplicando o princípio
+ * SRP (Single Responsibility Principle) e mantendo baixo acoplamento.
+ * </p>
+ * 
+ * @author Projeto ToDoList
+ * @version 2.0
+ * @since 2.0
+ */
 public class PersistenciaController {
     private Persistencia persistencia;
     private static final String ARQUIVO_DADOS = "todolist.dat";
     
+    /**
+     * Construtor que inicializa o mecanismo de persistência.
+     */
     public PersistenciaController() {
         this.persistencia = new Persistencia();
     }

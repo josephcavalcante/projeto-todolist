@@ -6,8 +6,17 @@ import relatorios.GeradorDeRelatorios;
 import java.time.LocalDate;
 import java.util.List;
 
-// service que cuida so dos relatorios
-// separei da classe principal pra ficar mais organizado
+/**
+ * Service responsável pela geração de relatórios.
+ * <p>
+ * Centraliza a lógica de geração de relatórios em diferentes formatos,
+ * aplicando o princípio SRP (Single Responsibility Principle).
+ * </p>
+ * 
+ * @author Projeto ToDoList
+ * @version 2.0
+ * @since 2.0
+ */
 public class RelatorioService implements IRelatorioService {
     
     @Override

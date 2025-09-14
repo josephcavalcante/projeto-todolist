@@ -4,11 +4,25 @@ import modelo.Subtarefa;
 import interfaces.ISubtarefaService;
 import java.util.List;
 
-// controller especifico pra subtarefas - SRP
-// so coordena operacoes de subtarefa
+/**
+ * Controller responsável por coordenar operações de subtarefas.
+ * <p>
+ * Atua como camada de coordenação entre a interface e o SubtarefaService,
+ * seguindo o padrão GRASP Controller e mantendo baixo acoplamento.
+ * </p>
+ * 
+ * @author Projeto ToDoList
+ * @version 2.0
+ * @since 2.0
+ */
 public class SubtarefaController {
     private ISubtarefaService subtarefaService;
     
+    /**
+     * Construtor que injeta a dependência do service.
+     * 
+     * @param subtarefaService service de subtarefas
+     */
     public SubtarefaController(ISubtarefaService subtarefaService) {
         this.subtarefaService = subtarefaService;
     }

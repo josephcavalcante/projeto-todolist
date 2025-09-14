@@ -7,11 +7,26 @@ import controle.ManipuladorDeTarefas;
 import interfaces.ITarefaRepository;
 import modelo.Tarefa;
 
-// implementacao do repositorio
-// aqui fica toda a logica de acesso aos dados
+/**
+ * Implementação do repositório de tarefas usando arquivo.
+ * <p>
+ * Fornece acesso aos dados de tarefas através do ManipuladorDeTarefas,
+ * seguindo o padrão Repository. Pode ser substituída por implementações
+ * que usam banco de dados ou APIs sem afetar o código cliente.
+ * </p>
+ * 
+ * @author Projeto ToDoList
+ * @version 2.0
+ * @since 1.1
+ */
 public class TarefaRepository implements ITarefaRepository {
     private ManipuladorDeTarefas manipulador;
     
+    /**
+     * Construtor que injeta o manipulador de tarefas.
+     * 
+     * @param manipulador manipulador responsável pelo acesso aos dados
+     */
     public TarefaRepository(ManipuladorDeTarefas manipulador) {
         this.manipulador = manipulador;
     }
