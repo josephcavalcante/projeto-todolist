@@ -3,27 +3,52 @@ package modelo;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import javax.persistence.*;
 
 /**
- * Entidade que representa um evento no sistema.
+ * Entidade JPA que representa um evento no sistema.
  * <p>
+ * Mapeada para a tabela "eventos" no banco de dados.
  * Um evento possui título, descrição, data e local. Aplica o princípio
  * Information Expert calculando os dias restantes para o evento.
+ * Constraint de unicidade na data impede conflito de eventos.
  * </p>
  * 
  * @author Projeto ToDoList
  * @version 2.1
  * @since 2.1
  */
+@Entity
+@Table(name = "eventos")
 public class Evento implements Serializable {
     private static final long serialVersionUID = 1L;
     
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Long id;
+    
+    @Column(name = "titulo", nullable = false, length = 100)
     private String titulo;
+    
+    @Column(name = "descricao", length = 500)
     private String descricao;
+    
+    @Column(name = "data_evento", nullable = false, unique = true)
     private LocalDate dataEvento;
+    
+    @Column(name = "local", length = 200)
     private String local;
+    
+    @Column(name = "data_cadastro", nullable = false)
     private LocalDate dataCadastro;
 
+    /**
+     * Construtor padrão para JPA.
+     */
+    public Evento() {
+    }
+    
     /**
      * Construtor completo do evento.
      * 
@@ -71,6 +96,15 @@ public class Evento implements Serializable {
     }
 
     // Getters e Setters
+    
+    public Long getId() {
+        return id;
+    }
+    
+    public void setId(Long id) {
+        this.id = id;
+    }
+    
     public String getTitulo() {
         return titulo;
     }

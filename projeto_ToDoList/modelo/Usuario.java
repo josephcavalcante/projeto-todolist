@@ -29,5 +29,16 @@ public class Usuario implements Serializable {
         return emailFixo;
     }
     
-    // sem setEmail() - email é imutável
+    /**
+     * Método interno para JPA definir email.
+     * Não deve ser usado diretamente no código.
+     */
+    protected void setEmail(String email) {
+        this.emailFixo = email;
+    }
+    
+    @Override
+    public String toString() {
+        return String.format("Usuario{id=%d, nome='%s', email='%s'}", id, nomeUsuario, emailFixo);
+    }
 }

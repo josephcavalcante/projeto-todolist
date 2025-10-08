@@ -1,47 +1,94 @@
 package modelo;
 
 import java.io.Serializable;
+import javax.persistence.*;
 
-// modelo de subtarefa do sistema
+/**
+ * Entidade JPA que representa uma subtarefa no sistema.
+ * <p>
+ * Mapeada para a tabela "subtarefas" no banco de dados.
+ * Possui relacionamento Many-to-One com Tarefa.
+ * </p>
+ * 
+ * @author Projeto ToDoList
+ * @version 2.1
+ * @since 1.0
+ */
+@Entity
+@Table(name = "subtarefas")
 public class Subtarefa implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Long id;
+    
+    @Column(name = "titulo", nullable = false, length = 100)
     private String tituloSub;
+    
+    @Column(name = "descricao", length = 500)
     private String descricaoSub;
+    
+    @Column(name = "percentual", precision = 5, scale = 2)
     private double percentualConclusao;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tarefa_id", nullable = false)
+    private Tarefa tarefa;
 
-    // construção da subtarefa
+    /**
+     * Construtor padrão para JPA.
+     */
+    public Subtarefa() {
+    }
+    
+    /**
+     * Construtor completo para criação de subtarefa.
+     */
     public Subtarefa(String titulo, String descricao, double percentual) {
         this.tituloSub = titulo;
         this.descricaoSub = descricao;
         this.percentualConclusao = percentual;
     }
 
-    // acesso ao título
+    // Getters e Setters
+    
+    public Long getId() {
+        return id;
+    }
+    
+    public void setId(Long id) {
+        this.id = id;
+    }
+    
     public String getTitulo() {
         return tituloSub;
     }
 
-    // modificação do título
     public void setTitulo(String titulo) {
         this.tituloSub = titulo;
     }
 
-    // obtenção da descrição
     public String getDescricao() {
         return descricaoSub;
     }
 
-    // alteração da descrição
     public void setDescricao(String descricao) {
         this.descricaoSub = descricao;
     }
 
-    // consulta do percentual de conclusão
     public double getPercentual() {
         return percentualConclusao;
     }
 
-    // atualização do percentual
     public void setPercentual(double percentual) {
         this.percentualConclusao = percentual;
+    }
+    
+    public Tarefa getTarefa() {
+        return tarefa;
+    }
+    
+    public void setTarefa(Tarefa tarefa) {
+        this.tarefa = tarefa;
     }
 } 
