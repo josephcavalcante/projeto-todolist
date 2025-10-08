@@ -3,17 +3,24 @@ package factories;
 import controle.ManipuladorDeTarefas;
 import controle.services.TarefaService;
 import controle.services.SubtarefaService;
+import controle.services.EventoService;
 import interfaces.ITarefaRepository;
 import interfaces.IValidadorTarefa;
 import interfaces.IRelatorioService;
 import interfaces.IUsuarioService;
 import interfaces.ISubtarefaService;
+import interfaces.IEventoService;
+import interfaces.IEventoRepository;
+import interfaces.IValidadorEvento;
 import repositorios.TarefaRepository;
+import repositorios.EventoRepository;
 import validadores.ValidadorTarefa;
+import validadores.ValidadorEvento;
 import controle.services.RelatorioService;
 import controle.services.UsuarioService;
 import controllers.TarefaController;
 import controllers.SubtarefaController;
+import controllers.EventoController;
 import controllers.PersistenciaController;
 
 /**
@@ -71,5 +78,26 @@ public class ServiceFactory {
     
     public static PersistenciaController criarPersistenciaController() {
         return new PersistenciaController();
+    }
+    
+    /**
+     * Cria uma instância de EventoService com suas dependências injetadas.
+     * 
+     * @return instância configurada de EventoService
+     */
+    public static IEventoService criarEventoService() {
+        IEventoRepository repositorio = new EventoRepository();
+        IValidadorEvento validador = new ValidadorEvento();
+        return new EventoService(repositorio, validador);
+    }
+    
+    /**
+     * Cria uma instância de EventoController.
+     * 
+     * @return instância de EventoController
+     */
+    public static EventoController criarEventoController() {
+        IEventoService eventoService = criarEventoService();
+        return new EventoController(eventoService);
     }
 }

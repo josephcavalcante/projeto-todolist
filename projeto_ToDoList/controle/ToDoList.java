@@ -6,8 +6,10 @@ import modelo.Usuario;
 import interfaces.IRelatorioService;
 import interfaces.IUsuarioService;
 import interfaces.ISubtarefaService;
+import interfaces.IEventoService;
 import controllers.TarefaController;
 import controllers.SubtarefaController;
+import controllers.EventoController;
 import controllers.PersistenciaController;
 import factories.ServiceFactory;
 import comunicacao.Mensageiro;
@@ -33,8 +35,10 @@ public class ToDoList {
     private ISubtarefaService serviceSubs;
     private IRelatorioService relatorioService;
     private IUsuarioService usuarioService;
+    private IEventoService eventoService;
     private TarefaController tarefaController;
     private SubtarefaController subtarefaController;
+    private EventoController eventoController;
     private PersistenciaController persistenciaController;
 
     /**
@@ -61,8 +65,10 @@ public class ToDoList {
         this.serviceTarefas = ServiceFactory.criarTarefaService(gerenciadorTarefas);
         this.serviceSubs = ServiceFactory.criarSubtarefaService(gerenciadorTarefas, serviceTarefas);
         this.relatorioService = ServiceFactory.criarRelatorioService();
+        this.eventoService = ServiceFactory.criarEventoService();
         this.tarefaController = ServiceFactory.criarTarefaController(gerenciadorTarefas);
         this.subtarefaController = ServiceFactory.criarSubtarefaController(gerenciadorTarefas, serviceTarefas);
+        this.eventoController = ServiceFactory.criarEventoController();
     }
 
     // salva usando controller de persistencia
@@ -222,5 +228,88 @@ public class ToDoList {
     // localização de tarefa por título - usando controller
     public Tarefa buscarTarefaPorTitulo(String titulo) {
         return tarefaController.buscarTarefa(titulo);
+    }
+    
+    // ========== GESTÃO DE EVENTOS - USANDO CONTROLLER ==========
+    
+    /**
+     * Cadastra um novo evento no sistema.
+     * 
+     * @param titulo título do evento
+     * @param descricao descrição do evento
+     * @param dataEvento data do evento
+     * @param local local do evento
+     * @return true se cadastrado com sucesso, false caso contrário
+     */
+    public boolean cadastrarEvento(String titulo, String descricao, LocalDate dataEvento, String local) {
+        return eventoController.cadastrarEvento(titulo, descricao, dataEvento, local);
+    }
+    
+    /**
+     * Edita um evento existente.
+     * 
+     * @param tituloAntigo título atual do evento
+     * @param dataAntiga data atual do evento
+     * @param novoTitulo novo título
+     * @param novaDescricao nova descrição
+     * @param novaData nova data
+     * @param novoLocal novo local
+     * @return true se editado com sucesso, false caso contrário
+     */
+    public boolean editarEvento(String tituloAntigo, LocalDate dataAntiga, String novoTitulo, 
+                               String novaDescricao, LocalDate novaData, String novoLocal) {
+        return eventoController.editarEvento(tituloAntigo, dataAntiga, novoTitulo, novaDescricao, novaData, novoLocal);
+    }
+    
+    /**
+     * Remove um evento do sistema.
+     * 
+     * @param titulo título do evento
+     * @param dataEvento data do evento
+     * @return true se removido com sucesso, false caso contrário
+     */
+    public boolean removerEvento(String titulo, LocalDate dataEvento) {
+        return eventoController.removerEvento(titulo, dataEvento);
+    }
+    
+    /**
+     * Lista todos os eventos com informações de dias restantes.
+     * 
+     * @return lista de eventos
+     */
+    public List<modelo.Evento> listarEventosComDiasRestantes() {
+        return eventoController.listarEventosComDiasRestantes();
+    }
+    
+    /**
+     * Lista eventos de uma data específica.
+     * 
+     * @param data data para filtrar
+     * @return lista de eventos da data
+     */
+    public List<modelo.Evento> listarEventosPorData(LocalDate data) {
+        return eventoController.listarEventosPorData(data);
+    }
+    
+    /**
+     * Lista eventos de um mês específico.
+     * 
+     * @param mes mês (1-12)
+     * @param ano ano
+     * @return lista de eventos do mês
+     */
+    public List<modelo.Evento> listarEventosPorMes(int mes, int ano) {
+        return eventoController.listarEventosPorMes(mes, ano);
+    }
+    
+    /**
+     * Busca um evento específico.
+     * 
+     * @param titulo título do evento
+     * @param dataEvento data do evento
+     * @return o evento encontrado ou null
+     */
+    public modelo.Evento buscarEvento(String titulo, LocalDate dataEvento) {
+        return eventoController.buscarEvento(titulo, dataEvento);
     }
 } 
