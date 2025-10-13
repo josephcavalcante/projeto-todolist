@@ -11,7 +11,7 @@
 ### 🎯 [ANTES vs DEPOIS: Design Patterns](ANTES_VS_DEPOIS_DESIGN_PATTERNS.md)
 - **Demonstração completa para disciplina**
 - Código monolítico vs Arquitetura limpa
-- 26 padrões implementados
+- alguns padrões implementados
 - Transformação radical do sistema
 
 ## 🎯 Resumo Executivo
