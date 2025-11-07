@@ -4,8 +4,10 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import controle.ToDoList;
+
 import modelo.Tarefa;
+import negocio.ToDoList;
+
 import java.util.List;
 
 public class TelaListarTarefas extends JPanel {

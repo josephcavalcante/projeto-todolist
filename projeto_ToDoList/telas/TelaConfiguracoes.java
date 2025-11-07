@@ -1,7 +1,9 @@
 package telas;
 import javax.swing.*;
+
+import negocio.ToDoList;
+
 import java.awt.*;
-import controle.ToDoList;
 
 public class TelaConfiguracoes extends JPanel {
     private TelaPrincipal janela;

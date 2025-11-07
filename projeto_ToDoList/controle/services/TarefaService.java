@@ -3,8 +3,10 @@ package controle.services;
 import modelo.Tarefa;
 import interfaces.IValidadorTarefa;
 import interfaces.ITarefaRepository;
+import interfaces.ITarefaService;
 import validadores.ValidadorTarefa;
 import repositorios.TarefaRepository;
+import controle.ManipuladorDeTarefas;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -19,7 +21,7 @@ import java.util.List;
  * @version 2.0
  * @since 1.1
  */
-public class TarefaService {
+public class TarefaService implements ITarefaService {
     private ITarefaRepository repositorio;
     private IValidadorTarefa validador;
 
@@ -59,6 +61,7 @@ public class TarefaService {
      * @param prioridade nível de prioridade (1-5)
      * @return true se a tarefa foi cadastrada com sucesso, false caso contrário
      */
+    @Override
     public boolean cadastrar(String titulo, String descricao, LocalDate deadline, int prioridade) {
         // validação usando validador dedicado
         if(!validador.validarTitulo(titulo)) {
@@ -85,6 +88,7 @@ public class TarefaService {
      * @param novoPercentual novo percentual de conclusão
      * @return true se a edição foi bem-sucedida, false caso contrário
      */
+    @Override
     public boolean editar(String tituloAntigo, String novoTitulo, String novaDescricao, LocalDate novoDeadline, int novaPrioridade, double novoPercentual) {
         // verificação do novo título
         if (novoTitulo == null || novoTitulo.trim().length() == 0) {
@@ -113,6 +117,7 @@ public class TarefaService {
      * @param titulo título da tarefa a ser excluída
      * @return true se a exclusão foi bem-sucedida, false caso contrário
      */
+    @Override
     public boolean excluir(String titulo) {
         try {
             Tarefa tarefaParaRemover = buscarPorTitulo(titulo);
@@ -132,7 +137,48 @@ public class TarefaService {
      * @param titulo título da tarefa a ser buscada
      * @return a tarefa encontrada ou null se não existir
      */
+    @Override
     public Tarefa buscarPorTitulo(String titulo) {
         return repositorio.buscarPorTitulo(titulo);
+    }
+    
+    /**
+     * Lista todas as tarefas do sistema.
+     * 
+     * @return lista com todas as tarefas, ou lista vazia se não houver tarefas
+     */
+    @Override
+    public List<Tarefa> listarTodas() {
+        return repositorio.listarTodas();
+    }
+    
+    /**
+     * Lista tarefas filtradas por data específica.
+     * 
+     * @param data a data para filtrar as tarefas
+     * @return lista de tarefas da data especificada
+     */
+    @Override
+    public List<Tarefa> listarPorData(LocalDate data) {
+        return repositorio.listarPorData(data);
+    }
+    
+    /**
+     * Lista tarefas críticas (prazo vencendo).
+     * 
+     * @return lista de tarefas críticas
+     */
+    @Override
+    public List<Tarefa> listarCriticas() {
+        // Implementação delegada para o repositório
+        // Assumindo que o repositório tem método para tarefas críticas
+        // ou implementamos a lógica aqui
+        return repositorio.listarTodas().stream()
+            .filter(tarefa -> {
+                LocalDate hoje = LocalDate.now();
+                LocalDate prazoLimite = tarefa.getDeadline().minusDays(tarefa.getPrioridade());
+                return prazoLimite.isBefore(hoje) || prazoLimite.equals(hoje);
+            })
+            .collect(java.util.stream.Collectors.toList());
     }
 }

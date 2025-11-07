@@ -1,7 +1,8 @@
 package controllers;
 
 import modelo.Tarefa;
-import controle.services.TarefaService;
+import interfaces.ITarefaService;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -18,9 +19,9 @@ import java.util.List;
  * @since 2.0
  */
 public class TarefaController {
-    private TarefaService tarefaService;
+    private ITarefaService tarefaService;
     
-    public TarefaController(TarefaService tarefaService) {
+    public TarefaController(ITarefaService tarefaService) {
         this.tarefaService = tarefaService;
     }
     
@@ -41,19 +42,16 @@ public class TarefaController {
         return tarefaService.buscarPorTitulo(titulo);
     }
     
-    // metodos de listagem - delegacao pro repository
+    // metodos de listagem - delegacao pro service
     public List<Tarefa> listarTodasTarefas() {
-        // TODO: implementar no TarefaService
-        return null; // temporario
+        return tarefaService.listarTodas();
     }
     
     public List<Tarefa> listarTarefasPorData(LocalDate data) {
-        // TODO: implementar no TarefaService  
-        return null; // temporario
+        return tarefaService.listarPorData(data);
     }
     
     public List<Tarefa> listarTarefasCriticas() {
-        // TODO: implementar no TarefaService
-        return null; // temporario
+        return tarefaService.listarCriticas();
     }
 }

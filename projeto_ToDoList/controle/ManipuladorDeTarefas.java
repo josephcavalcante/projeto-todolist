@@ -1,14 +1,14 @@
-package controle;
-
-import modelo.Tarefa;
-import modelo.Subtarefa;
-import modelo.Usuario;
+package negocio;
 
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import modelo.Subtarefa;
+import modelo.Tarefa;
+import modelo.Usuario;
 
 // controle principal das tarefas do sistema
 public class ManipuladorDeTarefas implements Serializable {

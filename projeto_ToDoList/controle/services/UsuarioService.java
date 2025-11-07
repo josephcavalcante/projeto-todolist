@@ -1,8 +1,7 @@
 package controle.services;
 
-import modelo.Usuario;
-
 import interfaces.IUsuarioService;
+import modelo.Usuario;
 
 /**
  * Service responsável pela gestão de dados do usuário.

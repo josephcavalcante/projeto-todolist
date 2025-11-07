@@ -1,8 +1,9 @@
 package telas;
 import java.awt.*;
 import javax.swing.*;
-import controle.ToDoList;
+
 import modelo.Tarefa;
+import negocio.ToDoList;
 
 public class TelaGerenciadorTarefas extends JPanel {
 

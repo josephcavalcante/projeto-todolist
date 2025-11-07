@@ -1,4 +1,4 @@
-package controle;
+package negocio;
 
 import modelo.Tarefa;
 import modelo.Subtarefa;
@@ -58,7 +58,7 @@ public class ToDoList {
         
         // se tem usuario salvo, usa ele
         if (gerenciadorTarefas.getUsuario() != null) {
-            this.usuarioService = new controle.services.UsuarioService(gerenciadorTarefas.getUsuario());
+            this.usuarioService = new negocio.services.UsuarioService(gerenciadorTarefas.getUsuario());
         }
         
         // cria services e controllers usando factory

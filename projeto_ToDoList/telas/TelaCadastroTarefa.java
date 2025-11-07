@@ -2,8 +2,9 @@ package telas;
 import javax.swing.*;
 import java.awt.*;
 import java.time.LocalDate;
-import controle.ToDoList;
+
 import modelo.Tarefa;
+import negocio.ToDoList;
 
 public class TelaCadastroTarefa extends JPanel {
     private TelaPrincipal janelaPrincipal;

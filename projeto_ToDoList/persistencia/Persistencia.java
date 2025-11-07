@@ -1,7 +1,8 @@
 package persistencia;
 
 import java.io.*;
-import controle.ManipuladorDeTarefas;
+
+import negocio.ManipuladorDeTarefas;
 
 // gerenciamento da persistência de dados
 // usa serialização padrão do Java

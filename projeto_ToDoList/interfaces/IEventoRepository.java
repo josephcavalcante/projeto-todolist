@@ -1,8 +1,9 @@
 package interfaces;
 
-import modelo.Evento;
 import java.time.LocalDate;
 import java.util.List;
+
+import modelo.Evento;
 
 /**
  * Interface para repositório de eventos.

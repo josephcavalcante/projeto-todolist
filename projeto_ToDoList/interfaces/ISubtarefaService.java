@@ -1,8 +1,8 @@
 package interfaces;
 
-import modelo.Tarefa;
-import modelo.Subtarefa;
 import java.util.List;
+
+import modelo.Subtarefa;
 
 /**
  * Interface para serviços de gestão de subtarefas.

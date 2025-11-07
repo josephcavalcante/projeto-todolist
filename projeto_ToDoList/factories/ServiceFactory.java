@@ -1,11 +1,14 @@
 package factories;
 
-import controle.ManipuladorDeTarefas;
-import controle.services.TarefaService;
-import controle.services.SubtarefaService;
-import controle.services.EventoService;
 import interfaces.ITarefaRepository;
 import interfaces.IValidadorTarefa;
+import interfaces.ITarefaService;
+import controle.ManipuladorDeTarefas;
+import controle.services.EventoService;
+import controle.services.RelatorioService;
+import controle.services.SubtarefaService;
+import controle.services.TarefaService;
+import controle.services.UsuarioService;
 import interfaces.IRelatorioService;
 import interfaces.IUsuarioService;
 import interfaces.ISubtarefaService;
@@ -16,8 +19,6 @@ import repositorios.TarefaRepository;
 import repositorios.EventoRepository;
 import validadores.ValidadorTarefa;
 import validadores.ValidadorEvento;
-import controle.services.RelatorioService;
-import controle.services.UsuarioService;
 import controllers.TarefaController;
 import controllers.SubtarefaController;
 import controllers.EventoController;
@@ -41,9 +42,9 @@ public class ServiceFactory {
      * Cria uma instância de TarefaService com suas dependências injetadas.
      * 
      * @param manipulador manipulador de tarefas para o repositório
-     * @return instância configurada de TarefaService
+     * @return instância configurada de ITarefaService
      */
-    public static TarefaService criarTarefaService(ManipuladorDeTarefas manipulador) {
+    public static ITarefaService criarTarefaService(ManipuladorDeTarefas manipulador) {
         ITarefaRepository repositorio = new TarefaRepository(manipulador);
         IValidadorTarefa validador = new ValidadorTarefa();
         return new TarefaService(repositorio, validador);
@@ -62,16 +63,16 @@ public class ServiceFactory {
         return new UsuarioService();
     }
     
-    public static ISubtarefaService criarSubtarefaService(ManipuladorDeTarefas manipulador, TarefaService tarefaService) {
+    public static ISubtarefaService criarSubtarefaService(ManipuladorDeTarefas manipulador, ITarefaService tarefaService) {
         return new SubtarefaService(manipulador, tarefaService);
     }
     
     public static TarefaController criarTarefaController(ManipuladorDeTarefas manipulador) {
-        TarefaService tarefaService = criarTarefaService(manipulador);
+        ITarefaService tarefaService = criarTarefaService(manipulador);
         return new TarefaController(tarefaService);
     }
     
-    public static SubtarefaController criarSubtarefaController(ManipuladorDeTarefas manipulador, TarefaService tarefaService) {
+    public static SubtarefaController criarSubtarefaController(ManipuladorDeTarefas manipulador, ITarefaService tarefaService) {
         ISubtarefaService subtarefaService = criarSubtarefaService(manipulador, tarefaService);
         return new SubtarefaController(subtarefaService);
     }

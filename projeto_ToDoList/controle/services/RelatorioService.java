@@ -1,10 +1,11 @@
 package controle.services;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import interfaces.IRelatorioService;
 import modelo.Tarefa;
 import relatorios.GeradorDeRelatorios;
-import java.time.LocalDate;
-import java.util.List;
 
 /**
  * Service responsável pela geração de relatórios.

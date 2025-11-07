@@ -1,11 +1,26 @@
 package telas;
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import java.awt.*;
-import controle.ToDoList;
-import modelo.Tarefa;
-import modelo.Subtarefa;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridLayout;
 import java.util.List;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.table.DefaultTableModel;
+
+import modelo.Subtarefa;
+import modelo.Tarefa;
+import negocio.ToDoList;
 
 public class TelaSubtarefas extends JPanel {
     private TelaPrincipal janelaPai;

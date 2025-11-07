@@ -1,8 +1,9 @@
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Scanner;
-import controle.ToDoList;
+
 import modelo.Tarefa;
+import negocio.ToDoList;
 import modelo.Subtarefa;
 
 /**

@@ -1,7 +1,9 @@
 package telas;
 import javax.swing.*;
+
+import negocio.ToDoList;
+
 import java.awt.*;
-import controle.ToDoList;
 
 // tela para geração de relatórios
 public class TelaRelatorios extends JPanel {

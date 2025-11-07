@@ -3,6 +3,8 @@ package controle.services;
 import modelo.Tarefa;
 import modelo.Subtarefa;
 import interfaces.ISubtarefaService;
+import interfaces.ITarefaService;
+import controle.ManipuladorDeTarefas;
 import java.util.List;
 
 /**
@@ -18,9 +20,9 @@ import java.util.List;
  */
 public class SubtarefaService implements ISubtarefaService {
     private ManipuladorDeTarefas controlador;
-    private TarefaService servicoTarefas;
+    private ITarefaService servicoTarefas;
 
-    public SubtarefaService(ManipuladorDeTarefas manipulador, TarefaService tarefaService) {
+    public SubtarefaService(ManipuladorDeTarefas manipulador, ITarefaService tarefaService) {
         this.controlador = manipulador;
         this.servicoTarefas = tarefaService; // dependência para localização de tarefas
     }

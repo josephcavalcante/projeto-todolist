@@ -1,11 +1,12 @@
-package controle.services;
+package negocio.services;
 
-import interfaces.IEventoService;
-import interfaces.IEventoRepository;
-import interfaces.IValidadorEvento;
-import modelo.Evento;
 import java.time.LocalDate;
 import java.util.List;
+
+import interfaces.IEventoRepository;
+import interfaces.IEventoService;
+import interfaces.IValidadorEvento;
+import modelo.Evento;
 
 /**
  * Service responsável pela lógica de negócio dos eventos.

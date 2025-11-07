@@ -1,7 +1,9 @@
 package telas;
 import javax.swing.*;
+
+import negocio.ToDoList;
+
 import java.awt.*;
-import controle.ToDoList;
 
 public class TelaPrincipal extends JFrame {
     private ToDoList sistema;
