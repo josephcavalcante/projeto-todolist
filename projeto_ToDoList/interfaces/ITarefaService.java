@@ -1,8 +1,9 @@
 package interfaces;
 
-import modelo.Tarefa;
 import java.time.LocalDate;
 import java.util.List;
+
+import modelo.Tarefa;
 
 /**
  * Interface para serviços de gestão de tarefas.

@@ -16,6 +16,7 @@ import modelo.Usuario;
  */
 public class UsuarioService implements IUsuarioService {
     private Usuario usuario;
+    private boolean logado = false; // controle de sessão
     
     /**
      * Construtor padrão que cria um usuário com dados padrão.
@@ -45,5 +46,36 @@ public class UsuarioService implements IUsuarioService {
     
     public String obterEmail() {
         return usuario.getEmail();
+    }
+    
+    @Override
+    public void definirSenha(String senha) {
+        if (senha != null && !senha.trim().isEmpty()) {
+            usuario.setSenha(senha.trim());
+        }
+    }
+    
+    @Override
+    public boolean temSenha() {
+        return usuario.temSenha();
+    }
+    
+    @Override
+    public boolean login(String senha) {
+        if (usuario.verificarSenha(senha)) {
+            logado = true;
+            return true;
+        }
+        return false;
+    }
+    
+    @Override
+    public void logout() {
+        logado = false;
+    }
+    
+    @Override
+    public boolean isLogado() {
+        return logado;
     }
 }

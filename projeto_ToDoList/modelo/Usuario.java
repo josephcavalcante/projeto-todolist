@@ -31,6 +31,9 @@ public class Usuario implements Serializable {
     
     @Column(name = "email", nullable = false, unique = true, length = 150)
     private String emailFixo; // não pode ser alterado
+    
+    @Column(name = "senha", nullable = true, length = 255)
+    private String senha; // para autenticação do usuário
 
     /**
      * Construtor padrão para JPA.
@@ -44,6 +47,15 @@ public class Usuario implements Serializable {
     public Usuario(String nome, String email) {
         this.nomeUsuario = nome;
         this.emailFixo = email;
+    }
+    
+    /**
+     * Construtor completo com senha para criação de usuário.
+     */
+    public Usuario(String nome, String email, String senha) {
+        this.nomeUsuario = nome;
+        this.emailFixo = email;
+        this.senha = senha;
     }
 
     // Getters e Setters
@@ -76,8 +88,36 @@ public class Usuario implements Serializable {
         this.emailFixo = email;
     }
     
+    public String getSenha() {
+        return senha;
+    }
+    
+    public void setSenha(String senha) {
+        this.senha = senha;
+    }
+    
+    /**
+     * Verifica se o usuário tem senha definida.
+     * 
+     * @return true se tem senha, false caso contrário
+     */
+    public boolean temSenha() {
+        return senha != null && !senha.trim().isEmpty();
+    }
+    
+    /**
+     * Verifica se a senha fornecida está correta.
+     * 
+     * @param senhaFornecida senha a ser verificada
+     * @return true se a senha está correta, false caso contrário
+     */
+    public boolean verificarSenha(String senhaFornecida) {
+        return senha != null && senha.equals(senhaFornecida);
+    }
+    
     @Override
     public String toString() {
-        return String.format("Usuario{id=%d, nome='%s', email='%s'}", id, nomeUsuario, emailFixo);
+        return String.format("Usuario{id=%d, nome='%s', email='%s', temSenha=%s}", 
+                           id, nomeUsuario, emailFixo, temSenha());
     }
 }
