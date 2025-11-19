@@ -5,8 +5,8 @@ import interfaces.IValidadorTarefa;
 import interfaces.ITarefaService;
 import controle.ManipuladorDeTarefas;
 import controle.services.EventoService;
-import controle.services.RelatorioService;
 import controle.services.SubtarefaService;
+import relatorios.GeradorDeRelatorios;
 import controle.services.TarefaService;
 import controle.services.UsuarioService;
 import interfaces.IRelatorioService;
@@ -51,12 +51,12 @@ public class ServiceFactory {
     }
     
     /**
-     * Cria uma instância de RelatorioService.
+     * Cria uma instância de GeradorDeRelatorios.
      * 
-     * @return instância de RelatorioService
+     * @return instância de IRelatorioService
      */
     public static IRelatorioService criarRelatorioService() {
-        return new RelatorioService();
+        return new GeradorDeRelatorios();
     }
     
     public static IUsuarioService criarUsuarioService() {

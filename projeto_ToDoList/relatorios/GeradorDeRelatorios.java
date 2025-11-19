@@ -4,17 +4,28 @@ import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfWriter;
+import interfaces.IRelatorioService;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import modelo.Tarefa;
 
-// criação de relatórios em PDF e Excel
-public class GeradorDeRelatorios {
+/**
+ * Service responsável pela geração de relatórios em diferentes formatos.
+ * <p>
+ * Implementa IRelatorioService diretamente, eliminando camada desnecessária.
+ * Gera relatórios em PDF usando iText e Excel usando formato CSV.
+ * </p>
+ * 
+ * @author Projeto ToDoList
+ * @version 2.1
+ * @since 2.0
+ */
+public class GeradorDeRelatorios implements IRelatorioService {
     
-    // geração de relatório PDF diário
-    public static void gerarRelatorioPDF(List<Tarefa> tarefas, LocalDate data) {
+    @Override
+    public boolean gerarPDF(List<Tarefa> tarefas, LocalDate data) {
         Document documentoPDF = new Document();
         try {
             // configuração do arquivo PDF
@@ -37,15 +48,17 @@ public class GeradorDeRelatorios {
                     documentoPDF.add(new Paragraph(" "));
                 }
             }
+            return true;
         } catch (DocumentException | IOException erro) {
-            erro.printStackTrace();
+            System.out.println("Erro ao gerar PDF: " + erro.getMessage());
+            return false;
         } finally {
             documentoPDF.close();
         }
     }
 
-    // criação de planilha Excel (formato CSV)
-    public static void gerarRelatorioExcel(List<Tarefa> tarefas, int mes, int ano) {
+    @Override
+    public boolean gerarExcel(List<Tarefa> tarefas, int mes, int ano) {
         // implementação simples usando CSV
         try (FileOutputStream arquivoSaida = new FileOutputStream("relatorio_mensal.csv")) {
             StringBuilder conteudoCSV = new StringBuilder();
@@ -65,8 +78,10 @@ public class GeradorDeRelatorios {
             
             // gravação do conteúdo
             arquivoSaida.write(conteudoCSV.toString().getBytes("UTF-8"));
+            return true;
         } catch (IOException erro) {
-            erro.printStackTrace();
+            System.out.println("Erro ao gerar Excel: " + erro.getMessage());
+            return false;
         }
     }
 } 
