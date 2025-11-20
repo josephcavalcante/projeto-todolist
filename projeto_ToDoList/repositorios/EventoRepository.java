@@ -1,6 +1,6 @@
 package repositorios;
 
-import interfaces.IEventoRepository;
+import interfaces.repositories.IEventoRepository;
 import modelo.Evento;
 import java.time.LocalDate;
 import java.util.List;

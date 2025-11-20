@@ -1,20 +1,20 @@
 package factories;
 
-import interfaces.ITarefaRepository;
-import interfaces.IValidadorTarefa;
-import interfaces.ITarefaService;
+import interfaces.repositories.ITarefaRepository;
+import interfaces.validators.IValidadorTarefa;
+import interfaces.services.ITarefaService;
 import controle.ManipuladorDeTarefas;
 import controle.services.EventoService;
 import controle.services.SubtarefaService;
 import relatorios.GeradorDeRelatorios;
 import controle.services.TarefaService;
 import controle.services.UsuarioService;
-import interfaces.IRelatorioService;
-import interfaces.IUsuarioService;
-import interfaces.ISubtarefaService;
-import interfaces.IEventoService;
-import interfaces.IEventoRepository;
-import interfaces.IValidadorEvento;
+import interfaces.services.IRelatorioService;
+import interfaces.services.IUsuarioService;
+import interfaces.services.ISubtarefaService;
+import interfaces.services.IEventoService;
+import interfaces.repositories.IEventoRepository;
+import interfaces.validators.IValidadorEvento;
 import repositorios.TarefaRepository;
 import repositorios.EventoRepository;
 import validadores.ValidadorTarefa;
@@ -23,6 +23,8 @@ import controllers.TarefaController;
 import controllers.SubtarefaController;
 import controllers.EventoController;
 import controllers.PersistenciaController;
+import interfaces.persistence.IPersistenciaGenerica;
+import persistencia.Persistencia;
 
 /**
  * Factory responsável pela criação e configuração de services e controllers.
@@ -77,8 +79,14 @@ public class ServiceFactory {
         return new SubtarefaController(subtarefaService);
     }
     
+    /**
+     * Cria uma instância de PersistenciaController com suas dependências injetadas.
+     * 
+     * @return instância configurada de PersistenciaController
+     */
     public static PersistenciaController criarPersistenciaController() {
-        return new PersistenciaController();
+        IPersistenciaGenerica persistencia = new Persistencia();
+        return new PersistenciaController(persistencia);
     }
     
     /**

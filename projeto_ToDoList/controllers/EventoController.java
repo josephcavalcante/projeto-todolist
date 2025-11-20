@@ -1,6 +1,6 @@
 package controllers;
 
-import interfaces.IEventoService;
+import interfaces.services.IEventoService;
 import modelo.Evento;
 import java.time.LocalDate;
 import java.util.List;

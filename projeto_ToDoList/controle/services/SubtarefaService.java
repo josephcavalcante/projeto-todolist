@@ -2,8 +2,8 @@ package controle.services;
 
 import modelo.Tarefa;
 import modelo.Subtarefa;
-import interfaces.ISubtarefaService;
-import interfaces.ITarefaService;
+import interfaces.services.ISubtarefaService;
+import interfaces.services.ITarefaService;
 import controle.ManipuladorDeTarefas;
 import java.util.List;
 

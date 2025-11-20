@@ -1,9 +1,9 @@
 package controle.services;
 
 import modelo.Tarefa;
-import interfaces.IValidadorTarefa;
-import interfaces.ITarefaRepository;
-import interfaces.ITarefaService;
+import interfaces.validators.IValidadorTarefa;
+import interfaces.repositories.ITarefaRepository;
+import interfaces.services.ITarefaService;
 import validadores.ValidadorTarefa;
 import repositorios.TarefaRepository;
 import controle.ManipuladorDeTarefas;

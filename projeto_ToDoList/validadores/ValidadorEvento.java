@@ -1,7 +1,7 @@
 package validadores;
 
-import interfaces.IValidadorEvento;
-import interfaces.IEventoRepository;
+import interfaces.validators.IValidadorEvento;
+import interfaces.repositories.IEventoRepository;
 import modelo.Evento;
 import java.time.LocalDate;
 

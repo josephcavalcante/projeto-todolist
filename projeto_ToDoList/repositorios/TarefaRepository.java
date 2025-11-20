@@ -3,7 +3,7 @@ package repositorios;
 import java.time.LocalDate;
 import java.util.List;
 
-import interfaces.ITarefaRepository;
+import interfaces.repositories.ITarefaRepository;
 import modelo.Tarefa;
 import negocio.ManipuladorDeTarefas;
 
@@ -58,9 +58,6 @@ public class TarefaRepository implements ITarefaRepository {
     
     @Override
     public Tarefa buscarPorTitulo(String titulo) {
-        return listarTodas().stream()
-            .filter(t -> t.getTitulo().equalsIgnoreCase(titulo))
-            .findFirst()
-            .orElse(null);
+        return manipulador.buscarTarefaPorTitulo(titulo);
     }
 }

@@ -1,4 +1,4 @@
-package interfaces;
+package interfaces.validators;
 
 import modelo.Tarefa;
 

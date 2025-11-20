@@ -1,8 +1,9 @@
 package controllers;
 
-import modelo.Subtarefa;
-import interfaces.ISubtarefaService;
 import java.util.List;
+
+import interfaces.services.ISubtarefaService;
+import modelo.Subtarefa;
 
 /**
  * Controller responsável por coordenar operações de subtarefas.
@@ -27,19 +28,51 @@ public class SubtarefaController {
         this.subtarefaService = subtarefaService;
     }
     
+    /**
+     * Coordena a adição de uma subtarefa a uma tarefa.
+     * 
+     * @param tituloTarefa título da tarefa pai
+     * @param titulo título da subtarefa
+     * @param descricao descrição da subtarefa
+     * @param percentual percentual de conclusão
+     * @return true se adicionada com sucesso
+     */
     public boolean adicionarSubtarefa(String tituloTarefa, String titulo, String descricao, double percentual) {
         return subtarefaService.adicionar(tituloTarefa, titulo, descricao, percentual);
     }
     
+    /**
+     * Coordena a edição de uma subtarefa existente.
+     * 
+     * @param tituloTarefa título da tarefa pai
+     * @param tituloAntigo título atual da subtarefa
+     * @param novoTitulo novo título
+     * @param novaDescricao nova descrição
+     * @param novoPercentual novo percentual
+     * @return true se editada com sucesso
+     */
     public boolean editarSubtarefa(String tituloTarefa, String tituloAntigo, String novoTitulo, 
                                   String novaDescricao, double novoPercentual) {
         return subtarefaService.editar(tituloTarefa, tituloAntigo, novoTitulo, novaDescricao, novoPercentual);
     }
     
+    /**
+     * Coordena a remoção de uma subtarefa.
+     * 
+     * @param tituloTarefa título da tarefa pai
+     * @param titulo título da subtarefa a ser removida
+     * @return true se removida com sucesso
+     */
     public boolean removerSubtarefa(String tituloTarefa, String titulo) {
         return subtarefaService.remover(tituloTarefa, titulo);
     }
     
+    /**
+     * Coordena a listagem de subtarefas de uma tarefa.
+     * 
+     * @param tituloTarefa título da tarefa pai
+     * @return lista de subtarefas da tarefa
+     */
     public List<Subtarefa> listarSubtarefas(String tituloTarefa) {
         return subtarefaService.listar(tituloTarefa);
     }

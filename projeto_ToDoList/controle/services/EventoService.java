@@ -1,11 +1,11 @@
-package negocio.services;
+package controle.services;
 
 import java.time.LocalDate;
 import java.util.List;
 
-import interfaces.IEventoRepository;
-import interfaces.IEventoService;
-import interfaces.IValidadorEvento;
+import interfaces.repositories.IEventoRepository;
+import interfaces.services.IEventoService;
+import interfaces.validators.IValidadorEvento;
 import modelo.Evento;
 
 /**

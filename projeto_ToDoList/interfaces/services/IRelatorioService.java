@@ -1,4 +1,4 @@
-package interfaces;
+package interfaces.services;
 
 import modelo.Tarefa;
 import java.time.LocalDate;

@@ -1,49 +1,50 @@
-spackage controllers;
+package controllers;
 
-import persistencia.Persistencia;
-import interfaces.IUsuarioService;
-import negocio.ManipuladorDeTarefas;
+import interfaces.persistence.IPersistenciaGenerica;
 
 /**
- * Controller responsável por coordenar operações de persistência.
+ * Controller genérico responsável por coordenar operações de persistência.
  * <p>
- * Gerencia o carregamento e salvamento de dados, aplicando o princípio
- * SRP (Single Responsibility Principle) e mantendo baixo acoplamento.
+ * Gerencia salvamento e carregamento de qualquer tipo de objeto,
+ * aplicando SRP, DIP e OCP. Totalmente desacoplado de tipos específicos.
  * </p>
  * 
  * @author Projeto ToDoList
- * @version 2.0
+ * @version 3.0
  * @since 2.0
  */
 public class PersistenciaController {
-    private Persistencia persistencia;
-    private static final String ARQUIVO_DADOS = "todolist.dat";
+    private IPersistenciaGenerica persistencia;
     
     /**
-     * Construtor que inicializa o mecanismo de persistência.
+     * Construtor que injeta a dependência de persistência.
+     * 
+     * @param persistencia implementação genérica de persistência
      */
-    public PersistenciaController() {
-        this.persistencia = new Persistencia();
+    public PersistenciaController(IPersistenciaGenerica persistencia) {
+        this.persistencia = persistencia;
     }
     
-    public ManipuladorDeTarefas carregarDados() {
-        try {
-            ManipuladorDeTarefas dados = persistencia.carregarManipulador(ARQUIVO_DADOS);
-            return dados != null ? dados : new ManipuladorDeTarefas();
-        } catch (Exception erro) {
-            System.out.println("Arquivo não encontrado. Iniciando vazio.");
-            return new ManipuladorDeTarefas();
-        }
+    /**
+     * Coordena o salvamento de um objeto.
+     * 
+     * @param objeto objeto a ser salvo
+     * @param identificador nome do arquivo ou identificador
+     * @return true se salvo com sucesso
+     */
+    public boolean salvar(Object objeto, String identificador) {
+        return persistencia.salvar(objeto, identificador);
     }
     
-    public boolean salvarDados(ManipuladorDeTarefas dados, IUsuarioService usuarioService) {
-        try {
-            dados.setUsuario(usuarioService.obterUsuario());
-            persistencia.salvarManipulador(dados, ARQUIVO_DADOS);
-            return true;
-        } catch (Exception ex) {
-            System.out.println("Erro ao salvar: " + ex.getMessage());
-            return false;
-        }
+    /**
+     * Coordena o carregamento de um objeto.
+     * 
+     * @param <T> tipo do objeto esperado
+     * @param identificador nome do arquivo ou identificador
+     * @param tipo classe do tipo esperado
+     * @return objeto carregado ou null se não encontrado
+     */
+    public <T> T carregar(String identificador, Class<T> tipo) {
+        return persistencia.carregar(identificador, tipo);
     }
 }

@@ -1,6 +1,6 @@
 package validadores;
 
-import interfaces.IValidadorTarefa;
+import interfaces.validators.IValidadorTarefa;
 import modelo.Tarefa;
 
 /**

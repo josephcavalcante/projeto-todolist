@@ -82,6 +82,14 @@ public class ManipuladorDeTarefas implements Serializable {
         this.usuarioSistema = usuario;
     }
 
+    // busca de tarefa por título
+    public Tarefa buscarTarefaPorTitulo(String titulo) {
+        return listaTarefas.stream()
+                .filter(t -> t.getTitulo().equalsIgnoreCase(titulo))
+                .findFirst()
+                .orElse(null);
+    }
+
     // cadastramento de tarefa com conversão de data
     public void cadastrarTarefa(String titulo, String descricao, String deadlineStr, int prioridade) throws Exception {
         try {

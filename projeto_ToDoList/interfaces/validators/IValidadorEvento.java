@@ -1,4 +1,4 @@
-package interfaces;
+package interfaces.validators;
 
 import modelo.Evento;
 import java.time.LocalDate;
@@ -55,5 +55,5 @@ public interface IValidadorEvento {
      * @param eventoRepository repositório para verificar conflitos
      * @return true se não há conflito, false se já existe evento na data
      */
-    boolean validarSemConflito(LocalDate dataEvento, interfaces.IEventoRepository eventoRepository);
+    boolean validarSemConflito(LocalDate dataEvento, interfaces.repositories.IEventoRepository eventoRepository);
 }

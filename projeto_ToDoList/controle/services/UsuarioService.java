@@ -1,6 +1,6 @@
 package controle.services;
 
-import interfaces.IUsuarioService;
+import interfaces.services.IUsuarioService;
 import modelo.Usuario;
 
 /**
