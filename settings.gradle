@@ -1,0 +1,4 @@
+rootProject.name = 'projeto-todolist'
+
+// Configuração para projetos multi-módulo (futuro)
+// include 'core', 'gui', 'api'
