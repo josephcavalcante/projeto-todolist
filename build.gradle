@@ -17,12 +17,29 @@ repositories {
 // }
 
 dependencies {
+    // Jakarta Mail (Email)
     implementation 'jakarta.mail:jakarta.mail-api:2.1.2'
     implementation 'org.eclipse.angus:jakarta.mail:2.0.2'
+    
+    // PDF e XML
     implementation 'com.itextpdf:itextpdf:5.5.13.3'
-    implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
     implementation 'com.thoughtworks.xstream:xstream:1.4.21'
     
+    // JPA / Hibernate (SQL)
+    implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
+    implementation 'org.hibernate.orm:hibernate-core:6.4.4.Final'
+    implementation 'org.postgresql:postgresql:42.7.2'
+    
+    // MongoDB (NoSQL)
+    implementation 'org.mongodb:mongodb-driver-sync:4.11.1'
+    
+    // Redis (Cache)
+    implementation 'redis.clients:jedis:5.1.0'
+    
+    // Segurança
+    implementation 'org.mindrot:jbcrypt:0.4'
+    
+    // Testes
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
 }

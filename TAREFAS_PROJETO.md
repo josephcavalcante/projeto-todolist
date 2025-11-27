@@ -3,7 +3,8 @@
 ## 📅 Fase 1: Planejamento e Documentação Inicial
 - [x] Analisar estrutura atual e requisitos
 - [ ] Criar documento de "Antes" (Snapshot da arquitetura atual) <!-- id: 0 -->
-- [ ] Definir tecnologias de Banco de Dados (SQL, NoSQL, Cache) <!-- id: 1 -->
+- [x] Definir tecnologias de Banco de Dados (SQL, NoSQL, Cache) <!-- id: 1 -->
+- [x] Configurar ambiente Docker (Postgres, Mongo, Redis)
 
 ## 💾 Fase 2: Persistência Poliglota (Banco de Dados 2)
 - [ ] **Configuração JPA (SQL)** <!-- id: 2 -->
