@@ -5,7 +5,7 @@ import modelo.Subtarefa;
 import interfaces.services.ISubtarefaService;
 import interfaces.services.ITarefaService;
 import validadores.ValidadorTarefa;
-import controle.ManipuladorDeTarefas;
+import negocio.ManipuladorDeTarefas;
 import java.util.List;
 
 /**
@@ -31,11 +31,12 @@ public class SubtarefaService implements ISubtarefaService {
     // inclusão de subtarefa nova
     public boolean adicionar(String tituloTarefa, String tituloSub, String descricaoSub, double percentual) {
         // validação da obrigatoriedade do título
-        if(tituloSub == null || tituloSub.trim().equals("")) return false; // inline
+        if (tituloSub == null || tituloSub.trim().equals(""))
+            return false; // inline
         try {
             // localização da tarefa principal
             Tarefa tarefaPai = servicoTarefas.buscarPorTitulo(tituloTarefa);
-            if(tarefaPai == null) { // sem espaço
+            if (tarefaPai == null) { // sem espaço
                 return false; // tarefa principal inexistente
             }
 
@@ -72,7 +73,8 @@ public class SubtarefaService implements ISubtarefaService {
     }
 
     // modificação de subtarefa (remoção + criação)
-    public boolean editar(String tituloTarefa, String tituloSubAntigo, String novoTituloSub, String novaDescricaoSub, double novoPercentual) {
+    public boolean editar(String tituloTarefa, String tituloSubAntigo, String novoTituloSub, String novaDescricaoSub,
+            double novoPercentual) {
         try {
             // estratégia: exclusão da antiga + inclusão da nova
             if (remover(tituloTarefa, tituloSubAntigo)) {
@@ -83,7 +85,7 @@ public class SubtarefaService implements ISubtarefaService {
             return false; // falha na edição
         }
     }
-    
+
     // listagem de subtarefas - metodo da interface
     @Override
     public List<Subtarefa> listar(String tituloTarefa) {

@@ -4,7 +4,7 @@ import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfWriter;
-import interfaces.IRelatorioService;
+import interfaces.services.IRelatorioService;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -22,8 +22,8 @@ import modelo.Tarefa;
  * @version 2.1
  * @since 2.0
  */
-public class GeradorDeRelatorios implements IRelatorioService { 
-    
+public class GeradorDeRelatorios implements IRelatorioService {
+
     @Override
     public boolean gerarPDF(List<Tarefa> tarefas, LocalDate data) {
         Document documentoPDF = new Document();
@@ -63,19 +63,19 @@ public class GeradorDeRelatorios implements IRelatorioService {
         try (FileOutputStream arquivoSaida = new FileOutputStream("relatorio_mensal.csv")) {
             StringBuilder conteudoCSV = new StringBuilder();
             conteudoCSV.append("Título,Descrição,Deadline,Prioridade,Percentual,Status\n");
-            
+
             // processamento de cada tarefa
             for (Tarefa itemTarefa : tarefas) {
                 String situacao = itemTarefa.getPercentual() >= 100.0 ? "CONCLUÍDA" : "PENDENTE"; // 100.0 explicito
                 conteudoCSV.append(String.format("\"%s\",\"%s\",%s,%d,%.1f,%s\n",
-                    itemTarefa.getTitulo(),
-                    itemTarefa.getDescricao(),
-                    itemTarefa.getDeadline(),
-                    itemTarefa.getPrioridade(),
-                    itemTarefa.getPercentual(),
-                    situacao));
+                        itemTarefa.getTitulo(),
+                        itemTarefa.getDescricao(),
+                        itemTarefa.getDeadline(),
+                        itemTarefa.getPrioridade(),
+                        itemTarefa.getPercentual(),
+                        situacao));
             }
-            
+
             // gravação do conteúdo
             arquivoSaida.write(conteudoCSV.toString().getBytes("UTF-8"));
             return true;

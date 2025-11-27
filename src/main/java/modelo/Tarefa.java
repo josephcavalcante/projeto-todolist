@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 /**
  * Entidade JPA que representa uma tarefa no sistema.
@@ -21,33 +21,33 @@ import javax.persistence.*;
 @Table(name = "tarefas")
 public class Tarefa implements Serializable {
     private static final long serialVersionUID = 1L;
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
-    
+
     @Column(name = "titulo", nullable = false, length = 100)
     private String titulo;
-    
+
     @Column(name = "descricao", length = 500)
     private String descricao;
-    
+
     @Column(name = "data_cadastro", nullable = false)
     private LocalDate dataCadastro;
-    
+
     @Column(name = "deadline", nullable = false)
     private LocalDate deadline;
-    
+
     @Column(name = "percentual", precision = 5, scale = 2)
     private double percentual;
-    
+
     @Column(name = "data_concretizacao")
     private LocalDate dataConcretizacao;
-    
+
     @Column(name = "prioridade", nullable = false)
     private int prioridade;
-    
+
     @OneToMany(mappedBy = "tarefa", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Subtarefa> subtarefas;
 
@@ -57,7 +57,7 @@ public class Tarefa implements Serializable {
     public Tarefa() {
         this.subtarefas = new ArrayList<>();
     }
-    
+
     /**
      * Construtor completo para criação de tarefa.
      */
@@ -72,15 +72,15 @@ public class Tarefa implements Serializable {
     }
 
     // Getters e Setters
-    
+
     public Long getId() {
         return id;
     }
-    
+
     public void setId(Long id) {
         this.id = id;
     }
-    
+
     public String getTitulo() {
         return titulo;
     }
@@ -155,7 +155,7 @@ public class Tarefa implements Serializable {
     public void removerSubtarefa(Subtarefa subtarefa) {
         this.subtarefas.remove(subtarefa);
     }
-    
+
     /**
      * Verifica se a tarefa está em estado crítico.
      * <p>
@@ -170,4 +170,4 @@ public class Tarefa implements Serializable {
         LocalDate pontoCritico = deadline.minusDays(prioridade);
         return hoje.isAfter(pontoCritico) || hoje.equals(pontoCritico);
     }
-} 
+}

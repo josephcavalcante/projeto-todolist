@@ -3,7 +3,7 @@ package modelo;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 /**
  * Entidade JPA que representa um evento no sistema.
@@ -22,24 +22,24 @@ import javax.persistence.*;
 @Table(name = "eventos")
 public class Evento implements Serializable {
     private static final long serialVersionUID = 1L;
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
-    
+
     @Column(name = "titulo", nullable = false, length = 100)
     private String titulo;
-    
+
     @Column(name = "descricao", length = 500)
     private String descricao;
-    
+
     @Column(name = "data_evento", nullable = false, unique = true)
     private LocalDate dataEvento;
-    
+
     @Column(name = "local", length = 200)
     private String local;
-    
+
     @Column(name = "data_cadastro", nullable = false)
     private LocalDate dataCadastro;
 
@@ -48,14 +48,14 @@ public class Evento implements Serializable {
      */
     public Evento() {
     }
-    
+
     /**
      * Construtor completo do evento.
      * 
-     * @param titulo título do evento (obrigatório)
-     * @param descricao descrição detalhada do evento
+     * @param titulo     título do evento (obrigatório)
+     * @param descricao  descrição detalhada do evento
      * @param dataEvento data em que o evento ocorrerá
-     * @param local local onde o evento acontecerá
+     * @param local      local onde o evento acontecerá
      */
     public Evento(String titulo, String descricao, LocalDate dataEvento, String local) {
         this.titulo = titulo;
@@ -68,7 +68,8 @@ public class Evento implements Serializable {
     /**
      * Calcula quantos dias faltam para o evento.
      * <p>
-     * Aplica Information Expert - o evento sabe calcular seus próprios dias restantes.
+     * Aplica Information Expert - o evento sabe calcular seus próprios dias
+     * restantes.
      * </p>
      * 
      * @return número de dias até o evento (negativo se já passou)
@@ -96,15 +97,15 @@ public class Evento implements Serializable {
     }
 
     // Getters e Setters
-    
+
     public Long getId() {
         return id;
     }
-    
+
     public void setId(Long id) {
         this.id = id;
     }
-    
+
     public String getTitulo() {
         return titulo;
     }
@@ -147,14 +148,16 @@ public class Evento implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("Evento{titulo='%s', data=%s, local='%s', diasRestantes=%d}", 
-                           titulo, dataEvento, local, diasRestantes());
+        return String.format("Evento{titulo='%s', data=%s, local='%s', diasRestantes=%d}",
+                titulo, dataEvento, local, diasRestantes());
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
+        if (this == obj)
+            return true;
+        if (obj == null || getClass() != obj.getClass())
+            return false;
         Evento evento = (Evento) obj;
         return titulo.equals(evento.titulo) && dataEvento.equals(evento.dataEvento);
     }

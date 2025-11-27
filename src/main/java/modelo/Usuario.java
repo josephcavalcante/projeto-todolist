@@ -1,7 +1,7 @@
 package modelo;
 
 import java.io.Serializable;
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 /**
  * Entidade JPA que representa um usuário no sistema.
@@ -16,22 +16,22 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "usuarios", uniqueConstraints = {
-    @UniqueConstraint(columnNames = "email")
+        @UniqueConstraint(columnNames = "email")
 })
 public class Usuario implements Serializable {
     private static final long serialVersionUID = 1L;
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
-    
+
     @Column(name = "nome_usuario", nullable = false, length = 100)
     private String nomeUsuario;
-    
+
     @Column(name = "email", nullable = false, unique = true, length = 150)
     private String emailFixo; // não pode ser alterado
-    
+
     @Column(name = "senha", nullable = true, length = 255)
     private String senha; // para autenticação do usuário
 
@@ -48,7 +48,7 @@ public class Usuario implements Serializable {
         this.nomeUsuario = nome;
         this.emailFixo = email;
     }
-    
+
     /**
      * Construtor completo com senha para criação de usuário.
      */
@@ -59,11 +59,11 @@ public class Usuario implements Serializable {
     }
 
     // Getters e Setters
-    
+
     public Long getId() {
         return id;
     }
-    
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -79,7 +79,7 @@ public class Usuario implements Serializable {
     public String getEmail() {
         return emailFixo;
     }
-    
+
     /**
      * Método interno para JPA definir email.
      * Não deve ser usado diretamente no código.
@@ -87,15 +87,15 @@ public class Usuario implements Serializable {
     protected void setEmail(String email) {
         this.emailFixo = email;
     }
-    
+
     public String getSenha() {
         return senha;
     }
-    
+
     public void setSenha(String senha) {
         this.senha = senha;
     }
-    
+
     /**
      * Verifica se o usuário tem senha definida.
      * 
@@ -104,7 +104,7 @@ public class Usuario implements Serializable {
     public boolean temSenha() {
         return senha != null && !senha.trim().isEmpty();
     }
-    
+
     /**
      * Verifica se a senha fornecida está correta.
      * 
@@ -114,10 +114,10 @@ public class Usuario implements Serializable {
     public boolean verificarSenha(String senhaFornecida) {
         return senha != null && senha.equals(senhaFornecida);
     }
-    
+
     @Override
     public String toString() {
-        return String.format("Usuario{id=%d, nome='%s', email='%s', temSenha=%s}", 
-                           id, nomeUsuario, emailFixo, temSenha());
+        return String.format("Usuario{id=%d, nome='%s', email='%s', temSenha=%s}",
+                id, nomeUsuario, emailFixo, temSenha());
     }
 }

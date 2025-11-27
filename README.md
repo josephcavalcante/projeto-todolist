@@ -1,7 +1,7 @@
 # ToDoList - Sistema de Gerenciamento de Tarefas
 
 [![Java](https://img.shields.io/badge/Java-17+-orange.svg)](https://www.oracle.com/java/)
-[![Gradle](https://img.shields.io/badge/Gradle-8.10-blue.svg)](https://gradle.org/)
+[![Gradle](https://img.shields.io/badge/Gradle-8.11.1-blue.svg)](https://gradle.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 ## 📋 Sobre o Projeto
@@ -129,7 +129,7 @@ java -jar build/libs/projeto-todolist-2.0.jar
 ```gradle
 dependencies {
     implementation 'jakarta.mail:jakarta.mail-api:2.1.2'
-    implementation 'com.sun.mail:jakarta.mail:2.1.2'
+    implementation 'org.eclipse.angus:jakarta.mail:2.0.2'
     implementation 'com.itextpdf:itextpdf:5.5.13.3'
     implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
     implementation 'com.thoughtworks.xstream:xstream:1.4.21'

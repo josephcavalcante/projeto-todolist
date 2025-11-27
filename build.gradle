@@ -5,71 +5,55 @@ plugins {
 
 group = 'br.com.todolist'
 version = '2.0'
-description = 'Sistema ToDoList com padrões SOLID e GRASP'
 
 repositories {
     mavenCentral()
 }
 
+// java {
+//     toolchain {
+//         languageVersion = JavaLanguageVersion.of(17)
+//     }
+// }
+
 dependencies {
-    // JUnit 5 para testes
+    implementation 'jakarta.mail:jakarta.mail-api:2.1.2'
+    implementation 'org.eclipse.angus:jakarta.mail:2.0.2'
+    implementation 'com.itextpdf:itextpdf:5.5.13.3'
+    implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
+    implementation 'com.thoughtworks.xstream:xstream:1.4.21'
+    
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
-    
-    // Jakarta Mail para envio de emails
-    implementation 'jakarta.mail:jakarta.mail-api:2.1.2'
-    implementation 'com.sun.mail:jakarta.mail:2.1.2'
-    
-    // iText para geração de PDFs
-    implementation 'com.itextpdf:itextpdf:5.5.13.3'
-    
-    // JPA para persistência (futuro uso com banco)
-    implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
-    
-    // XStream para serialização XML (compatibilidade)
-    implementation 'com.thoughtworks.xstream:xstream:1.4.21'
 }
 
 application {
     mainClass = 'Main'
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-}
+// compileJava {
+//     options.release = 17
+// }
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
-    options.compilerArgs += ['-Xlint:unchecked', '-Xlint:deprecation']
 }
 
-test {
-    useJUnitPlatform()
-}
+// test {
+//     useJUnitPlatform()
+// }
 
-// Task para executar com interface gráfica
 task runGUI(type: JavaExec) {
-    group = 'application'
-    description = 'Executa a aplicação com interface gráfica'
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'telas.TelaPrincipal'
 }
 
-// Task para criar JAR executável
 jar {
     manifest {
-        attributes(
-            'Main-Class': 'Main',
-            'Implementation-Title': project.name,
-            'Implementation-Version': project.version
-        )
+        attributes 'Main-Class': 'Main'
     }
-    
-    // Inclui todas as dependências no JAR
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
-    
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }

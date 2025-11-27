@@ -3,14 +3,16 @@ package negocio;
 import modelo.Tarefa;
 import modelo.Subtarefa;
 import modelo.Usuario;
-import interfaces.IRelatorioService;
-import interfaces.IUsuarioService;
-import interfaces.ISubtarefaService;
-import interfaces.IEventoService;
-import controllers.TarefaController;
-import controllers.SubtarefaController;
-import controllers.EventoController;
-import controllers.PersistenciaController;
+import interfaces.services.IRelatorioService;
+import interfaces.services.IUsuarioService;
+import interfaces.services.ISubtarefaService;
+import interfaces.services.IEventoService;
+import interfaces.services.ITarefaService;
+import controle.services.UsuarioService;
+import interfaces.controllers.ITarefaController;
+import interfaces.controllers.ISubtarefaController;
+import interfaces.controllers.IEventoController;
+import interfaces.controllers.IPersistenciaController;
 import factories.ServiceFactory;
 import comunicacao.Mensageiro;
 
@@ -31,15 +33,15 @@ import java.util.List;
  */
 public class ToDoList {
     private ManipuladorDeTarefas gerenciadorTarefas; // ainda precisa pra compatibilidade
-    private TarefaService serviceTarefas;
+    private ITarefaService serviceTarefas;
     private ISubtarefaService serviceSubs;
     private IRelatorioService relatorioService;
     private IUsuarioService usuarioService;
     private IEventoService eventoService;
-    private TarefaController tarefaController;
-    private SubtarefaController subtarefaController;
-    private EventoController eventoController;
-    private PersistenciaController persistenciaController;
+    private ITarefaController tarefaController;
+    private ISubtarefaController subtarefaController;
+    private IEventoController eventoController;
+    private IPersistenciaController persistenciaController;
 
     /**
      * Construtor que inicializa o sistema usando ServiceFactory.
@@ -52,15 +54,18 @@ public class ToDoList {
         // inicializa usando factory
         this.persistenciaController = ServiceFactory.criarPersistenciaController();
         this.usuarioService = ServiceFactory.criarUsuarioService();
-        
+
         // carrega dados usando controller
-        this.gerenciadorTarefas = persistenciaController.carregarDados();
-        
+        this.gerenciadorTarefas = persistenciaController.carregar("todolist.dat", ManipuladorDeTarefas.class);
+        if (this.gerenciadorTarefas == null) {
+            this.gerenciadorTarefas = new ManipuladorDeTarefas();
+        }
+
         // se tem usuario salvo, usa ele
         if (gerenciadorTarefas.getUsuario() != null) {
-            this.usuarioService = new negocio.services.UsuarioService(gerenciadorTarefas.getUsuario());
+            this.usuarioService = new UsuarioService(gerenciadorTarefas.getUsuario());
         }
-        
+
         // cria services e controllers usando factory
         this.serviceTarefas = ServiceFactory.criarTarefaService(gerenciadorTarefas);
         this.serviceSubs = ServiceFactory.criarSubtarefaService(gerenciadorTarefas, serviceTarefas);
@@ -73,7 +78,7 @@ public class ToDoList {
 
     // salva usando controller de persistencia
     public void salvarDados() {
-        persistenciaController.salvarDados(gerenciadorTarefas, usuarioService);
+        persistenciaController.salvar(gerenciadorTarefas, "todolist.dat");
     }
 
     // ========== GESTÃO DE TAREFAS - USANDO CONTROLLER ==========
@@ -81,37 +86,40 @@ public class ToDoList {
     // inclusão de tarefa nova no sistema
     public boolean adicionarTarefa(String titulo, String descricao, LocalDate deadline, int prioridade) {
         boolean sucesso = tarefaController.adicionarTarefa(titulo, descricao, deadline, prioridade);
-        if (sucesso) salvarDados();
+        if (sucesso)
+            salvarDados();
         return sucesso;
     }
 
     // remoção de tarefa do sistema
     public boolean removerTarefa(String titulo) {
         boolean sucesso = tarefaController.removerTarefa(titulo);
-        if (sucesso) salvarDados();
+        if (sucesso)
+            salvarDados();
         return sucesso;
     }
 
     // edição de tarefa existente
-    public boolean editarTarefa(String tituloAntigo, String novoTitulo, String novaDescricao, 
-                               LocalDate novoDeadline, int novaPrioridade, double novoPercentual) {
-        boolean sucesso = tarefaController.editarTarefa(tituloAntigo, novoTitulo, novaDescricao, 
-                                                       novoDeadline, novaPrioridade, novoPercentual);
-        if (sucesso) salvarDados();
+    public boolean editarTarefa(String tituloAntigo, String novoTitulo, String novaDescricao,
+            LocalDate novoDeadline, int novaPrioridade, double novoPercentual) {
+        boolean sucesso = tarefaController.editarTarefa(tituloAntigo, novoTitulo, novaDescricao,
+                novoDeadline, novaPrioridade, novoPercentual);
+        if (sucesso)
+            salvarDados();
         return sucesso;
     }
-    
+
     // metodos de compatibilidade - ainda precisam pras telas
     public void adicionarTarefa(Tarefa tarefa) {
         gerenciadorTarefas.adicionarTarefa(tarefa);
         salvarDados();
     }
-    
+
     public void removerTarefa(Tarefa tarefa) {
         gerenciadorTarefas.removerTarefa(tarefa);
         salvarDados();
     }
-    
+
     public void editarTarefa(Tarefa antiga, Tarefa nova) {
         gerenciadorTarefas.editarTarefa(antiga, nova);
         salvarDados();
@@ -137,14 +145,16 @@ public class ToDoList {
     // adição de subtarefa usando controller
     public boolean adicionarSubtarefa(String tituloTarefa, String titulo, String descricao, double percentual) {
         boolean sucesso = subtarefaController.adicionarSubtarefa(tituloTarefa, titulo, descricao, percentual);
-        if (sucesso) salvarDados();
+        if (sucesso)
+            salvarDados();
         return sucesso;
     }
 
     // exclusão de subtarefa usando controller
     public boolean removerSubtarefa(String tituloTarefa, String titulo) {
         boolean sucesso = subtarefaController.removerSubtarefa(tituloTarefa, titulo);
-        if (sucesso) salvarDados();
+        if (sucesso)
+            salvarDados();
         return sucesso;
     }
 
@@ -152,18 +162,18 @@ public class ToDoList {
     public List<Subtarefa> listarSubtarefas(String tituloTarefa) {
         return subtarefaController.listarSubtarefas(tituloTarefa);
     }
-    
+
     // metodos de compatibilidade - ainda precisam pras telas
     public void adicionarSubtarefa(Tarefa tarefa, Subtarefa subtarefa) {
         gerenciadorTarefas.adicionarSubtarefa(tarefa, subtarefa);
         salvarDados();
     }
-    
+
     public void removerSubtarefa(Tarefa tarefa, Subtarefa subtarefa) {
         gerenciadorTarefas.removerSubtarefa(tarefa, subtarefa);
         salvarDados();
     }
-    
+
     public List<Subtarefa> listarSubtarefas(Tarefa tarefa) {
         return gerenciadorTarefas.listarSubtarefas(tarefa);
     }
@@ -216,7 +226,7 @@ public class ToDoList {
     // ========== INTERFACE COM SERVICES ==========
 
     // disponibilização dos services
-    public TarefaService getTarefaService() {
+    public ITarefaService getTarefaService() {
         return serviceTarefas;
     }
 
@@ -229,49 +239,49 @@ public class ToDoList {
     public Tarefa buscarTarefaPorTitulo(String titulo) {
         return tarefaController.buscarTarefa(titulo);
     }
-    
+
     // ========== GESTÃO DE EVENTOS - USANDO CONTROLLER ==========
-    
+
     /**
      * Cadastra um novo evento no sistema.
      * 
-     * @param titulo título do evento
-     * @param descricao descrição do evento
+     * @param titulo     título do evento
+     * @param descricao  descrição do evento
      * @param dataEvento data do evento
-     * @param local local do evento
+     * @param local      local do evento
      * @return true se cadastrado com sucesso, false caso contrário
      */
     public boolean cadastrarEvento(String titulo, String descricao, LocalDate dataEvento, String local) {
         return eventoController.cadastrarEvento(titulo, descricao, dataEvento, local);
     }
-    
+
     /**
      * Edita um evento existente.
      * 
-     * @param tituloAntigo título atual do evento
-     * @param dataAntiga data atual do evento
-     * @param novoTitulo novo título
+     * @param tituloAntigo  título atual do evento
+     * @param dataAntiga    data atual do evento
+     * @param novoTitulo    novo título
      * @param novaDescricao nova descrição
-     * @param novaData nova data
-     * @param novoLocal novo local
+     * @param novaData      nova data
+     * @param novoLocal     novo local
      * @return true se editado com sucesso, false caso contrário
      */
-    public boolean editarEvento(String tituloAntigo, LocalDate dataAntiga, String novoTitulo, 
-                               String novaDescricao, LocalDate novaData, String novoLocal) {
+    public boolean editarEvento(String tituloAntigo, LocalDate dataAntiga, String novoTitulo,
+            String novaDescricao, LocalDate novaData, String novoLocal) {
         return eventoController.editarEvento(tituloAntigo, dataAntiga, novoTitulo, novaDescricao, novaData, novoLocal);
     }
-    
+
     /**
      * Remove um evento do sistema.
      * 
-     * @param titulo título do evento
+     * @param titulo     título do evento
      * @param dataEvento data do evento
      * @return true se removido com sucesso, false caso contrário
      */
     public boolean removerEvento(String titulo, LocalDate dataEvento) {
         return eventoController.removerEvento(titulo, dataEvento);
     }
-    
+
     /**
      * Lista todos os eventos com informações de dias restantes.
      * 
@@ -280,7 +290,7 @@ public class ToDoList {
     public List<modelo.Evento> listarEventosComDiasRestantes() {
         return eventoController.listarEventosComDiasRestantes();
     }
-    
+
     /**
      * Lista eventos de uma data específica.
      * 
@@ -290,7 +300,7 @@ public class ToDoList {
     public List<modelo.Evento> listarEventosPorData(LocalDate data) {
         return eventoController.listarEventosPorData(data);
     }
-    
+
     /**
      * Lista eventos de um mês específico.
      * 
@@ -301,15 +311,15 @@ public class ToDoList {
     public List<modelo.Evento> listarEventosPorMes(int mes, int ano) {
         return eventoController.listarEventosPorMes(mes, ano);
     }
-    
+
     /**
      * Busca um evento específico.
      * 
-     * @param titulo título do evento
+     * @param titulo     título do evento
      * @param dataEvento data do evento
      * @return o evento encontrado ou null
      */
     public modelo.Evento buscarEvento(String titulo, LocalDate dataEvento) {
         return eventoController.buscarEvento(titulo, dataEvento);
     }
-} 
+}

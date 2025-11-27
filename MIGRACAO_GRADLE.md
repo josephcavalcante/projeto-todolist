@@ -51,7 +51,7 @@ projeto-todolist/
 ```gradle
 // Antes: JARs na pasta lib/
 implementation 'jakarta.mail:jakarta.mail-api:2.1.2'
-implementation 'com.sun.mail:jakarta.mail:2.1.2'
+implementation 'org.eclipse.angus:jakarta.mail:2.0.2'
 implementation 'com.itextpdf:itextpdf:5.5.13.3'
 implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
 implementation 'com.thoughtworks.xstream:xstream:1.4.21'
