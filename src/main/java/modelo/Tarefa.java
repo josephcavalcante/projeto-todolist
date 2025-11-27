@@ -48,7 +48,7 @@ public class Tarefa implements Serializable {
     @Column(name = "prioridade", nullable = false)
     private int prioridade;
 
-    @OneToMany(mappedBy = "tarefa", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Transient
     private List<Subtarefa> subtarefas;
 
     /**

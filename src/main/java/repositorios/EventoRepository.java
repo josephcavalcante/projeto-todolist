@@ -1,11 +1,11 @@
 package repositorios;
 
+import jakarta.persistence.EntityManager;
+import persistencia.DatabaseManager;
 import interfaces.repositories.IEventoRepository;
 import modelo.Evento;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.ArrayList;
-import java.util.stream.Collectors;
 
 /**
  * Implementação do repositório de eventos usando lista em memória.
@@ -20,68 +20,124 @@ import java.util.stream.Collectors;
  * @since 2.1
  */
 public class EventoRepository implements IEventoRepository {
-    private List<Evento> eventos;
-    
-    /**
-     * Construtor que inicializa a lista de eventos.
-     */
+
     public EventoRepository() {
-        this.eventos = new ArrayList<>();
     }
-    
+
+    private EntityManager getEntityManager() {
+        return DatabaseManager.getInstance().getEntityManager();
+    }
+
     @Override
     public void salvar(Evento evento) {
         if (evento == null) {
             throw new IllegalArgumentException("Evento não pode ser nulo");
         }
-        eventos.add(evento);
-    }
-    
-    @Override
-    public void remover(Evento evento) {
-        eventos.remove(evento);
-    }
-    
-    @Override
-    public void atualizar(Evento antigo, Evento novo) {
-        int index = eventos.indexOf(antigo);
-        if (index != -1) {
-            eventos.set(index, novo);
+        EntityManager em = getEntityManager();
+        try {
+            em.getTransaction().begin();
+            if (evento.getId() == null) {
+                em.persist(evento);
+            } else {
+                em.merge(evento);
+            }
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            em.getTransaction().rollback();
+            throw e;
+        } finally {
+            em.close();
         }
     }
-    
+
+    @Override
+    public void remover(Evento evento) {
+        EntityManager em = getEntityManager();
+        try {
+            em.getTransaction().begin();
+            Evento e = em.find(Evento.class, evento.getId());
+            if (e != null) {
+                em.remove(e);
+            }
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            em.getTransaction().rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public void atualizar(Evento antigo, Evento novo) {
+        salvar(novo);
+    }
+
     @Override
     public List<Evento> listarTodos() {
-        return new ArrayList<>(eventos);
+        EntityManager em = getEntityManager();
+        try {
+            return em.createQuery("SELECT e FROM Evento e", Evento.class).getResultList();
+        } finally {
+            em.close();
+        }
     }
-    
+
     @Override
     public List<Evento> listarPorData(LocalDate data) {
-        return eventos.stream()
-                .filter(evento -> evento.getDataEvento().equals(data))
-                .collect(Collectors.toList());
+        EntityManager em = getEntityManager();
+        try {
+            return em.createQuery("SELECT e FROM Evento e WHERE e.dataEvento = :data", Evento.class)
+                    .setParameter("data", data)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
     }
-    
+
     @Override
     public List<Evento> listarPorMes(int mes, int ano) {
-        return eventos.stream()
-                .filter(evento -> evento.getDataEvento().getMonthValue() == mes && 
-                                evento.getDataEvento().getYear() == ano)
-                .collect(Collectors.toList());
+        EntityManager em = getEntityManager();
+        try {
+            return em
+                    .createQuery(
+                            "SELECT e FROM Evento e WHERE MONTH(e.dataEvento) = :mes AND YEAR(e.dataEvento) = :ano",
+                            Evento.class)
+                    .setParameter("mes", mes)
+                    .setParameter("ano", ano)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
     }
-    
+
     @Override
     public Evento buscarPorTituloEData(String titulo, LocalDate data) {
-        return eventos.stream()
-                .filter(evento -> evento.getTitulo().equalsIgnoreCase(titulo) && 
-                                evento.getDataEvento().equals(data))
-                .findFirst()
-                .orElse(null);
+        EntityManager em = getEntityManager();
+        try {
+            return em
+                    .createQuery("SELECT e FROM Evento e WHERE e.titulo = :titulo AND e.dataEvento = :data",
+                            Evento.class)
+                    .setParameter("titulo", titulo)
+                    .setParameter("data", data)
+                    .getResultStream()
+                    .findFirst()
+                    .orElse(null);
+        } finally {
+            em.close();
+        }
     }
-    
+
     @Override
     public boolean existeEventoNaData(LocalDate data) {
-        return eventos.stream()
-                .anyMatch(evento -> evento.getDataEvento().equals(data));
+        EntityManager em = getEntityManager();
+        try {
+            Long count = em.createQuery("SELECT COUNT(e) FROM Evento e WHERE e.dataEvento = :data", Long.class)
+                    .setParameter("data", data)
+                    .getSingleResult();
+            return count > 0;
+        } finally {
+            em.close();
+        }
     }
 }

@@ -1,9 +1,10 @@
 package factories;
 
 import interfaces.repositories.ITarefaRepository;
+import interfaces.repositories.ISubtarefaRepository;
 import interfaces.validators.IValidadorTarefa;
 import interfaces.services.ITarefaService;
-import negocio.ManipuladorDeTarefas;
+
 import controle.services.EventoService;
 import controle.services.SubtarefaService;
 import relatorios.GeradorDeRelatorios;
@@ -45,86 +46,46 @@ import persistencia.Persistencia;
  */
 public class ServiceFactory {
 
-    /**
-     * Cria uma instância de TarefaService com suas dependências injetadas.
-     * 
-     * @param manipulador manipulador de tarefas para o repositório
-     * @return instância configurada de ITarefaService
-     */
-    public static ITarefaService criarTarefaService(ManipuladorDeTarefas manipulador) {
-        ITarefaRepository repositorio = new TarefaRepository(manipulador);
+    public static ITarefaService criarTarefaService() {
+        ITarefaRepository repositorio = new TarefaRepository();
         IValidadorTarefa validador = new ValidadorTarefa();
         return new TarefaService(repositorio, validador);
     }
 
-    /**
-     * Cria uma instância de GeradorDeRelatorios.
-     * 
-     * @return instância de IRelatorioService
-     */
     public static IRelatorioService criarRelatorioService() {
         return new GeradorDeRelatorios();
     }
 
     public static IUsuarioService criarUsuarioService() {
-        return new UsuarioService();
+        return new UsuarioService(new repositorios.UsuarioRepository());
     }
 
-    public static ISubtarefaService criarSubtarefaService(ManipuladorDeTarefas manipulador,
-            ITarefaService tarefaService) {
-        return new SubtarefaService(manipulador, tarefaService);
+    public static ISubtarefaService criarSubtarefaService(ITarefaService tarefaService) {
+        ISubtarefaRepository repositorio = new repositorios.SubtarefaRepositoryMongo();
+        return new SubtarefaService(repositorio, tarefaService);
     }
 
-    /**
-     * Cria uma instância de TarefaController com suas dependências injetadas.
-     * 
-     * @param manipulador manipulador de tarefas
-     * @return instância configurada de ITarefaController
-     */
-    public static ITarefaController criarTarefaController(ManipuladorDeTarefas manipulador) {
-        ITarefaService tarefaService = criarTarefaService(manipulador);
+    public static ITarefaController criarTarefaController() {
+        ITarefaService tarefaService = criarTarefaService();
         return new TarefaController(tarefaService);
     }
 
-    /**
-     * Cria uma instância de SubtarefaController com suas dependências injetadas.
-     * 
-     * @param manipulador   manipulador de tarefas
-     * @param tarefaService service de tarefas
-     * @return instância configurada de ISubtarefaController
-     */
-    public static ISubtarefaController criarSubtarefaController(ManipuladorDeTarefas manipulador,
-            ITarefaService tarefaService) {
-        ISubtarefaService subtarefaService = criarSubtarefaService(manipulador, tarefaService);
+    public static ISubtarefaController criarSubtarefaController(ITarefaService tarefaService) {
+        ISubtarefaService subtarefaService = criarSubtarefaService(tarefaService);
         return new SubtarefaController(subtarefaService);
     }
 
-    /**
-     * Cria uma instância de PersistenciaController com suas dependências injetadas.
-     * 
-     * @return instância configurada de IPersistenciaController
-     */
     public static IPersistenciaController criarPersistenciaController() {
         IPersistencia persistencia = new Persistencia();
         return new PersistenciaController(persistencia);
     }
 
-    /**
-     * Cria uma instância de EventoService com suas dependências injetadas.
-     * 
-     * @return instância configurada de EventoService
-     */
     public static IEventoService criarEventoService() {
         IEventoRepository repositorio = new EventoRepository();
         IValidadorEvento validador = new ValidadorEvento();
         return new EventoService(repositorio, validador);
     }
 
-    /**
-     * Cria uma instância de EventoController.
-     * 
-     * @return instância de IEventoController
-     */
     public static IEventoController criarEventoController() {
         IEventoService eventoService = criarEventoService();
         return new EventoController(eventoService);

@@ -6,14 +6,14 @@ import interfaces.repositories.ITarefaRepository;
 import interfaces.services.ITarefaService;
 import validadores.ValidadorTarefa;
 import repositorios.TarefaRepository;
-import negocio.ManipuladorDeTarefas;
+
 import java.time.LocalDate;
 import java.util.List;
 
 /**
  * Service responsável pela lógica de negócio das tarefas.
  * <p>
- * Centraliza as operações de CRUD de tarefas, aplicando validações e 
+ * Centraliza as operações de CRUD de tarefas, aplicando validações e
  * coordenando com o repositório de dados. Segue o padrão Service Layer.
  * </p>
  * 
@@ -29,23 +29,11 @@ public class TarefaService implements ITarefaService {
      * Construtor com injeção de dependência (DIP).
      * 
      * @param repositorio implementação do repositório de tarefas
-     * @param validador implementação do validador de tarefas
+     * @param validador   implementação do validador de tarefas
      */
     public TarefaService(ITarefaRepository repositorio, IValidadorTarefa validador) {
         this.repositorio = repositorio;
         this.validador = validador;
-    }
-    
-    /**
-     * Construtor de compatibilidade com versão anterior.
-     * 
-     * @param manipulador manipulador de tarefas legado
-     * @deprecated Use o construtor com injeção de dependência
-     */
-    @Deprecated
-    public TarefaService(ManipuladorDeTarefas manipulador) {
-        this.repositorio = new TarefaRepository(manipulador);
-        this.validador = new ValidadorTarefa();
     }
 
     /**
@@ -55,16 +43,16 @@ public class TarefaService implements ITarefaService {
      * A data de cadastro é definida automaticamente como a data atual.
      * </p>
      * 
-     * @param titulo título da tarefa (obrigatório)
-     * @param descricao descrição detalhada da tarefa
-     * @param deadline data limite para conclusão
+     * @param titulo     título da tarefa (obrigatório)
+     * @param descricao  descrição detalhada da tarefa
+     * @param deadline   data limite para conclusão
      * @param prioridade nível de prioridade (1-5)
      * @return true se a tarefa foi cadastrada com sucesso, false caso contrário
      */
     @Override
     public boolean cadastrar(String titulo, String descricao, LocalDate deadline, int prioridade) {
         // validação usando validador dedicado
-        if(!validador.validarTitulo(titulo)) {
+        if (!validador.validarTitulo(titulo)) {
             return false;
         }
         try {
@@ -84,33 +72,34 @@ public class TarefaService implements ITarefaService {
      * SOLID/GRASP/GOF. Service atua como Creator e orquestrador.
      * </p>
      * 
-     * @param tituloAntigo título atual da tarefa a ser editada
-     * @param novoTitulo novo título da tarefa
-     * @param novaDescricao nova descrição da tarefa
-     * @param novoDeadline nova data limite
+     * @param tituloAntigo   título atual da tarefa a ser editada
+     * @param novoTitulo     novo título da tarefa
+     * @param novaDescricao  nova descrição da tarefa
+     * @param novoDeadline   nova data limite
      * @param novaPrioridade nova prioridade
      * @param novoPercentual novo percentual de conclusão
      * @return true se a edição foi bem-sucedida, false caso contrário
      */
     @Override
-    public boolean editar(String tituloAntigo, String novoTitulo, String novaDescricao, LocalDate novoDeadline, int novaPrioridade, double novoPercentual) {
+    public boolean editar(String tituloAntigo, String novoTitulo, String novaDescricao, LocalDate novoDeadline,
+            int novaPrioridade, double novoPercentual) {
         // validação usando Strategy Pattern
         if (!validador.validarTitulo(novoTitulo)) {
             return false;
         }
         try {
-            // localização da tarefa original 
+            // localização da tarefa original
             Tarefa tarefaOriginal = buscarPorTitulo(tituloAntigo);
             if (tarefaOriginal == null) {
                 return false; // tarefa inexistente
             }
 
             // criação da tarefa atualizada
-            Tarefa tarefaAtualizada = new Tarefa(novoTitulo.trim(), novaDescricao.trim(), 
-                                               tarefaOriginal.getDataCadastro(), novoDeadline, novaPrioridade);
+            Tarefa tarefaAtualizada = new Tarefa(novoTitulo.trim(), novaDescricao.trim(),
+                    tarefaOriginal.getDataCadastro(), novoDeadline, novaPrioridade);
             tarefaAtualizada.setId(tarefaOriginal.getId()); // preserva ID para JPA
             tarefaAtualizada.setPercentual(novoPercentual);
-            
+
             // persistência da nova instância
             repositorio.atualizar(tarefaOriginal, tarefaAtualizada);
             return true;
@@ -149,7 +138,7 @@ public class TarefaService implements ITarefaService {
     public Tarefa buscarPorTitulo(String titulo) {
         return repositorio.buscarPorTitulo(titulo);
     }
-    
+
     /**
      * Lista todas as tarefas do sistema.
      * 
@@ -159,7 +148,7 @@ public class TarefaService implements ITarefaService {
     public List<Tarefa> listarTodas() {
         return repositorio.listarTodas();
     }
-    
+
     /**
      * Lista tarefas filtradas por data específica.
      * 
@@ -170,7 +159,7 @@ public class TarefaService implements ITarefaService {
     public List<Tarefa> listarPorData(LocalDate data) {
         return repositorio.listarPorData(data);
     }
-    
+
     /**
      * Lista tarefas críticas (prazo vencendo).
      * 
@@ -179,7 +168,7 @@ public class TarefaService implements ITarefaService {
     @Override
     public List<Tarefa> listarCriticas() {
         return repositorio.listarTodas().stream()
-            .filter(Tarefa::isCritica)
-            .collect(java.util.stream.Collectors.toList());
+                .filter(Tarefa::isCritica)
+                .collect(java.util.stream.Collectors.toList());
     }
 }

@@ -8,11 +8,9 @@ import interfaces.services.IUsuarioService;
 import interfaces.services.ISubtarefaService;
 import interfaces.services.IEventoService;
 import interfaces.services.ITarefaService;
-import controle.services.UsuarioService;
 import interfaces.controllers.ITarefaController;
 import interfaces.controllers.ISubtarefaController;
 import interfaces.controllers.IEventoController;
-import interfaces.controllers.IPersistenciaController;
 import factories.ServiceFactory;
 import comunicacao.Mensageiro;
 
@@ -32,7 +30,6 @@ import java.util.List;
  * @since 1.0
  */
 public class ToDoList {
-    private ManipuladorDeTarefas gerenciadorTarefas; // ainda precisa pra compatibilidade
     private ITarefaService serviceTarefas;
     private ISubtarefaService serviceSubs;
     private IRelatorioService relatorioService;
@@ -41,7 +38,6 @@ public class ToDoList {
     private ITarefaController tarefaController;
     private ISubtarefaController subtarefaController;
     private IEventoController eventoController;
-    private IPersistenciaController persistenciaController;
 
     /**
      * Construtor que inicializa o sistema usando ServiceFactory.
@@ -52,110 +48,83 @@ public class ToDoList {
      */
     public ToDoList() {
         // inicializa usando factory
-        this.persistenciaController = ServiceFactory.criarPersistenciaController();
         this.usuarioService = ServiceFactory.criarUsuarioService();
 
-        // carrega dados usando controller
-        this.gerenciadorTarefas = persistenciaController.carregar("todolist.dat", ManipuladorDeTarefas.class);
-        if (this.gerenciadorTarefas == null) {
-            this.gerenciadorTarefas = new ManipuladorDeTarefas();
-        }
-
-        // se tem usuario salvo, usa ele
-        if (gerenciadorTarefas.getUsuario() != null) {
-            this.usuarioService = new UsuarioService(gerenciadorTarefas.getUsuario());
-        }
-
         // cria services e controllers usando factory
-        this.serviceTarefas = ServiceFactory.criarTarefaService(gerenciadorTarefas);
-        this.serviceSubs = ServiceFactory.criarSubtarefaService(gerenciadorTarefas, serviceTarefas);
+        this.serviceTarefas = ServiceFactory.criarTarefaService();
+        this.serviceSubs = ServiceFactory.criarSubtarefaService(serviceTarefas);
         this.relatorioService = ServiceFactory.criarRelatorioService();
         this.eventoService = ServiceFactory.criarEventoService();
-        this.tarefaController = ServiceFactory.criarTarefaController(gerenciadorTarefas);
-        this.subtarefaController = ServiceFactory.criarSubtarefaController(gerenciadorTarefas, serviceTarefas);
+        this.tarefaController = ServiceFactory.criarTarefaController();
+        this.subtarefaController = ServiceFactory.criarSubtarefaController(serviceTarefas);
         this.eventoController = ServiceFactory.criarEventoController();
     }
 
-    // salva usando controller de persistencia
+    // Mantido para compatibilidade com a UI antiga (que chama este método)
+    // A persistência agora é automática via JPA/Mongo
     public void salvarDados() {
-        persistenciaController.salvar(gerenciadorTarefas, "todolist.dat");
     }
 
     // ========== GESTÃO DE TAREFAS - USANDO CONTROLLER ==========
 
     // inclusão de tarefa nova no sistema
     public boolean adicionarTarefa(String titulo, String descricao, LocalDate deadline, int prioridade) {
-        boolean sucesso = tarefaController.adicionarTarefa(titulo, descricao, deadline, prioridade);
-        if (sucesso)
-            salvarDados();
-        return sucesso;
+        return tarefaController.adicionarTarefa(titulo, descricao, deadline, prioridade);
     }
 
     // remoção de tarefa do sistema
     public boolean removerTarefa(String titulo) {
-        boolean sucesso = tarefaController.removerTarefa(titulo);
-        if (sucesso)
-            salvarDados();
-        return sucesso;
+        return tarefaController.removerTarefa(titulo);
     }
 
     // edição de tarefa existente
     public boolean editarTarefa(String tituloAntigo, String novoTitulo, String novaDescricao,
             LocalDate novoDeadline, int novaPrioridade, double novoPercentual) {
-        boolean sucesso = tarefaController.editarTarefa(tituloAntigo, novoTitulo, novaDescricao,
+        return tarefaController.editarTarefa(tituloAntigo, novoTitulo, novaDescricao,
                 novoDeadline, novaPrioridade, novoPercentual);
-        if (sucesso)
-            salvarDados();
-        return sucesso;
     }
 
     // metodos de compatibilidade - ainda precisam pras telas
     public void adicionarTarefa(Tarefa tarefa) {
-        gerenciadorTarefas.adicionarTarefa(tarefa);
-        salvarDados();
+        // Adaptando para usar o controller/service
+        tarefaController.adicionarTarefa(tarefa.getTitulo(), tarefa.getDescricao(), tarefa.getDeadline(),
+                tarefa.getPrioridade());
     }
 
     public void removerTarefa(Tarefa tarefa) {
-        gerenciadorTarefas.removerTarefa(tarefa);
-        salvarDados();
+        tarefaController.removerTarefa(tarefa.getTitulo());
     }
 
     public void editarTarefa(Tarefa antiga, Tarefa nova) {
-        gerenciadorTarefas.editarTarefa(antiga, nova);
-        salvarDados();
+        tarefaController.editarTarefa(antiga.getTitulo(), nova.getTitulo(), nova.getDescricao(),
+                nova.getDeadline(), nova.getPrioridade(), nova.getPercentual());
     }
 
     // listagem completa das tarefas
     public List<Tarefa> listarTodasTarefas() {
-        return gerenciadorTarefas.listarTarefas();
+        return serviceTarefas.listarTodas();
     }
 
     // filtro de tarefas por data específica
     public List<Tarefa> listarTarefasPorData(LocalDate data) {
-        return gerenciadorTarefas.listarTarefasPorData(data);
+        return serviceTarefas.listarPorData(data);
     }
 
     // busca de tarefas críticas (prazo vencendo)
     public List<Tarefa> listarTarefasCriticas() {
-        return gerenciadorTarefas.listarTarefasCriticas();
+        return serviceTarefas.listarCriticas();
     }
 
     // ========== CONTROLE DE SUBTAREFAS - USANDO CONTROLLER ==========
 
     // adição de subtarefa usando controller
     public boolean adicionarSubtarefa(String tituloTarefa, String titulo, String descricao, double percentual) {
-        boolean sucesso = subtarefaController.adicionarSubtarefa(tituloTarefa, titulo, descricao, percentual);
-        if (sucesso)
-            salvarDados();
-        return sucesso;
+        return subtarefaController.adicionarSubtarefa(tituloTarefa, titulo, descricao, percentual);
     }
 
     // exclusão de subtarefa usando controller
     public boolean removerSubtarefa(String tituloTarefa, String titulo) {
-        boolean sucesso = subtarefaController.removerSubtarefa(tituloTarefa, titulo);
-        if (sucesso)
-            salvarDados();
-        return sucesso;
+        return subtarefaController.removerSubtarefa(tituloTarefa, titulo);
     }
 
     // listagem das subtarefas usando controller
@@ -165,17 +134,16 @@ public class ToDoList {
 
     // metodos de compatibilidade - ainda precisam pras telas
     public void adicionarSubtarefa(Tarefa tarefa, Subtarefa subtarefa) {
-        gerenciadorTarefas.adicionarSubtarefa(tarefa, subtarefa);
-        salvarDados();
+        subtarefaController.adicionarSubtarefa(tarefa.getTitulo(), subtarefa.getTitulo(),
+                subtarefa.getDescricao(), subtarefa.getPercentual());
     }
 
     public void removerSubtarefa(Tarefa tarefa, Subtarefa subtarefa) {
-        gerenciadorTarefas.removerSubtarefa(tarefa, subtarefa);
-        salvarDados();
+        subtarefaController.removerSubtarefa(tarefa.getTitulo(), subtarefa.getTitulo());
     }
 
     public List<Subtarefa> listarSubtarefas(Tarefa tarefa) {
-        return gerenciadorTarefas.listarSubtarefas(tarefa);
+        return subtarefaController.listarSubtarefas(tarefa.getTitulo());
     }
 
     // ========== GERAÇÃO DE RELATÓRIOS ==========
@@ -215,12 +183,6 @@ public class ToDoList {
     // alteração do nome do usuário (email permanece fixo)
     public void setNomeUsuario(String novoNome) {
         usuarioService.alterarNome(novoNome);
-        salvarDados(); // persistência da alteração
-    }
-
-    // acesso ao manipulador principal
-    public ManipuladorDeTarefas getManipuladorTarefas() {
-        return gerenciadorTarefas;
     }
 
     // ========== INTERFACE COM SERVICES ==========

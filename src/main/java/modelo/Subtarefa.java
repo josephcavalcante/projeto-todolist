@@ -1,7 +1,6 @@
 package modelo;
 
 import java.io.Serializable;
-import jakarta.persistence.*;
 
 /**
  * Entidade JPA que representa uma subtarefa no sistema.
@@ -14,27 +13,16 @@ import jakarta.persistence.*;
  * @version 2.1
  * @since 1.0
  */
-@Entity
-@Table(name = "subtarefas")
 public class Subtarefa implements Serializable {
     private static final long serialVersionUID = 1L;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Long id;
 
-    @Column(name = "titulo", nullable = false, length = 100)
     private String tituloSub;
 
-    @Column(name = "descricao", length = 500)
     private String descricaoSub;
 
-    @Column(name = "percentual", precision = 5, scale = 2)
     private double percentualConclusao;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tarefa_id", nullable = false)
     private Tarefa tarefa;
 
     /**

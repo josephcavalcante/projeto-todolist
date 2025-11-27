@@ -5,7 +5,7 @@ import modelo.Subtarefa;
 import interfaces.services.ISubtarefaService;
 import interfaces.services.ITarefaService;
 import validadores.ValidadorTarefa;
-import negocio.ManipuladorDeTarefas;
+import interfaces.repositories.ISubtarefaRepository;
 import java.util.List;
 
 /**
@@ -20,55 +20,49 @@ import java.util.List;
  * @since 1.0
  */
 public class SubtarefaService implements ISubtarefaService {
-    private ManipuladorDeTarefas controlador;
+    private ISubtarefaRepository repositorio;
     private ITarefaService servicoTarefas;
 
-    public SubtarefaService(ManipuladorDeTarefas manipulador, ITarefaService tarefaService) {
-        this.controlador = manipulador;
-        this.servicoTarefas = tarefaService; // dependência para localização de tarefas
+    public SubtarefaService(ISubtarefaRepository repositorio, ITarefaService tarefaService) {
+        this.repositorio = repositorio;
+        this.servicoTarefas = tarefaService;
     }
 
     // inclusão de subtarefa nova
     public boolean adicionar(String tituloTarefa, String tituloSub, String descricaoSub, double percentual) {
-        // validação da obrigatoriedade do título
         if (tituloSub == null || tituloSub.trim().equals(""))
-            return false; // inline
+            return false;
         try {
-            // localização da tarefa principal
             Tarefa tarefaPai = servicoTarefas.buscarPorTitulo(tituloTarefa);
-            if (tarefaPai == null) { // sem espaço
-                return false; // tarefa principal inexistente
+            if (tarefaPai == null) {
+                return false;
             }
 
-            // instanciação da subtarefa
             Subtarefa novaSub = new Subtarefa(tituloSub.trim(), descricaoSub.trim(), percentual);
-            controlador.adicionarSubtarefa(tarefaPai, novaSub);
-            return true; // operação concluída
+            novaSub.setTarefa(tarefaPai);
+            repositorio.salvar(novaSub);
+            return true;
         } catch (Exception erro) {
-            return false; // falha na operação
+            return false;
         }
     }
 
     // exclusão de subtarefa
     public boolean remover(String tituloTarefa, String tituloSub) {
         try {
-            // localização da tarefa principal
             Tarefa tarefa = servicoTarefas.buscarPorTitulo(tituloTarefa);
             if (tarefa == null) {
-                return false; // tarefa principal inexistente
+                return false;
             }
 
-            // busca da subtarefa para remoção
-            List<Subtarefa> listaSubs = controlador.listarSubtarefas(tarefa);
-            for (Subtarefa subtarefa : listaSubs) {
-                if (subtarefa.getTitulo().equals(tituloSub)) {
-                    controlador.removerSubtarefa(tarefa, subtarefa);
-                    return true; // remoção efetuada
-                }
+            Subtarefa subtarefa = repositorio.buscarPorTitulo(tituloSub, tarefa.getId());
+            if (subtarefa != null) {
+                repositorio.remover(subtarefa);
+                return true;
             }
-            return false; // subtarefa não encontrada
+            return false;
         } catch (Exception ex) {
-            return false; // falha na remoção
+            return false;
         }
     }
 
@@ -76,23 +70,22 @@ public class SubtarefaService implements ISubtarefaService {
     public boolean editar(String tituloTarefa, String tituloSubAntigo, String novoTituloSub, String novaDescricaoSub,
             double novoPercentual) {
         try {
-            // estratégia: exclusão da antiga + inclusão da nova
             if (remover(tituloTarefa, tituloSubAntigo)) {
                 return adicionar(tituloTarefa, novoTituloSub, novaDescricaoSub, novoPercentual);
             }
-            return false; // falha na remoção inicial
+            return false;
         } catch (Exception e) {
-            return false; // falha na edição
+            return false;
         }
     }
 
-    // listagem de subtarefas - metodo da interface
+    // listagem de subtarefas
     @Override
     public List<Subtarefa> listar(String tituloTarefa) {
         Tarefa tarefa = servicoTarefas.buscarPorTitulo(tituloTarefa);
         if (tarefa != null) {
-            return controlador.listarSubtarefas(tarefa);
+            return repositorio.listarPorTarefaId(tarefa.getId());
         }
-        return List.of(); // lista vazia se tarefa nao existe
+        return List.of();
     }
 }
