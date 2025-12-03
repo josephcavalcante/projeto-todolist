@@ -106,4 +106,14 @@ public class TarefaRepository implements ITarefaRepository {
             em.close();
         }
     }
+
+    @Override
+    public Tarefa buscarPorId(Long id) {
+        EntityManager em = getEntityManager();
+        try {
+            return em.find(Tarefa.class, id);
+        } finally {
+            em.close();
+        }
+    }
 }

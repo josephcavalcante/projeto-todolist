@@ -7,8 +7,10 @@ import java.util.List;
 /**
  * Interface para repositório de tarefas.
  * <p>
- * Define as operações de acesso a dados para tarefas, seguindo o padrão Repository.
- * Permite diferentes implementações (arquivo, banco de dados, API) sem afetar o código cliente.
+ * Define as operações de acesso a dados para tarefas, seguindo o padrão
+ * Repository.
+ * Permite diferentes implementações (arquivo, banco de dados, API) sem afetar o
+ * código cliente.
  * </p>
  * 
  * @author Projeto ToDoList
@@ -23,29 +25,29 @@ public interface ITarefaRepository {
      * @throws IllegalArgumentException se a tarefa for nula
      */
     void salvar(Tarefa tarefa);
-    
+
     /**
      * Remove uma tarefa do repositório.
      * 
      * @param tarefa a tarefa a ser removida
      */
     void remover(Tarefa tarefa);
-    
+
     /**
      * Atualiza uma tarefa existente.
      * 
      * @param antiga a tarefa a ser substituída
-     * @param nova a nova versão da tarefa
+     * @param nova   a nova versão da tarefa
      */
     void atualizar(Tarefa antiga, Tarefa nova);
-    
+
     /**
      * Lista todas as tarefas do repositório.
      * 
      * @return lista com todas as tarefas, ou lista vazia se não houver tarefas
      */
     List<Tarefa> listarTodas();
-    
+
     /**
      * Lista tarefas filtradas por data específica.
      * 
@@ -53,7 +55,7 @@ public interface ITarefaRepository {
      * @return lista de tarefas da data especificada
      */
     List<Tarefa> listarPorData(LocalDate data);
-    
+
     /**
      * Busca uma tarefa pelo título.
      * 
@@ -61,4 +63,12 @@ public interface ITarefaRepository {
      * @return a tarefa encontrada ou null se não existir
      */
     Tarefa buscarPorTitulo(String titulo);
+
+    /**
+     * Busca uma tarefa pelo ID.
+     * 
+     * @param id o ID da tarefa
+     * @return a tarefa encontrada ou null
+     */
+    Tarefa buscarPorId(Long id);
 }

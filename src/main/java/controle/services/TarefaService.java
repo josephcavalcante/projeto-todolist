@@ -128,6 +128,26 @@ public class TarefaService implements ITarefaService {
         }
     }
 
+    // Implementação do padrão Observer
+    private java.util.List<interfaces.observer.IObserver> observadores = new java.util.ArrayList<>();
+
+    @Override
+    public void adicionarObservador(interfaces.observer.IObserver observer) {
+        observadores.add(observer);
+    }
+
+    @Override
+    public void removerObservador(interfaces.observer.IObserver observer) {
+        observadores.remove(observer);
+    }
+
+    @Override
+    public void notificarObservadores(Object mensagem) {
+        for (interfaces.observer.IObserver observer : observadores) {
+            observer.atualizar(mensagem);
+        }
+    }
+
     /**
      * Busca uma tarefa pelo título.
      * 

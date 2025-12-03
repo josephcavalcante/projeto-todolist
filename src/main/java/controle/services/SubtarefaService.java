@@ -88,4 +88,25 @@ public class SubtarefaService implements ISubtarefaService {
         }
         return List.of();
     }
+
 }
+
+    
+
+    
+        
+            
+
+        
+        
+
+        
+            
+            
+                
+            
+            
+        
+
+        
+    
