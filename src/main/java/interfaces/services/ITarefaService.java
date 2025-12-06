@@ -101,4 +101,20 @@ public interface ITarefaService extends ISubject {
      * @return lista de tarefas ordenada
      */
     List<Tarefa> listarOrdenado(interfaces.strategies.IOrdenacaoStrategy estrategia);
+
+    /**
+     * Atualiza o percentual de conclusão de uma tarefa.
+     * 
+     * @param idTarefa       ID da tarefa
+     * @param novoPercentual novo percentual
+     */
+    void atualizarPercentual(Long idTarefa, double novoPercentual);
+
+    /**
+     * Lista tarefas aplicando uma estratégia de filtragem.
+     * 
+     * @param filtro estratégia de filtragem
+     * @return lista de tarefas filtrada
+     */
+    List<Tarefa> listar(interfaces.strategies.IFiltroStrategy filtro);
 }

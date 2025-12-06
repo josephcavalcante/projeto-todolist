@@ -1,4 +1,5 @@
 package telas;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -20,7 +21,7 @@ public class TelaListarTarefas extends JPanel {
     public TelaListarTarefas(TelaPrincipal frame, ToDoList sistema, String tituloTela) {
         this(frame, sistema, tituloTela, null);
     }
-    
+
     public TelaListarTarefas(TelaPrincipal frame, ToDoList sistema, String tituloTela, String dataStr) {
         this.frame = frame;
         this.sistema = sistema;
@@ -35,12 +36,12 @@ public class TelaListarTarefas extends JPanel {
         add(titulo, BorderLayout.NORTH);
 
         // Tabela
-        String[] colunas = {"Título", "Descrição", "Deadline", "Prioridade", "Percentual"};
+        String[] colunas = { "Título", "Descrição", "Deadline", "Prioridade", "Percentual" };
         modelo = new DefaultTableModel(colunas, 0);
         tabela = new JTable(modelo);
         tabela.setFont(new Font("Arial", Font.PLAIN, 14));
         tabela.setRowHeight(25);
-        
+
         JScrollPane scrollTabela = new JScrollPane(tabela);
         scrollTabela.setPreferredSize(new Dimension(0, 300));
         add(scrollTabela, BorderLayout.CENTER);
@@ -89,9 +90,9 @@ public class TelaListarTarefas extends JPanel {
             int linha = tabela.getSelectedRow();
             if (linha >= 0) {
                 String tituloTarefa = (String) modelo.getValueAt(linha, 0);
-                int confirmacao = JOptionPane.showConfirmDialog(frame, 
-                    "Excluir tarefa: " + tituloTarefa + "?", 
-                    "Confirmar", JOptionPane.YES_NO_OPTION);
+                int confirmacao = JOptionPane.showConfirmDialog(frame,
+                        "Excluir tarefa: " + tituloTarefa + "?",
+                        "Confirmar", JOptionPane.YES_NO_OPTION);
                 if (confirmacao == JOptionPane.YES_OPTION) {
                     if (sistema.getTarefaService().excluir(tituloTarefa)) {
                         sistema.salvarDados();
@@ -136,7 +137,7 @@ public class TelaListarTarefas extends JPanel {
     private void carregarTarefas(String dataStr) {
         List<Tarefa> tarefas;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        
+
         // Determinar quais tarefas carregar baseado no título
         if (tituloTela.equals("Tarefas por Data") && dataStr != null) {
             try {
@@ -151,23 +152,21 @@ public class TelaListarTarefas extends JPanel {
         } else {
             tarefas = sistema.listarTodasTarefas();
         }
-        
+
         // Limpar tabela
         modelo.setRowCount(0);
-        
+
         // Adicionar tarefas à tabela
         for (Tarefa tarefa : tarefas) {
-            modelo.addRow(new Object[]{
-                tarefa.getTitulo(),
-                tarefa.getDescricao(),
-                tarefa.getDeadline().format(formatter),
-                tarefa.getPrioridade(),
-                String.format("%.1f%%", tarefa.getPercentual())
+            modelo.addRow(new Object[] {
+                    tarefa.getTitulo(),
+                    tarefa.getDescricao(),
+                    tarefa.getDeadline().format(formatter),
+                    tarefa.getPrioridade(),
+                    String.format("%.1f%%", tarefa.getPercentual())
             });
         }
     }
-
-
 
     public DefaultTableModel getModelo() {
         return modelo;

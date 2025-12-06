@@ -39,7 +39,7 @@ public class Tarefa implements Serializable {
     @Column(name = "deadline", nullable = false)
     private LocalDate deadline;
 
-    @Column(name = "percentual", precision = 5, scale = 2)
+    @Column(name = "percentual")
     private double percentual;
 
     @Column(name = "data_concretizacao")

@@ -4,8 +4,7 @@ import modelo.Tarefa;
 import interfaces.validators.IValidadorTarefa;
 import interfaces.repositories.ITarefaRepository;
 import interfaces.services.ITarefaService;
-import validadores.ValidadorTarefa;
-import repositorios.TarefaRepository;
+import interfaces.services.ITarefaService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -56,8 +55,14 @@ public class TarefaService implements ITarefaService {
             return false;
         }
         try {
-            // instanciação da tarefa com data atual
-            Tarefa novaTarefa = new Tarefa(titulo.trim(), descricao.trim(), LocalDate.now(), deadline, prioridade);
+            // Criação usando Builder Pattern
+            Tarefa novaTarefa = new builders.TarefaBuilder()
+                    .comTitulo(titulo)
+                    .comDescricao(descricao)
+                    .comPrazo(deadline)
+                    .comPrioridade(prioridade)
+                    .construir();
+
             repositorio.salvar(novaTarefa);
             return true; // operação bem-sucedida
         } catch (Exception ex) {
@@ -94,11 +99,18 @@ public class TarefaService implements ITarefaService {
                 return false; // tarefa inexistente
             }
 
-            // criação da tarefa atualizada
-            Tarefa tarefaAtualizada = new Tarefa(novoTitulo.trim(), novaDescricao.trim(),
-                    tarefaOriginal.getDataCadastro(), novoDeadline, novaPrioridade);
+            // Uso do Builder para criar a versão atualizada
+            // Preservamos a data de cadastro original da tarefa antiga
+            Tarefa tarefaAtualizada = new builders.TarefaBuilder()
+                    .comTitulo(novoTitulo)
+                    .comDescricao(novaDescricao)
+                    .comDataCadastro(tarefaOriginal.getDataCadastro())
+                    .comPrazo(novoDeadline)
+                    .comPrioridade(novaPrioridade)
+                    .comPercentual(novoPercentual)
+                    .construir();
+
             tarefaAtualizada.setId(tarefaOriginal.getId()); // preserva ID para JPA
-            tarefaAtualizada.setPercentual(novoPercentual);
 
             // persistência da nova instância
             repositorio.atualizar(tarefaOriginal, tarefaAtualizada);
@@ -177,7 +189,7 @@ public class TarefaService implements ITarefaService {
      */
     @Override
     public List<Tarefa> listarPorData(LocalDate data) {
-        return repositorio.listarPorData(data);
+        return listar(new strategies.FiltroPorDataStrategy(data));
     }
 
     /**
@@ -187,8 +199,32 @@ public class TarefaService implements ITarefaService {
      */
     @Override
     public List<Tarefa> listarCriticas() {
-        return repositorio.listarTodas().stream()
-                .filter(Tarefa::isCritica)
-                .collect(java.util.stream.Collectors.toList());
+        return listar(new strategies.FiltroCriticasStrategy());
+    }
+
+    @Override
+    public List<Tarefa> listarOrdenado(interfaces.strategies.IOrdenacaoStrategy estrategia) {
+        List<Tarefa> todas = listarTodas();
+        return estrategia.ordenar(todas);
+    }
+
+    @Override
+    public List<Tarefa> listar(interfaces.strategies.IFiltroStrategy filtro) {
+        List<Tarefa> todas = listarTodas();
+        return filtro.filtrar(todas);
+    }
+
+    @Override
+    public void atualizarPercentual(Long idTarefa, double novoPercentual) {
+        try {
+            Tarefa tarefa = repositorio.buscarPorId(idTarefa);
+            if (tarefa != null) {
+                tarefa.setPercentual(novoPercentual);
+                repositorio.salvar(tarefa);
+                notificarObservadores("Tarefa atualizada: " + tarefa.getTitulo());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

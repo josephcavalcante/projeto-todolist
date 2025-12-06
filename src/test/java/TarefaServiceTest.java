@@ -60,8 +60,18 @@ public class TarefaServiceTest {
     @Test
     void testListarTodasTarefas() {
         // Arrange
-        Tarefa tarefa1 = new Tarefa("Tarefa 1", "Desc 1", LocalDate.now(), LocalDate.now().plusDays(1), 1);
-        Tarefa tarefa2 = new Tarefa("Tarefa 2", "Desc 2", LocalDate.now(), LocalDate.now().plusDays(2), 2);
+        Tarefa tarefa1 = new builders.TarefaBuilder()
+            .comTitulo("Tarefa 1")
+            .comDescricao("Desc 1")
+            .comPrazo(LocalDate.now().plusDays(1))
+            .comPrioridade(1)
+            .construir();
+        Tarefa tarefa2 = new builders.TarefaBuilder()
+            .comTitulo("Tarefa 2")
+            .comDescricao("Desc 2")
+            .comPrazo(LocalDate.now().plusDays(2))
+            .comPrioridade(2)
+            .construir();
         mockRepository.tarefas.add(tarefa1);
         mockRepository.tarefas.add(tarefa2);
 
