@@ -51,6 +51,10 @@ public class Tarefa implements Serializable {
     @Transient
     private List<Subtarefa> subtarefas;
 
+    @ManyToOne
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
+
     /**
      * Construtor padrão para JPA.
      */
@@ -154,6 +158,14 @@ public class Tarefa implements Serializable {
 
     public void removerSubtarefa(Subtarefa subtarefa) {
         this.subtarefas.remove(subtarefa);
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
     }
 
     /**

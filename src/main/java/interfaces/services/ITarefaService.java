@@ -4,18 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import modelo.Tarefa;
-
-/**
- * Interface para serviços de gestão de tarefas.
- * <p>
- * Define operações CRUD para tarefas, mantendo baixo acoplamento
- * e seguindo o princípio ISP (Interface Segregation Principle).
- * </p>
- * 
- * @author Projeto ToDoList
- * @version 2.1
- * @since 2.1
- */
+import modelo.Usuario;
 import interfaces.observer.ISubject;
 
 /**
@@ -26,8 +15,8 @@ import interfaces.observer.ISubject;
  * </p>
  * 
  * @author Projeto ToDoList
- * @version 2.1
- * @since 2.1
+ * @version 2.2
+ * @since 1.0
  */
 public interface ITarefaService extends ISubject {
 
@@ -38,9 +27,10 @@ public interface ITarefaService extends ISubject {
      * @param descricao  descrição detalhada da tarefa
      * @param deadline   data limite para conclusão
      * @param prioridade nível de prioridade (1-5)
+     * @param usuario    usuário dono da tarefa
      * @return true se a tarefa foi cadastrada com sucesso, false caso contrário
      */
-    boolean cadastrar(String titulo, String descricao, LocalDate deadline, int prioridade);
+    boolean cadastrar(String titulo, String descricao, LocalDate deadline, int prioridade, Usuario usuario);
 
     /**
      * Edita uma tarefa existente.
@@ -73,48 +63,28 @@ public interface ITarefaService extends ISubject {
     Tarefa buscarPorTitulo(String titulo);
 
     /**
-     * Lista todas as tarefas do sistema.
+     * Lista todas as tarefas do sistema (Geral).
      * 
-     * @return lista com todas as tarefas, ou lista vazia se não houver tarefas
+     * @return lista com todas as tarefas
      */
     List<Tarefa> listarTodas();
 
-    /**
-     * Lista tarefas filtradas por data específica.
-     * 
-     * @param data a data para filtrar as tarefas
-     * @return lista de tarefas da data especificada
-     */
-    List<Tarefa> listarPorData(LocalDate data);
+    // Métodos otimizados para Cache/Usuario
+    List<Tarefa> listarPorDataEUsuario(LocalDate data, Usuario usuario);
 
-    /**
-     * Lista tarefas críticas (prazo vencendo).
-     * 
-     * @return lista de tarefas críticas
-     */
-    List<Tarefa> listarCriticas();
+    List<Tarefa> listarPorUsuario(Usuario usuario);
 
-    /**
-     * Lista tarefas ordenadas por uma estratégia específica.
-     * 
-     * @param estrategia estratégia de ordenação a ser usada
-     * @return lista de tarefas ordenada
-     */
+    List<Tarefa> listarCriticasPorUsuario(Usuario usuario);
+
+    // Métodos baseados em Strategy (Geral)
+    List<Tarefa> listar(interfaces.strategies.IFiltroStrategy filtro);
+
     List<Tarefa> listarOrdenado(interfaces.strategies.IOrdenacaoStrategy estrategia);
 
-    /**
-     * Atualiza o percentual de conclusão de uma tarefa.
-     * 
-     * @param idTarefa       ID da tarefa
-     * @param novoPercentual novo percentual
-     */
-    void atualizarPercentual(Long idTarefa, double novoPercentual);
+    // Métodos Legados / Compatibilidade
+    List<Tarefa> listarPorData(LocalDate data);
 
-    /**
-     * Lista tarefas aplicando uma estratégia de filtragem.
-     * 
-     * @param filtro estratégia de filtragem
-     * @return lista de tarefas filtrada
-     */
-    List<Tarefa> listar(interfaces.strategies.IFiltroStrategy filtro);
+    List<Tarefa> listarCriticas();
+
+    void atualizarPercentual(Long idTarefa, double novoPercentual);
 }

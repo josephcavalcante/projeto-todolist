@@ -1,5 +1,4 @@
 package repositorios;
-
 import jakarta.persistence.EntityManager;
 import persistencia.DatabaseManager;
 import interfaces.repositories.IUsuarioRepository;
@@ -7,56 +6,33 @@ import modelo.Usuario;
 import java.util.List;
 
 public class UsuarioRepository implements IUsuarioRepository {
-
-    private EntityManager getEntityManager() {
-        return DatabaseManager.getInstance().getEntityManager();
-    }
+    private EntityManager getEntityManager() { return DatabaseManager.getInstance().getEntityManager(); }
 
     @Override
     public void salvar(Usuario usuario) {
         EntityManager em = getEntityManager();
         try {
             em.getTransaction().begin();
-            // Como só existe um usuário no sistema (por enquanto), verificamos se já existe
-            List<Usuario> usuarios = em.createQuery("SELECT u FROM Usuario u", Usuario.class).getResultList();
-            if (usuarios.isEmpty()) {
-                em.persist(usuario);
-            } else {
-                // Atualiza o primeiro encontrado (assumindo single user por enquanto)
-                Usuario existente = usuarios.get(0);
-                existente.setNome(usuario.getNome());
-
-                if (usuario.temSenha()) {
-                    existente.setSenha(usuario.getSenha()); // Deveria ser hash, mas por enquanto mantemos
-                                                            // compatibilidade
-                }
-                em.merge(existente);
-            }
+            if (usuario.getId() == null) em.persist(usuario);
+            else em.merge(usuario);
             em.getTransaction().commit();
         } catch (Exception e) {
-            em.getTransaction().rollback();
+            if(em.getTransaction().isActive()) em.getTransaction().rollback();
             throw e;
-        } finally {
-            em.close();
-        }
+        } finally { em.close(); }
     }
 
     @Override
-    public Usuario carregar() {
+    public Usuario buscarPorEmail(String email) {
         EntityManager em = getEntityManager();
         try {
-            List<Usuario> usuarios = em.createQuery("SELECT u FROM Usuario u", Usuario.class).getResultList();
-            if (!usuarios.isEmpty()) {
-                return usuarios.get(0);
-            }
-            return null;
-        } finally {
-            em.close();
-        }
+            return em.createQuery("SELECT u FROM Usuario u WHERE u.emailFixo = :email", Usuario.class)
+                    .setParameter("email", email).getResultStream().findFirst().orElse(null);
+        } finally { em.close(); }
     }
 
     @Override
-    public boolean existeUsuario() {
-        return carregar() != null;
-    }
+    public Usuario carregar() { return null; } // Deprecated
+    @Override
+    public boolean existeUsuario() { return false; } // Deprecated
 }

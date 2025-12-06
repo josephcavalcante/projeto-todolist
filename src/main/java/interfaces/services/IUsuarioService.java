@@ -20,7 +20,10 @@ public interface IUsuarioService {
      * @return o usuário atual
      */
     Usuario obterUsuario();
+ boolean login(String email, String senha);
     
+    // Novo método de cadastro
+    boolean cadastrar(String nome, String email, String senha);
     /**
      * Altera o nome do usuário atual.
      * 
@@ -55,7 +58,6 @@ public interface IUsuarioService {
      * @param senha senha fornecida pelo usuário
      * @return true se login bem-sucedido, false caso contrário
      */
-    boolean login(String senha);
     
     /**
      * Realiza logout do sistema.
