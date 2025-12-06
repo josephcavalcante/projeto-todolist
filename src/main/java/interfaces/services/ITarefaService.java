@@ -3,7 +3,7 @@ package interfaces.services;
 import java.time.LocalDate;
 import java.util.List;
 
-import modelo.Tarefa;
+import modelo.*;
 
 /**
  * Interface para serviços de gestão de tarefas.
@@ -40,7 +40,7 @@ public interface ITarefaService extends ISubject {
      * @param prioridade nível de prioridade (1-5)
      * @return true se a tarefa foi cadastrada com sucesso, false caso contrário
      */
-    boolean cadastrar(String titulo, String descricao, LocalDate deadline, int prioridade);
+    boolean cadastrar(String titulo, String descricao, LocalDate deadline, int prioridade, Usuario usuario);
 
     /**
      * Edita uma tarefa existente.
@@ -78,7 +78,16 @@ public interface ITarefaService extends ISubject {
      * @return lista com todas as tarefas, ou lista vazia se não houver tarefas
      */
     List<Tarefa> listarTodas();
+    
+    List<Tarefa> listarPorDataEUsuario(LocalDate data, Usuario usuario);
 
+    List<Tarefa> listarPorUsuario(Usuario usuario);
+    
+    List<Tarefa> listarCriticasPorUsuario(Usuario usuario);
+    
+    // Métodos legados
+   
+   
     /**
      * Lista tarefas filtradas por data específica.
      * 

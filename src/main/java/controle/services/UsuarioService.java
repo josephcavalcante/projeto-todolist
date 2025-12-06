@@ -1,78 +1,83 @@
 package controle.services;
 
 import interfaces.services.IUsuarioService;
-import interfaces.repositories.IUsuarioRepository;
+import repositorios.UsuarioRepository;
+import repositorios.TarefaRepository;
+import repositorios.TarefaCacheRepository;
 import modelo.Usuario;
+import modelo.Tarefa;
+import org.mindrot.jbcrypt.BCrypt;
+import java.util.List;
+import java.util.ArrayList;
 
-/**
- * Service responsável pela gestão de dados do usuário.
- * <p>
- * Centraliza operações relacionadas ao usuário do sistema, aplicando
- * o princípio SRP (Single Responsibility Principle).
- * </p>
- * 
- * @author Projeto ToDoList
- * @version 2.0
- * @since 2.0
- */
 public class UsuarioService implements IUsuarioService {
-    private Usuario usuario;
-    private boolean logado = false;
-    private IUsuarioRepository repositorio;
+    private Usuario usuarioLogado;
+    private UsuarioRepository usuarioRepository;
+    private TarefaRepository tarefaRepository;
+    private TarefaCacheRepository cacheRepository;
 
-    public UsuarioService(IUsuarioRepository repositorio) {
-        this.repositorio = repositorio;
-        this.usuario = repositorio.carregar();
-        if (this.usuario == null) {
-            this.usuario = new Usuario("Usuário", "projetopoo00@gmail.com");
-            repositorio.salvar(this.usuario);
-        }
+    public UsuarioService(UsuarioRepository uRepo, TarefaRepository tRepo) {
+        this.usuarioRepository = uRepo;
+        this.tarefaRepository = tRepo;
+        this.cacheRepository = new TarefaCacheRepository(); 
     }
 
-    public Usuario obterUsuario() {
-        return usuario;
-    }
-
-    public void alterarNome(String novoNome) {
-        if (novoNome != null && !novoNome.trim().isEmpty()) {
-            usuario.setNome(novoNome.trim());
-            repositorio.salvar(usuario);
-        }
-    }
-
-    public String obterEmail() {
-        return usuario.getEmail();
+    public boolean cadastrar(String nome, String email, String senhaAberta) {
+        if (usuarioRepository.buscarPorEmail(email) != null) return false;
+        
+        String senhaHash = BCrypt.hashpw(senhaAberta, BCrypt.gensalt());
+        Usuario novo = new Usuario(nome, email, senhaHash);
+        usuarioRepository.salvar(novo);
+        return true;
     }
 
     @Override
-    public void definirSenha(String senha) {
-        if (senha != null && !senha.trim().isEmpty()) {
-            usuario.setSenha(senha.trim());
-            repositorio.salvar(usuario);
-        }
-    }
+    public boolean login(String email, String senha) {
+        System.out.println("\n=== INICIANDO LOGIN: " + email + " ===");
+        
+        Usuario user = usuarioRepository.buscarPorEmail(email);
 
-    @Override
-    public boolean temSenha() {
-        return usuario.temSenha();
-    }
+        if (user != null && user.getSenha() != null && BCrypt.checkpw(senha, user.getSenha())) {
+            this.usuarioLogado = user;
+            System.out.println("✅ Senha correta. Carregando tarefas...");
 
-    @Override
-    public boolean login(String senha) {
-        if (usuario.verificarSenha(senha)) {
-            logado = true;
+            long inicio = System.currentTimeMillis();
+            
+            // 1. Tenta Redis
+            List<Tarefa> tarefas = cacheRepository.buscarCache(email);
+            
+            if (tarefas == null) {
+                // 2. Se falhar, busca SQL
+                System.out.println("⚠️ Cache MISS - Buscando do SQL...");
+                tarefas = tarefaRepository.listarPorUsuario(user);
+                
+                // 3. Salva no Redis se tiver dados
+                if (tarefas != null && !tarefas.isEmpty()) {
+                    cacheRepository.salvarCache(email, tarefas);
+                }
+            } else {
+                System.out.println("✅ Cache HIT - Tarefas do Redis");
+            }
+            
+            long fim = System.currentTimeMillis();
+            System.out.println("⏱️ Tempo total de carregamento: " + (fim - inicio) + "ms");
+
+            // 4. Injeta na memória
+            user.setTarefas(tarefas != null ? tarefas : new ArrayList<>());
+            
             return true;
         }
+        
+        System.out.println("❌ Falha no login.");
         return false;
     }
 
-    @Override
-    public void logout() {
-        logado = false;
-    }
-
-    @Override
-    public boolean isLogado() {
-        return logado;
-    }
+    // ... getters e setters padrão ...
+    @Override public Usuario obterUsuario() { return usuarioLogado; }
+    @Override public void alterarNome(String n) { if(usuarioLogado!=null) { usuarioLogado.setNome(n); usuarioRepository.salvar(usuarioLogado); }}
+    @Override public String obterEmail() { return usuarioLogado != null ? usuarioLogado.getEmail() : null; }
+    @Override public void definirSenha(String s) {} 
+    @Override public boolean temSenha() { return true; }
+    @Override public void logout() { usuarioLogado = null; }
+    @Override public boolean isLogado() { return usuarioLogado != null; }
 }

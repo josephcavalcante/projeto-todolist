@@ -2,6 +2,7 @@ package telas;
 import javax.swing.*;
 import java.awt.*;
 import java.time.LocalDate;
+import java.util.Date; // Import necessário para conversão
 
 import modelo.Tarefa;
 import negocio.ToDoList;
@@ -16,18 +17,18 @@ public class TelaCadastroTarefa extends JPanel {
 
     public TelaCadastroTarefa(TelaPrincipal frame, ToDoList sistema) {
         this.janelaPrincipal = frame;
-        this.todoSystem = sistema; // referencia pro sistema
+        this.todoSystem = sistema;
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 255));
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // titulo da tela
+        // Título
         JLabel labelTitulo = new JLabel("Cadastrar Nova Tarefa", JLabel.CENTER);
         labelTitulo.setFont(new Font("Arial", Font.BOLD, 28));
         labelTitulo.setForeground(new Color(60, 90, 170));
         add(labelTitulo, BorderLayout.NORTH);
 
-        // painel com os campos do formulario
+        // Formulário
         JPanel painelForm = new JPanel(new GridLayout(0, 1, 10, 10));
         painelForm.setBackground(new Color(245, 245, 255));
 
@@ -39,7 +40,7 @@ public class TelaCadastroTarefa extends JPanel {
         painelForm.add(new JLabel("Descrição:"));
         areaDescricao = new JTextArea(10, 20);
         areaDescricao.setFont(new Font("Arial", Font.PLAIN, 18));
-        areaDescricao.setLineWrap(true); // quebra linha automatica
+        areaDescricao.setLineWrap(true);
         areaDescricao.setWrapStyleWord(true);
         JScrollPane scroll = new JScrollPane(areaDescricao);
         scroll.setPreferredSize(new Dimension(0, 200));
@@ -48,7 +49,7 @@ public class TelaCadastroTarefa extends JPanel {
         painelForm.add(new JLabel("Deadline:"));
         spinnerData = new JSpinner(new SpinnerDateModel());
         spinnerData.setEditor(new JSpinner.DateEditor(spinnerData, "dd/MM/yyyy"));
-        spinnerData.setValue(java.sql.Date.valueOf(LocalDate.now().plusDays(7))); // padrao 7 dias
+        spinnerData.setValue(new Date()); // Data atual como padrão
         spinnerData.setFont(new Font("Arial", Font.PLAIN, 18));
         painelForm.add(spinnerData);
 
@@ -57,7 +58,7 @@ public class TelaCadastroTarefa extends JPanel {
         spinnerPrioridade.setFont(new Font("Arial", Font.PLAIN, 18));
         painelForm.add(spinnerPrioridade);
 
-        // botoes de acao
+        // Botões
         JButton botSalvar = new JButton("Salvar");
         JButton botCancelar = new JButton("Cancelar");
         botSalvar.setFont(new Font("Arial", Font.PLAIN, 18));
@@ -68,30 +69,35 @@ public class TelaCadastroTarefa extends JPanel {
 
         add(painelForm, BorderLayout.CENTER);
 
-        // eventos dos botoes
+        // --- AÇÕES ---
         botSalvar.addActionListener(e -> {
-            // pega os dados dos campos
             String titulo = campoTitulo.getText().trim();
             String desc = areaDescricao.getText().trim();
-            java.util.Date dataEscolhida = (java.util.Date) spinnerData.getValue();
-            LocalDate deadline = dataEscolhida.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+            
+            // Conversão de Data do Spinner para LocalDate
+            Date dataEscolhida = (Date) spinnerData.getValue();
+            LocalDate deadline = new java.sql.Date(dataEscolhida.getTime()).toLocalDate();
+            
             int prioridade = (Integer) spinnerPrioridade.getValue();
             
-            // tenta cadastrar a tarefa
-            if (todoSystem.getTarefaService().cadastrar(titulo, desc, deadline, prioridade)) {
-                todoSystem.salvarDados();
+            // CORREÇÃO AQUI: Usar método do Facade (todoSystem) em vez de chamar Service direto
+            // O Facade injeta o usuário logado automaticamente.
+            if (todoSystem.adicionarTarefa(titulo, desc, deadline, prioridade)) {
+                // Sucesso
+                todoSystem.salvarDados(); // (Mantido para compatibilidade, se necessário)
                 JOptionPane.showMessageDialog(janelaPrincipal, "Tarefa cadastrada com sucesso!");
-                // volta pro menu
+                
+                // Volta para o gerenciador
                 janelaPrincipal.setContentPane(new TelaGerenciadorTarefas(janelaPrincipal, todoSystem));
                 janelaPrincipal.revalidate();
                 janelaPrincipal.repaint();
             } else {
-                JOptionPane.showMessageDialog(janelaPrincipal, "Erro: Título é obrigatório!");
+                // Se falhar (Título vazio ou Usuário não logado)
+                JOptionPane.showMessageDialog(janelaPrincipal, "Erro ao cadastrar!\nVerifique se o título foi preenchido.", "Erro", JOptionPane.ERROR_MESSAGE);
             }
         });
 
         botCancelar.addActionListener(e -> {
-            // volta pro gerenciador sem salvar
             janelaPrincipal.setContentPane(new TelaGerenciadorTarefas(janelaPrincipal, todoSystem));
             janelaPrincipal.revalidate();
             janelaPrincipal.repaint();

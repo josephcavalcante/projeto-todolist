@@ -2,54 +2,27 @@ package factories;
 
 import interfaces.repositories.ITarefaRepository;
 import interfaces.repositories.ISubtarefaRepository;
-import interfaces.validators.IValidadorTarefa;
-import interfaces.services.ITarefaService;
-
-import controle.services.EventoService;
-import controle.services.SubtarefaService;
-import relatorios.GeradorDeRelatorios;
-import controle.services.TarefaService;
-import controle.services.UsuarioService;
-import interfaces.services.IRelatorioService;
-import interfaces.services.IUsuarioService;
-import interfaces.services.ISubtarefaService;
-import interfaces.services.IEventoService;
 import interfaces.repositories.IEventoRepository;
+import interfaces.validators.IValidadorTarefa;
 import interfaces.validators.IValidadorEvento;
-import repositorios.TarefaRepository;
-import repositorios.EventoRepository;
-import validadores.ValidadorTarefa;
-import validadores.ValidadorEvento;
-import controllers.TarefaController;
-import controllers.SubtarefaController;
-import controllers.EventoController;
-import controllers.PersistenciaController;
-import interfaces.controllers.IPersistenciaController;
-import interfaces.controllers.ITarefaController;
-import interfaces.controllers.IEventoController;
-import interfaces.controllers.ISubtarefaController;
-import interfaces.persistence.IPersistencia;
+import interfaces.services.*;
+import interfaces.controllers.*;
+import controle.services.*;
+import controllers.*;
+import repositorios.*;
+import validadores.*;
 import persistencia.Persistencia;
+import relatorios.GeradorDeRelatorios;
 
-/**
- * Factory responsável pela criação e configuração de services e controllers.
- * <p>
- * Centraliza a criação de objetos e injeção de dependências, seguindo os
- * padrões
- * GRASP Creator e Factory Method. Facilita a manutenção e permite trocar
- * implementações sem afetar o código cliente (OCP).
- * </p>
- * 
- * @author Projeto ToDoList
- * @version 2.0
- * @since 2.0
- */
 public class ServiceFactory {
 
     public static ITarefaService criarTarefaService() {
         ITarefaRepository repositorio = new TarefaRepository();
         IValidadorTarefa validador = new ValidadorTarefa();
-        return new TarefaService(repositorio, validador);
+        // --- CORREÇÃO: Cria e injeta o CacheRepository ---
+        TarefaCacheRepository cacheRepository = new TarefaCacheRepository();
+        return new TarefaService(repositorio, validador, cacheRepository);
+        // -------------------------------------------------
     }
 
     public static IRelatorioService criarRelatorioService() {
@@ -57,7 +30,8 @@ public class ServiceFactory {
     }
 
     public static IUsuarioService criarUsuarioService() {
-        return new UsuarioService(new repositorios.UsuarioRepository());
+        // Injeta repositórios de Usuario e Tarefa (para o cache strategy)
+        return new UsuarioService(new repositorios.UsuarioRepository(), new repositorios.TarefaRepository());
     }
 
     public static ISubtarefaService criarSubtarefaService(ITarefaService tarefaService) {
@@ -76,8 +50,7 @@ public class ServiceFactory {
     }
 
     public static IPersistenciaController criarPersistenciaController() {
-        IPersistencia persistencia = new Persistencia();
-        return new PersistenciaController(persistencia);
+        return new PersistenciaController(new Persistencia());
     }
 
     public static IEventoService criarEventoService() {

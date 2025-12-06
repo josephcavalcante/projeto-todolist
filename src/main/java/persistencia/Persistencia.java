@@ -2,7 +2,7 @@ package persistencia;
 
 import java.io.*;
 import interfaces.persistence.IPersistencia;
-import negocio.ManipuladorDeTarefas;
+// Import removido pois a classe não existe mais
 
 /**
  * Implementação de persistência usando serialização Java.
@@ -11,28 +11,15 @@ import negocio.ManipuladorDeTarefas;
  * seguindo o padrão Repository e implementando IPersistenciaGenerica.
  * Suporta qualquer tipo de objeto via generics.
  * </p>
- * 
- * @author Projeto ToDoList
+ * * @author Projeto ToDoList
  * @version 3.0
  * @since 1.0
  */
 public class Persistencia implements IPersistencia {
 
     /**
-     * Métodos de conveniência para ManipuladorDeTarefas (compatibilidade).
-     */
-    public void salvarManipulador(ManipuladorDeTarefas manipulador, String nomeArquivo) {
-        salvar(manipulador, nomeArquivo);
-    }
-    
-    public ManipuladorDeTarefas carregarManipulador(String nomeArquivo) {
-        return carregar(nomeArquivo, ManipuladorDeTarefas.class);
-    }
-    
-    /**
      * Implementação genérica do salvamento.
-     * 
-     * @param objeto objeto a ser salvo
+     * * @param objeto objeto a ser salvo
      * @param identificador nome do arquivo
      * @return true se salvo com sucesso
      */
@@ -48,8 +35,7 @@ public class Persistencia implements IPersistencia {
     
     /**
      * Implementação genérica do carregamento.
-     * 
-     * @param <T> tipo do objeto esperado
+     * * @param <T> tipo do objeto esperado
      * @param identificador nome do arquivo
      * @param tipo classe do tipo esperado
      * @return objeto carregado ou null se não encontrado
@@ -67,4 +53,6 @@ public class Persistencia implements IPersistencia {
             return null;
         }
     }
-} 
+}
+    
+

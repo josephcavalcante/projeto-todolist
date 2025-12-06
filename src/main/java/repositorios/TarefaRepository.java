@@ -1,23 +1,23 @@
 package repositorios;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 
 import jakarta.persistence.EntityManager;
 import persistencia.DatabaseManager;
 import interfaces.repositories.ITarefaRepository;
 import modelo.Tarefa;
+import modelo.Usuario;
 
 /**
- * Implementação do repositório de tarefas usando arquivo.
+ * Implementação do repositório de tarefas usando JPA.
  * <p>
- * Fornece acesso aos dados de tarefas através do ManipuladorDeTarefas,
- * seguindo o padrão Repository. Pode ser substituída por implementações
- * que usam banco de dados ou APIs sem afetar o código cliente.
+ * Fornece acesso aos dados de tarefas através do EntityManager,
+ * seguindo o padrão Repository.
  * </p>
- * 
- * @author Projeto ToDoList
- * @version 2.0
+ * * @author Projeto ToDoList
+ * @version 2.2
  * @since 1.1
  */
 public class TarefaRepository implements ITarefaRepository {
@@ -41,7 +41,9 @@ public class TarefaRepository implements ITarefaRepository {
             }
             em.getTransaction().commit();
         } catch (Exception e) {
-            em.getTransaction().rollback();
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             throw e;
         } finally {
             em.close();
@@ -53,13 +55,16 @@ public class TarefaRepository implements ITarefaRepository {
         EntityManager em = getEntityManager();
         try {
             em.getTransaction().begin();
+            // Garante que a tarefa está gerenciada antes de remover
             Tarefa t = em.find(Tarefa.class, tarefa.getId());
             if (t != null) {
                 em.remove(t);
             }
             em.getTransaction().commit();
         } catch (Exception e) {
-            em.getTransaction().rollback();
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             throw e;
         } finally {
             em.close();
@@ -68,7 +73,7 @@ public class TarefaRepository implements ITarefaRepository {
 
     @Override
     public void atualizar(Tarefa antiga, Tarefa nova) {
-        salvar(nova); // Em JPA, merge resolve atualização
+        salvar(nova); // Em JPA, merge resolve a atualização se o ID estiver setado
     }
 
     @Override
@@ -102,6 +107,39 @@ public class TarefaRepository implements ITarefaRepository {
                     .getResultStream()
                     .findFirst()
                     .orElse(null);
+        } finally {
+            em.close();
+        }
+    }
+
+    // --- CORREÇÃO: Implementação dos métodos que estavam faltando ---
+
+    @Override
+    public List<Tarefa> listarPorUsuario(Usuario usuario) {
+        EntityManager em = getEntityManager();
+        try {
+            // Retorna lista vazia se a query não achar nada, em vez de null
+            List<Tarefa> lista = em.createQuery("SELECT t FROM Tarefa t WHERE t.usuario = :usuario", Tarefa.class)
+                    .setParameter("usuario", usuario)
+                    .getResultList();
+            return lista != null ? lista : Collections.emptyList();
+        } catch (Exception e) {
+            return Collections.emptyList();
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public List<Tarefa> listarPorDataEUsuario(LocalDate data, Usuario usuario) {
+        EntityManager em = getEntityManager();
+        try {
+            return em.createQuery("SELECT t FROM Tarefa t WHERE t.deadline = :data AND t.usuario = :usuario", Tarefa.class)
+                    .setParameter("data", data)
+                    .setParameter("usuario", usuario)
+                    .getResultList();
+        } catch (Exception e) {
+            return Collections.emptyList();
         } finally {
             em.close();
         }
