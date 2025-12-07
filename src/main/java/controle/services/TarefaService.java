@@ -12,8 +12,6 @@ import strategies.FiltroCriticasStrategy;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Collections;
-import java.util.stream.Collectors;
 import java.util.ArrayList;
 
 /**
@@ -27,11 +25,12 @@ public class TarefaService implements ITarefaService {
     private ITarefaRepository repositorio;
     private IValidadorTarefa validador;
     private TarefaCacheRepository cacheRepository;
-    
+
     // Implementação do padrão Observer
     private List<interfaces.observer.IObserver> observadores = new ArrayList<>();
 
-    public TarefaService(ITarefaRepository repositorio, IValidadorTarefa validador, TarefaCacheRepository cacheRepository) {
+    public TarefaService(ITarefaRepository repositorio, IValidadorTarefa validador,
+            TarefaCacheRepository cacheRepository) {
         this.repositorio = repositorio;
         this.validador = validador;
         this.cacheRepository = cacheRepository;
@@ -50,7 +49,7 @@ public class TarefaService implements ITarefaService {
                     .comPrazo(deadline)
                     .comPrioridade(prioridade)
                     .construir();
-            
+
             // Vincula usuário (Remote)
             novaTarefa.setUsuario(usuario);
 
@@ -94,7 +93,7 @@ public class TarefaService implements ITarefaService {
                     .comPrioridade(novaPrioridade)
                     .comPercentual(novoPercentual)
                     .construir();
-            
+
             // Preserva ID e Usuario
             tarefaAtualizada.setId(tarefaOriginal.getId());
             tarefaAtualizada.setUsuario(tarefaOriginal.getUsuario());
@@ -106,8 +105,8 @@ public class TarefaService implements ITarefaService {
             Usuario usuario = tarefaOriginal.getUsuario();
             if (usuario != null && usuario.getTarefas() != null) {
                 List<Tarefa> listaMemoria = usuario.getTarefas();
-                for(int i=0; i<listaMemoria.size(); i++) {
-                    if(listaMemoria.get(i).getId().equals(tarefaOriginal.getId())) {
+                for (int i = 0; i < listaMemoria.size(); i++) {
+                    if (listaMemoria.get(i).getId().equals(tarefaOriginal.getId())) {
                         listaMemoria.set(i, tarefaAtualizada);
                         break;
                     }
@@ -130,7 +129,7 @@ public class TarefaService implements ITarefaService {
             if (tarefa != null) {
                 // 1. Remove SQL
                 repositorio.remover(tarefa);
-                
+
                 // 2. Remove Memória RAM
                 Usuario usuario = tarefa.getUsuario();
                 if (usuario != null && usuario.getTarefas() != null) {
@@ -138,57 +137,13 @@ public class TarefaService implements ITarefaService {
                     // 3. Invalida Redis
                     cacheRepository.invalidarCache(usuario.getEmail());
                 }
-                
+
                 return true;
             }
             return false;
         } catch (Exception ex) {
             return false;
         }
-    }
-
-    @Override
-    public Tarefa buscarPorTitulo(String titulo) {
-        return repositorio.buscarPorTitulo(titulo);
-    }
-
-    // --- MÉTODOS OTIMIZADOS (Redis/Memória) ---
-
-    @Override
-    public List<Tarefa> listarPorUsuario(Usuario usuario) {
-        if (usuario == null) return Collections.emptyList();
-        System.out.println("[PERFORMANCE] Listando tarefas da memória RAM do objeto Usuario.");
-        return usuario.getTarefas();
-    }
-
-    @Override
-    public List<Tarefa> listarPorDataEUsuario(LocalDate data, Usuario usuario) {
-        if (usuario == null) return Collections.emptyList();
-        return usuario.getTarefas().stream()
-                .filter(t -> t.getDeadline().equals(data))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<Tarefa> listarCriticasPorUsuario(Usuario usuario) {
-        if (usuario == null) return Collections.emptyList();
-        return usuario.getTarefas().stream()
-                .filter(Tarefa::isCritica)
-                .collect(Collectors.toList());
-    }
-
-    // --- MÉTODOS STRATEGY (Genéricos) ---
-
-    @Override
-    public List<Tarefa> listar(interfaces.strategies.IFiltroStrategy filtro) {
-        // Por padrão, usa listarTodas (vai no banco), mas o ideal seria passar o usuario contexto
-        // Como o método é genérico, mantemos comportamento original
-        return filtro.filtrar(listarTodas());
-    }
-
-    @Override
-    public List<Tarefa> listarOrdenado(interfaces.strategies.IOrdenacaoStrategy estrategia) {
-        return estrategia.ordenar(listarTodas());
     }
 
     // --- MÉTODOS OBSERVER ---
@@ -213,21 +168,6 @@ public class TarefaService implements ITarefaService {
     // --- MÉTODOS LEGADOS/AUXILIARES ---
 
     @Override
-    public List<Tarefa> listarTodas() {
-        return repositorio.listarTodas();
-    }
-
-    @Override
-    public List<Tarefa> listarPorData(LocalDate data) {
-        return listar(new FiltroPorDataStrategy(data));
-    }
-
-    @Override
-    public List<Tarefa> listarCriticas() {
-        return listar(new FiltroCriticasStrategy());
-    }
-
-    @Override
     public void atualizarPercentual(Long idTarefa, double novoPercentual) {
         try {
             Tarefa tarefa = repositorio.buscarPorId(idTarefa);
@@ -235,7 +175,7 @@ public class TarefaService implements ITarefaService {
                 tarefa.setPercentual(novoPercentual);
                 repositorio.salvar(tarefa);
                 notificarObservadores("Tarefa atualizada: " + tarefa.getTitulo());
-                
+
                 // Atualiza cache se possível
                 if (tarefa.getUsuario() != null) {
                     cacheRepository.invalidarCache(tarefa.getUsuario().getEmail());
@@ -245,183 +185,81 @@ public class TarefaService implements ITarefaService {
             e.printStackTrace();
         }
     }
+
+    @Override
+    public Tarefa buscarPorTitulo(String titulo) {
+        return repositorio.buscarPorTitulo(titulo);
+    }
+
+    // --- MÉTODOS OTIMIZADOS (Delegam para o novo Strategy com Contexto) ---
+
+    @Override
+    public List<Tarefa> listarPorUsuario(Usuario usuario) {
+        // Usa uma estratégia "neutra" que retorna tudo, mas passando o usuário para o
+        // contexto
+        return listar(t -> t, usuario);
+    }
+
+    @Override
+    public List<Tarefa> listarPorDataEUsuario(LocalDate data, Usuario usuario) {
+        return listar(new FiltroPorDataStrategy(data), usuario);
+    }
+
+    @Override
+    public List<Tarefa> listarCriticasPorUsuario(Usuario usuario) {
+        return listar(new FiltroCriticasStrategy(), usuario);
+    }
+
+    // --- MÉTODOS STRATEGY (Genéricos) ---
+
+    @Override
+    public List<Tarefa> listar(interfaces.strategies.IFiltroStrategy filtro, Usuario usuario) {
+        // TRAVA DE SEGURANÇA: Se não tem usuário, não mostra nada.
+        if (usuario == null) {
+            System.out.println("[SEGURANÇA] Tentativa de listagem sem usuário. Acesso negado.");
+            return new ArrayList<>();
+        }
+
+        List<Tarefa> fonteDados = null;
+
+        // 1. Tenta buscar do Cache (Redis)
+        System.out.println("[CACHE] Buscando tarefas no Redis para: " + usuario.getEmail());
+        fonteDados = cacheRepository.buscarCache(usuario.getEmail());
+
+        if (fonteDados == null) {
+            // 2. Cache Miss -> Busca do Banco SQL
+            System.out.println("[CACHE] Miss (Não achou no Redis). Buscando do Banco de Dados...");
+            fonteDados = repositorio.listarPorUsuario(usuario);
+
+            // 3. Atualiza o Cache para próxima vez (Cache-Aside)
+            if (fonteDados != null) {
+                cacheRepository.salvarCache(usuario.getEmail(), fonteDados);
+                // Opcional: Manter referencia no objeto para uso pontual
+                usuario.setTarefas(fonteDados);
+            }
+        } else {
+            // Cache Hit
+            usuario.setTarefas(fonteDados);
+        }
+
+        if (fonteDados == null) {
+            fonteDados = new ArrayList<>();
+        }
+
+        return filtro.filtrar(fonteDados);
+    }
+
+    @Override
+    public List<Tarefa> listarOrdenado(interfaces.strategies.IOrdenacaoStrategy estrategia, Usuario usuario) {
+        // Agora ordena a lista filtrada do usuário (chama listar para garantir regras)
+        List<Tarefa> tarefas = listar(new interfaces.strategies.IFiltroStrategy() {
+            public List<Tarefa> filtrar(List<Tarefa> t) {
+                return t;
+            }
+        }, usuario);
+        return estrategia.ordenar(tarefas);
+    }
+
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-    
-    
-    
-
-    
-            
-        
-        
-        
-    
-
-    
-    
-        
-            
-        
-            
-            
-
-            
-            
-
-            
-            
-
-            
-            
-            
-
-            
-        
-            
-            
-        
-    
-
-    
-    
-            
-        
-            
-        
-            
-            
-                
-
-            
-                    
-            
-            
-            
-
-            
-            
-
-            
-            
-                 
-                 
-                    
-                    
-                
-            
-
-            
-            
-
-            
-        
-            
-        
-    
-
-    
-    
-        
-            
-            
-                
-                
-
-                
-                
-
-                
-                
-
-                
-            
-            
-        
-            
-        
-    
-
-    
-    
-        
-        
-    
-
-    
-
-    
-    
-        
-            
-
-        
-        
-        
-        
-        
-    
-
-    
-    
-        
-            
-        
-        
-                
-                
-    
-
-    
-    
-        
-            
-        
-        
-                
-                
-    
-
-    
-    
-    
-        
-    
-
-    
-    
-        
-    
-
-    
-    
-        
-    
-
-    
-    // 
-    
-    
-    
-
-    
-    
-    
-
-    
-    
-    
-
-    
+//

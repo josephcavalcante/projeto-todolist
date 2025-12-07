@@ -11,7 +11,6 @@ import controle.services.*;
 import controllers.*;
 import repositorios.*;
 import validadores.*;
-import persistencia.Persistencia;
 import relatorios.GeradorDeRelatorios;
 
 public class ServiceFactory {
@@ -19,10 +18,9 @@ public class ServiceFactory {
     public static ITarefaService criarTarefaService() {
         ITarefaRepository repositorio = new TarefaRepository();
         IValidadorTarefa validador = new ValidadorTarefa();
-        // --- CORREÇÃO: Cria e injeta o CacheRepository ---
+        // Cria e injeta o CacheRepository
         repositorios.TarefaCacheRepository cacheRepository = new repositorios.TarefaCacheRepository();
         return new TarefaService(repositorio, validador, cacheRepository);
-        // -------------------------------------------------
     }
 
     public static IRelatorioService criarRelatorioService() {
@@ -49,9 +47,7 @@ public class ServiceFactory {
         return new SubtarefaController(subtarefaService);
     }
 
-    public static IPersistenciaController criarPersistenciaController() {
-        return new PersistenciaController(new Persistencia());
-    }
+    // Método Persistencia removido.
 
     public static IEventoService criarEventoService() {
         IEventoRepository repositorio = new EventoRepository();

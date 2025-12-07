@@ -1,4 +1,5 @@
 package telas;
+
 import javax.swing.*;
 import java.awt.*;
 import java.time.LocalDate;
@@ -86,9 +87,9 @@ public class TelaEditarTarefa extends JPanel {
         LocalDate novoDeadline = dateValue.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
         int novaPrioridade = (Integer) spnPrioridade.getValue();
         double novoPercentual = (Double) spnPercentual.getValue();
-        
-        if (sistema.getTarefaService().editar(tarefaOriginal.getTitulo(), novoTitulo, novaDescricao, novoDeadline, novaPrioridade, novoPercentual)) {
-            sistema.salvarDados();
+
+        if (sistema.getTarefaService().editar(tarefaOriginal.getTitulo(), novoTitulo, novaDescricao, novoDeadline,
+                novaPrioridade, novoPercentual)) {
             JOptionPane.showMessageDialog(frame, "Tarefa editada com sucesso!");
             voltarParaLista();
         } else {

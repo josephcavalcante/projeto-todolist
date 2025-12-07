@@ -1,4 +1,5 @@
 package telas;
+
 import java.awt.*;
 import javax.swing.*;
 
@@ -66,10 +67,10 @@ public class TelaGerenciadorTarefas extends JPanel {
             frame.repaint();
         });
         btnListarPorData.addActionListener(e -> {
-            String dataStr = JOptionPane.showInputDialog(frame, 
-                "Digite a data (dd/MM/yyyy):", 
-                java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-                
+            String dataStr = JOptionPane.showInputDialog(frame,
+                    "Digite a data (dd/MM/yyyy):",
+                    java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+
             if (dataStr != null) {
                 frame.setContentPane(new TelaListarTarefas(frame, sistema, "Tarefas por Data", dataStr));
                 frame.revalidate();
@@ -97,12 +98,11 @@ public class TelaGerenciadorTarefas extends JPanel {
         btnExcluir.addActionListener(e -> {
             String tituloExcluir = JOptionPane.showInputDialog(frame, "Digite o título da tarefa a excluir:");
             if (tituloExcluir != null && !tituloExcluir.trim().isEmpty()) {
-                int confirmacao = JOptionPane.showConfirmDialog(frame, 
-                    "Tem certeza que deseja excluir a tarefa '" + tituloExcluir + "'?", 
-                    "Confirmar Exclusão", JOptionPane.YES_NO_OPTION);
+                int confirmacao = JOptionPane.showConfirmDialog(frame,
+                        "Tem certeza que deseja excluir a tarefa '" + tituloExcluir + "'?",
+                        "Confirmar Exclusão", JOptionPane.YES_NO_OPTION);
                 if (confirmacao == JOptionPane.YES_OPTION) {
                     if (sistema.getTarefaService().excluir(tituloExcluir)) {
-                        sistema.salvarDados();
                         JOptionPane.showMessageDialog(frame, "Tarefa excluída com sucesso!");
                     } else {
                         JOptionPane.showMessageDialog(frame, "Tarefa não encontrada!");

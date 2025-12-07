@@ -95,7 +95,6 @@ public class TelaListarTarefas extends JPanel {
                         "Confirmar", JOptionPane.YES_NO_OPTION);
                 if (confirmacao == JOptionPane.YES_OPTION) {
                     if (sistema.getTarefaService().excluir(tituloTarefa)) {
-                        sistema.salvarDados();
                         modelo.removeRow(linha);
                         JOptionPane.showMessageDialog(frame, "Tarefa excluída!");
                     } else {

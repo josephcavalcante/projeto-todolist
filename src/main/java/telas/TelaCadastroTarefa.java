@@ -1,4 +1,5 @@
 package telas;
+
 import javax.swing.*;
 import java.awt.*;
 import java.time.LocalDate;
@@ -73,27 +74,29 @@ public class TelaCadastroTarefa extends JPanel {
         botSalvar.addActionListener(e -> {
             String titulo = campoTitulo.getText().trim();
             String desc = areaDescricao.getText().trim();
-            
+
             // Conversão de Data do Spinner para LocalDate
             Date dataEscolhida = (Date) spinnerData.getValue();
             LocalDate deadline = new java.sql.Date(dataEscolhida.getTime()).toLocalDate();
-            
+
             int prioridade = (Integer) spinnerPrioridade.getValue();
-            
-            // CORREÇÃO AQUI: Usar método do Facade (todoSystem) em vez de chamar Service direto
+
+            // CORREÇÃO AQUI: Usar método do Facade (todoSystem) em vez de chamar Service
+            // direto
             // O Facade injeta o usuário logado automaticamente.
             if (todoSystem.adicionarTarefa(titulo, desc, deadline, prioridade)) {
                 // Sucesso
-                todoSystem.salvarDados(); // (Mantido para compatibilidade, se necessário)
+                // todoSystem.salvarDados(); // (Removido: Persistência é automática via Banco)
                 JOptionPane.showMessageDialog(janelaPrincipal, "Tarefa cadastrada com sucesso!");
-                
+
                 // Volta para o gerenciador
                 janelaPrincipal.setContentPane(new TelaGerenciadorTarefas(janelaPrincipal, todoSystem));
                 janelaPrincipal.revalidate();
                 janelaPrincipal.repaint();
             } else {
                 // Se falhar (Título vazio ou Usuário não logado)
-                JOptionPane.showMessageDialog(janelaPrincipal, "Erro ao cadastrar!\nVerifique se o título foi preenchido.", "Erro", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(janelaPrincipal,
+                        "Erro ao cadastrar!\nVerifique se o título foi preenchido.", "Erro", JOptionPane.ERROR_MESSAGE);
             }
         });
 

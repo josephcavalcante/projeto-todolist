@@ -29,7 +29,7 @@ public class TarefaServiceTest {
     void setUp() {
         mockRepository = new MockTarefaRepository();
         mockValidador = new MockValidadorTarefa();
-        mockCache = new TarefaCacheRepository(); // Assume impl simples ou mock
+        mockCache = new MockCache();
 
         tarefaService = new TarefaService(mockRepository, mockValidador, mockCache);
     }
@@ -67,8 +67,10 @@ public class TarefaServiceTest {
     }
 
     @Test
-    void testListarTodasTarefas() {
+    void testListarTodasTarefasPorUsuario() {
         // Arrange
+        Usuario usuario = new Usuario("Teste", "teste@teste.com", "123");
+
         Tarefa tarefa1 = new builders.TarefaBuilder()
                 .comTitulo("Tarefa 1")
                 .comDescricao("Desc 1")
@@ -82,11 +84,12 @@ public class TarefaServiceTest {
                 .comPrioridade(2)
                 .construir();
 
+        // Simula que o repositório retorna tarefas para esse usuário
         mockRepository.tarefas.add(tarefa1);
         mockRepository.tarefas.add(tarefa2);
 
         // Act
-        List<Tarefa> resultado = tarefaService.listarTodas();
+        List<Tarefa> resultado = tarefaService.listarPorUsuario(usuario);
 
         // Assert
         assertEquals(2, resultado.size());
@@ -168,6 +171,35 @@ public class TarefaServiceTest {
         @Override
         public boolean validarTarefa(Tarefa tarefa) {
             return retornoValidacao;
+        }
+    }
+
+    @Test
+    void testListarComUsuarioGaranteSeguranca() {
+        // Arrange
+        // (usuario null)
+
+        // Act
+        // listar com null deve retornar vazio devido a trava de segurança
+        List<Tarefa> resultado = tarefaService.listar(t -> t, null);
+
+        // Assert
+        assertNotNull(resultado);
+        assertTrue(resultado.isEmpty());
+    }
+
+    private static class MockCache extends TarefaCacheRepository {
+        @Override
+        public void salvarCache(String email, List<Tarefa> t) {
+        }
+
+        @Override
+        public List<Tarefa> buscarCache(String email) {
+            return null;
+        }
+
+        @Override
+        public void invalidarCache(String email) {
         }
     }
 }

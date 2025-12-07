@@ -1,4 +1,5 @@
 package telas;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -44,12 +45,12 @@ public class TelaSubtarefas extends JPanel {
         add(cabecalho, BorderLayout.NORTH);
 
         // criando a tabela das subtarefas
-        String[] nomesColunas = {"Título", "Descrição", "Percentual"};
+        String[] nomesColunas = { "Título", "Descrição", "Percentual" };
         modeloTabela = new DefaultTableModel(nomesColunas, 0);
         tabelaSubtarefas = new JTable(modeloTabela);
         tabelaSubtarefas.setFont(new Font("Arial", Font.PLAIN, 14));
         tabelaSubtarefas.setRowHeight(25); // altura das linhas
-        
+
         JScrollPane scroll = new JScrollPane(tabelaSubtarefas);
         scroll.setPreferredSize(new Dimension(0, 300));
         add(scroll, BorderLayout.CENTER);
@@ -92,13 +93,13 @@ public class TelaSubtarefas extends JPanel {
         // busca as subtarefas da tarefa atual
         List<Subtarefa> listaSubs = app.listarSubtarefas(tarefaPrincipal);
         modeloTabela.setRowCount(0); // limpa a tabela
-        
+
         // adiciona cada subtarefa na tabela
         for (Subtarefa sub : listaSubs) {
-            modeloTabela.addRow(new Object[]{
-                sub.getTitulo(),
-                sub.getDescricao(),
-                String.format("%.1f%%", sub.getPercentual())
+            modeloTabela.addRow(new Object[] {
+                    sub.getTitulo(),
+                    sub.getDescricao(),
+                    String.format("%.1f%%", sub.getPercentual())
             });
         }
     }
@@ -107,16 +108,15 @@ public class TelaSubtarefas extends JPanel {
         // cria o formulario vazio
         JPanel form = criarFormularioSubtarefa("", "", 0.0);
         int resposta = JOptionPane.showConfirmDialog(janelaPai, form, "Nova Subtarefa", JOptionPane.OK_CANCEL_OPTION);
-        
+
         if (resposta == JOptionPane.OK_OPTION) {
             // pega os dados do formulario
             String tit = ((JTextField) form.getComponent(1)).getText().trim();
             String desc = ((JTextField) form.getComponent(3)).getText().trim();
             double perc = (Double) ((JSpinner) form.getComponent(5)).getValue();
-            
+
             // tenta adicionar
             if (app.obterSubtarefaService().adicionar(tarefaPrincipal.getTitulo(), tit, desc, perc)) {
-                app.salvarDados();
                 carregarSubtarefas(); // atualiza a tabela
                 JOptionPane.showMessageDialog(janelaPai, "Subtarefa adicionada!");
             } else {
@@ -135,17 +135,18 @@ public class TelaSubtarefas extends JPanel {
         } catch (NumberFormatException e) {
             percentualOriginal = 0.0;
         }
-        
+
         JPanel painel = criarFormularioSubtarefa(tituloOriginal, descricaoOriginal, percentualOriginal);
-        int resultado = JOptionPane.showConfirmDialog(janelaPai, painel, "Editar Subtarefa", JOptionPane.OK_CANCEL_OPTION);
-        
+        int resultado = JOptionPane.showConfirmDialog(janelaPai, painel, "Editar Subtarefa",
+                JOptionPane.OK_CANCEL_OPTION);
+
         if (resultado == JOptionPane.OK_OPTION) {
             String novoTitulo = ((JTextField) painel.getComponent(1)).getText().trim();
             String novaDescricao = ((JTextField) painel.getComponent(3)).getText().trim();
             double novoPercentual = (Double) ((JSpinner) painel.getComponent(5)).getValue();
-            
-            if (app.obterSubtarefaService().editar(tarefaPrincipal.getTitulo(), tituloOriginal, novoTitulo, novaDescricao, novoPercentual)) {
-                app.salvarDados();
+
+            if (app.obterSubtarefaService().editar(tarefaPrincipal.getTitulo(), tituloOriginal, novoTitulo,
+                    novaDescricao, novoPercentual)) {
                 carregarSubtarefas();
                 JOptionPane.showMessageDialog(janelaPai, "Subtarefa editada!");
             } else {
@@ -176,14 +177,13 @@ public class TelaSubtarefas extends JPanel {
     }
 
     private boolean confirmarExclusao(String titulo) {
-        return JOptionPane.showConfirmDialog(janelaPai, 
-            "Excluir subtarefa: " + titulo + "?", 
-            "Confirmar", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
+        return JOptionPane.showConfirmDialog(janelaPai,
+                "Excluir subtarefa: " + titulo + "?",
+                "Confirmar", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
     }
 
     private void excluirSubtarefa(String titulo) {
         if (app.obterSubtarefaService().remover(tarefaPrincipal.getTitulo(), titulo)) {
-            app.salvarDados();
             carregarSubtarefas();
             JOptionPane.showMessageDialog(janelaPai, "Subtarefa excluída!");
         } else {
@@ -201,29 +201,29 @@ public class TelaSubtarefas extends JPanel {
     private JPanel criarFormularioSubtarefa(String titulo, String descricao, double percentual) {
         JPanel painel = new JPanel(new GridLayout(0, 1, 8, 8));
         painel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        
+
         JLabel lblTitulo = new JLabel("Título:");
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 14));
         JTextField txtTitulo = new JTextField(titulo);
         txtTitulo.setFont(new Font("Arial", Font.PLAIN, 14));
-        
+
         JLabel lblDescricao = new JLabel("Descrição:");
         lblDescricao.setFont(new Font("Arial", Font.BOLD, 14));
         JTextField txtDescricao = new JTextField(descricao);
         txtDescricao.setFont(new Font("Arial", Font.PLAIN, 14));
-        
+
         JLabel lblPercentual = new JLabel("Percentual (0-100):");
         lblPercentual.setFont(new Font("Arial", Font.BOLD, 14));
         JSpinner spnPercentual = new JSpinner(new SpinnerNumberModel(percentual, 0.0, 100.0, 1.0));
         spnPercentual.setFont(new Font("Arial", Font.PLAIN, 14));
-        
+
         painel.add(lblTitulo);
         painel.add(txtTitulo);
         painel.add(lblDescricao);
         painel.add(txtDescricao);
         painel.add(lblPercentual);
         painel.add(spnPercentual);
-        
+
         return painel;
     }
 }
