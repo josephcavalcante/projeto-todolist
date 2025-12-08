@@ -42,9 +42,13 @@ public class UsuarioService implements IUsuarioService {
             System.out.println("✅ Senha correta. Carregando tarefas...");
 
             long inicio = System.currentTimeMillis();
+            return true;
+        }
+    
+            /*
             
             // 1. Tenta Redis
-            List<Tarefa> tarefas = cacheRepository.buscarCache(email);
+            List<Tarefa> tarefas = cacheRepository.buscarCache(user.getId());
             
             if (tarefas == null) {
                 // 2. Se falhar, busca SQL
@@ -53,7 +57,7 @@ public class UsuarioService implements IUsuarioService {
                 
                 // 3. Salva no Redis se tiver dados
                 if (tarefas != null && !tarefas.isEmpty()) {
-                    cacheRepository.salvarCache(email, tarefas);
+                    cacheRepository.salvarCache(user.getId(), tarefas);
                 }
             } else {
                 System.out.println("✅ Cache HIT - Tarefas do Redis");
@@ -69,6 +73,8 @@ public class UsuarioService implements IUsuarioService {
         }
         
         System.out.println("❌ Falha no login.");
+        return false;
+        */
         return false;
     }
 

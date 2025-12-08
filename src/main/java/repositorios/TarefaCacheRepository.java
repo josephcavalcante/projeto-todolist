@@ -19,26 +19,26 @@ public class TarefaCacheRepository {
         this.xstream.allowTypesByWildcard(new String[] { "modelo.**", "java.util.**" });
     }
 
-    public void salvarCache(String emailUsuario, List<Tarefa> tarefas) {
+    public void salvarCache(Long id, List<Tarefa> tarefas) {
         try (Jedis jedis = RedisManager.getInstance().getJedis()) {
             if (jedis == null) return;
 
-            String chave = "tarefas:" + emailUsuario;
+            String chave = "tarefas:" + id;
             String xml = xstream.toXML(tarefas);
             
             jedis.setex(chave, TTL_SECONDS, xml);
-            System.out.println("[REDIS] CACHE SAVE -> Dados salvos para: " + emailUsuario);
+            System.out.println("[REDIS] CACHE SAVE -> Dados salvos para: " + id);
         } catch (Exception e) {
             System.out.println("[REDIS] Erro ao salvar: " + e.getMessage());
         }
     }
 
     @SuppressWarnings("unchecked")
-    public List<Tarefa> buscarCache(String emailUsuario) {
+    public List<Tarefa> buscarCache(Long id) {
         try (Jedis jedis = RedisManager.getInstance().getJedis()) {
             if (jedis == null) return null;
 
-            String chave = "tarefas:" + emailUsuario;
+            String chave = "tarefas:" + id;
             System.out.println("[REDIS] Buscando chave: " + chave);
             
             String xml = jedis.get(chave);
@@ -55,11 +55,11 @@ public class TarefaCacheRepository {
         return null;
     }
 
-    public void invalidarCache(String emailUsuario) {
+    public void invalidarCache(Long id) {
         try (Jedis jedis = RedisManager.getInstance().getJedis()) {
             if (jedis == null) return;
             
-            jedis.del("tarefas:" + emailUsuario);
+            jedis.del("tarefas:" + id);
             System.out.println("[REDIS] INVALIDATE -> Cache limpo para atualização.");
         }
     }

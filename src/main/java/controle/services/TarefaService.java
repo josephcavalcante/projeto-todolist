@@ -36,13 +36,35 @@ public class TarefaService implements ITarefaService {
         this.cacheRepository = cacheRepository;
     }
 
+    /**
+     * Método auxiliar para centralizar a atualização do Cache.
+     * Garante consistência entre Banco SQL e Redis.
+     */
+    private void sincronizarCache(Usuario usuario) {
+        if (usuario == null) return;
+        
+        // 1. Invalida versão antiga (opcional, pois o salvar sobrescreve, mas é boa prática)
+        cacheRepository.invalidarCache(usuario.getId());
+
+        // 2. Busca a versão mais recente do Banco de Dados (Fonte da verdade)
+        List<Tarefa> tarefasAtualizadas = repositorio.listarPorUsuario(usuario);
+
+        // 3. Salva o novo estado no Redis
+        cacheRepository.salvarCache(usuario.getId(), tarefasAtualizadas);
+        
+        // 4. Atualiza a referência em memória do objeto Usuário para refletir tudo
+        usuario.setTarefas(tarefasAtualizadas);
+        
+        System.out.println("[SYNC] Cache do Redis atualizado com sucesso para usuário: " + usuario.getEmail());
+    }
+
     @Override
     public boolean cadastrar(String titulo, String descricao, LocalDate deadline, int prioridade, Usuario usuario) {
         if (!validador.validarTitulo(titulo)) {
             return false;
         }
         try {
-            // Criação usando Builder Pattern (HEAD)
+            // Criação usando Builder Pattern
             Tarefa novaTarefa = new TarefaBuilder()
                     .comTitulo(titulo)
                     .comDescricao(descricao)
@@ -50,21 +72,14 @@ public class TarefaService implements ITarefaService {
                     .comPrioridade(prioridade)
                     .construir();
 
-            // Vincula usuário (Remote)
             novaTarefa.setUsuario(usuario);
 
             // 1. Persistência Real (SQL)
             repositorio.salvar(novaTarefa);
 
-            // 2. Atualiza Memória RAM (Otimização Remote)
-            if (usuario.getTarefas() != null) {
-                usuario.getTarefas().add(novaTarefa);
-            }
-
-            // 3. Invalida Redis (Remote)
-            cacheRepository.invalidarCache(usuario.getEmail());
-            System.out.println("[SYNC] Tarefa criada. Redis invalidado e memória atualizada.");
-
+            // 2. Atualização Proativa do Cache (Write-Through)
+            sincronizarCache(usuario);
+            
             return true;
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -94,26 +109,14 @@ public class TarefaService implements ITarefaService {
                     .comPercentual(novoPercentual)
                     .construir();
 
-            // Preserva ID e Usuario
             tarefaAtualizada.setId(tarefaOriginal.getId());
             tarefaAtualizada.setUsuario(tarefaOriginal.getUsuario());
 
             // 1. Atualiza SQL
             repositorio.atualizar(tarefaOriginal, tarefaAtualizada);
 
-            // 2. Atualiza Memória RAM
-            Usuario usuario = tarefaOriginal.getUsuario();
-            if (usuario != null && usuario.getTarefas() != null) {
-                List<Tarefa> listaMemoria = usuario.getTarefas();
-                for (int i = 0; i < listaMemoria.size(); i++) {
-                    if (listaMemoria.get(i).getId().equals(tarefaOriginal.getId())) {
-                        listaMemoria.set(i, tarefaAtualizada);
-                        break;
-                    }
-                }
-                // 3. Invalida Redis
-                cacheRepository.invalidarCache(usuario.getEmail());
-            }
+            // 2. Atualização Proativa do Cache
+            sincronizarCache(tarefaOriginal.getUsuario());
 
             return true;
         } catch (Exception erro) {
@@ -127,21 +130,22 @@ public class TarefaService implements ITarefaService {
         try {
             Tarefa tarefa = buscarPorTitulo(titulo);
             if (tarefa != null) {
+                Usuario usuario = tarefa.getUsuario();
+
                 // 1. Remove SQL
                 repositorio.remover(tarefa);
 
-                // 2. Remove Memória RAM
-                Usuario usuario = tarefa.getUsuario();
-                if (usuario != null && usuario.getTarefas() != null) {
-                    usuario.getTarefas().removeIf(t -> t.getId().equals(tarefa.getId()));
-                    // 3. Invalida Redis
-                    cacheRepository.invalidarCache(usuario.getEmail());
+                // 2. Atualização Proativa do Cache
+                // Mesmo ao excluir, recarregamos a lista (agora menor) e salvamos no Redis
+                if (usuario != null) {
+                    sincronizarCache(usuario);
                 }
 
                 return true;
             }
             return false;
         } catch (Exception ex) {
+            ex.printStackTrace();
             return false;
         }
     }
@@ -165,7 +169,7 @@ public class TarefaService implements ITarefaService {
         }
     }
 
-    // --- MÉTODOS LEGADOS/AUXILIARES ---
+    // --- MÉTODOS AUXILIARES ---
 
     @Override
     public void atualizarPercentual(Long idTarefa, double novoPercentual) {
@@ -176,9 +180,9 @@ public class TarefaService implements ITarefaService {
                 repositorio.salvar(tarefa);
                 notificarObservadores("Tarefa atualizada: " + tarefa.getTitulo());
 
-                // Atualiza cache se possível
+                // Atualiza cache também aqui
                 if (tarefa.getUsuario() != null) {
-                    cacheRepository.invalidarCache(tarefa.getUsuario().getEmail());
+                    sincronizarCache(tarefa.getUsuario());
                 }
             }
         } catch (Exception e) {
@@ -191,12 +195,10 @@ public class TarefaService implements ITarefaService {
         return repositorio.buscarPorTitulo(titulo);
     }
 
-    // --- MÉTODOS OTIMIZADOS (Delegam para o novo Strategy com Contexto) ---
+    // --- MÉTODOS DE LEITURA (STRATEGY) ---
 
     @Override
     public List<Tarefa> listarPorUsuario(Usuario usuario) {
-        // Usa uma estratégia "neutra" que retorna tudo, mas passando o usuário para o
-        // contexto
         return listar(t -> t, usuario);
     }
 
@@ -210,32 +212,25 @@ public class TarefaService implements ITarefaService {
         return listar(new FiltroCriticasStrategy(), usuario);
     }
 
-    // --- MÉTODOS STRATEGY (Genéricos) ---
-
     @Override
     public List<Tarefa> listar(interfaces.strategies.IFiltroStrategy filtro, Usuario usuario) {
-        // TRAVA DE SEGURANÇA: Se não tem usuário, não mostra nada.
-        if (usuario == null) {
-            System.out.println("[SEGURANÇA] Tentativa de listagem sem usuário. Acesso negado.");
-            return new ArrayList<>();
-        }
+        if (usuario == null) return new ArrayList<>();
 
-        List<Tarefa> fonteDados = null;
+        List<Tarefa> fonteDados;
 
         // 1. Tenta buscar do Cache (Redis)
         System.out.println("[CACHE] Buscando tarefas no Redis para: " + usuario.getEmail());
-        fonteDados = cacheRepository.buscarCache(usuario.getEmail());
+        fonteDados = cacheRepository.buscarCache(usuario.getId());
 
         if (fonteDados == null) {
             // 2. Cache Miss -> Busca do Banco SQL
-            System.out.println("[CACHE] Miss (Não achou no Redis). Buscando do Banco de Dados...");
+            System.out.println("[CACHE] Miss. Buscando do SQL...");
             fonteDados = repositorio.listarPorUsuario(usuario);
 
-            // 3. Atualiza o Cache para próxima vez (Cache-Aside)
+            // 3. Salva no Cache para a próxima leitura (Cache-Aside)
+            // Isso garante que se o cache expirar sozinho, ele será repopulado na leitura
             if (fonteDados != null) {
-                cacheRepository.salvarCache(usuario.getEmail(), fonteDados);
-                // Opcional: Manter referencia no objeto para uso pontual
-                usuario.setTarefas(fonteDados);
+                cacheRepository.salvarCache(usuario.getId(), fonteDados);
             }
         } else {
             // Cache Hit
@@ -251,15 +246,7 @@ public class TarefaService implements ITarefaService {
 
     @Override
     public List<Tarefa> listarOrdenado(interfaces.strategies.IOrdenacaoStrategy estrategia, Usuario usuario) {
-        // Agora ordena a lista filtrada do usuário (chama listar para garantir regras)
-        List<Tarefa> tarefas = listar(new interfaces.strategies.IFiltroStrategy() {
-            public List<Tarefa> filtrar(List<Tarefa> t) {
-                return t;
-            }
-        }, usuario);
+        List<Tarefa> tarefas = listar(t -> t, usuario);
         return estrategia.ordenar(tarefas);
     }
-
 }
-
-//
