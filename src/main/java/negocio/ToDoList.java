@@ -18,7 +18,7 @@ public class ToDoList {
     private ITarefaService serviceTarefas;
     private ISubtarefaService serviceSubs;
     private IRelatorioService relatorioService;
-    private IUsuarioService usuarioService;
+    private IUsuarioController usuarioController; // Agora usa Controller
     private IEventoService eventoService;
     private ITarefaController tarefaController;
     private ISubtarefaController subtarefaController;
@@ -26,7 +26,7 @@ public class ToDoList {
     private IRelatorioController relatorioController;
 
     public ToDoList() {
-        this.usuarioService = ServiceFactory.criarUsuarioService();
+        this.usuarioController = ServiceFactory.criarUsuarioController();
         this.serviceTarefas = ServiceFactory.criarTarefaService();
         this.serviceSubs = ServiceFactory.criarSubtarefaService(serviceTarefas);
         this.relatorioService = ServiceFactory.criarRelatorioService();
@@ -39,37 +39,33 @@ public class ToDoList {
 
     // Login e Usuário
     public boolean login(String email, String senha) {
-        return usuarioService.login(email, senha);
+        return usuarioController.login(email, senha);
     }
 
     public boolean cadastrarUsuario(String nome, String email, String senha) {
-        return usuarioService.cadastrar(nome, email, senha);
+        return usuarioController.cadastrar(nome, email, senha);
     }
 
     public void logout() {
-        usuarioService.logout();
+        usuarioController.logout();
     }
 
     public boolean isUsuarioLogado() {
-        return usuarioService.isLogado();
+        return usuarioController.isLogado();
     }
 
     public Usuario obterUsuario() {
-        return usuarioService.obterUsuario();
+        return usuarioController.obterUsuario();
     }
 
     public void setNomeUsuario(String novoNome) {
-        usuarioService.alterarNome(novoNome);
-    }
-
-    public IUsuarioService getUsuarioService() {
-        return usuarioService;
+        usuarioController.alterarNome(novoNome);
     }
 
     // --- MÉTODOS DE TAREFAS (CORRIGIDOS COM FILTRO DE USUÁRIO) ---
 
     public boolean adicionarTarefa(String titulo, String descricao, LocalDate deadline, int prioridade) {
-        Usuario usuario = usuarioService.obterUsuario();
+        Usuario usuario = usuarioController.obterUsuario();
         if (usuario == null)
             return false;
         // Chama o controller/service passando o usuário dono da tarefa
@@ -89,7 +85,7 @@ public class ToDoList {
 
     // LISTAR: Agora filtra pelo usuário logado (via Controller)
     public List<Tarefa> listarTodasTarefas() {
-        Usuario usuario = usuarioService.obterUsuario();
+        Usuario usuario = usuarioController.obterUsuario();
         if (usuario != null) {
             return tarefaController.listarTodas(usuario);
         }
@@ -97,7 +93,7 @@ public class ToDoList {
     }
 
     public List<Tarefa> listarTarefasPorData(LocalDate data) {
-        Usuario usuario = usuarioService.obterUsuario();
+        Usuario usuario = usuarioController.obterUsuario();
         if (usuario != null) {
             return tarefaController.listarPorData(data, usuario);
         }
@@ -105,7 +101,7 @@ public class ToDoList {
     }
 
     public List<Tarefa> listarTarefasCriticas() {
-        Usuario usuario = usuarioService.obterUsuario();
+        Usuario usuario = usuarioController.obterUsuario();
         if (usuario != null) {
             return tarefaController.listarCriticas(usuario);
         }
@@ -113,7 +109,7 @@ public class ToDoList {
     }
 
     public List<Tarefa> listarTarefasOrdenadasPorData() {
-        Usuario usuario = usuarioService.obterUsuario();
+        Usuario usuario = usuarioController.obterUsuario();
         if (usuario != null) {
             return tarefaController.listarOrdenado(new OrdenacaoPorDataStrategy(), usuario);
         }
@@ -121,7 +117,7 @@ public class ToDoList {
     }
 
     public List<Tarefa> listarTarefasOrdenadasPorPrioridade() {
-        Usuario usuario = usuarioService.obterUsuario();
+        Usuario usuario = usuarioController.obterUsuario();
         if (usuario != null) {
             return tarefaController.listarOrdenado(new OrdenacaoPorPrioridadeStrategy(), usuario);
         }
@@ -169,7 +165,8 @@ public class ToDoList {
     }
 
     public boolean enviarRelatorioEmail(LocalDate data) {
-        return relatorioController.enviarRelatorioEmail(listarTarefasPorData(data), usuarioService.obterEmail(), data);
+        return relatorioController.enviarRelatorioEmail(listarTarefasPorData(data), usuarioController.obterEmail(),
+                data);
     }
 
     public boolean gerarRelatorioExcel(int mes, int ano) {

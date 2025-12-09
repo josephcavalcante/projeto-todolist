@@ -70,4 +70,9 @@ public class ServiceFactory {
         IRelatorioService relatorioService = criarRelatorioService();
         return new RelatorioController(relatorioService);
     }
+
+    public static IUsuarioController criarUsuarioController() {
+        IUsuarioService usuarioService = criarUsuarioService();
+        return new UsuarioController(usuarioService);
+    }
 }
