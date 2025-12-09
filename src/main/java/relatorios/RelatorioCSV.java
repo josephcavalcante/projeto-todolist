@@ -15,6 +15,9 @@ public class RelatorioCSV extends RelatorioTemplate {
         // Usa OutputStreamWriter para UTF-8
         escritor = new OutputStreamWriter(new FileOutputStream(caminho), StandardCharsets.UTF_8);
         buffer = new StringBuilder();
+
+        // Adiciona BOM (Byte Order Mark) para o Excel reconhecer UTF-8
+        buffer.append("\uFEFF");
     }
 
     @Override

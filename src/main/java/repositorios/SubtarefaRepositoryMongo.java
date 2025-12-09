@@ -62,9 +62,8 @@ public class SubtarefaRepositoryMongo implements ISubtarefaRepository {
                     doc.getString("titulo"),
                     doc.getString("descricao"),
                     doc.getDouble("percentual"));
-            // Precisamos setar a tarefa aqui? Talvez só o ID baste, mas o modelo pede
-            // objeto Tarefa.
-            // Por enquanto, criamos uma Tarefa dummy só com ID para manter a referência
+            // Precisamos setar a tarefa aqui? Talvez só o ID bastasse
+            // Por enquanto, cria uma Tarefa dummy só com ID para manter a referência
             Tarefa t = new Tarefa();
             t.setId(tarefaId);
             s.setTarefa(t);

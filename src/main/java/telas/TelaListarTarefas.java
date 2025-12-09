@@ -123,7 +123,7 @@ public class TelaListarTarefas extends JPanel implements IObserver {
                         "Excluir tarefa: " + tituloTarefa + "?",
                         "Confirmar", JOptionPane.YES_NO_OPTION);
                 if (confirmacao == JOptionPane.YES_OPTION) {
-                    if (sistema.getTarefaService().excluir(tituloTarefa)) {
+                    if (sistema.removerTarefa(tituloTarefa)) {
                         modelo.removeRow(linha);
                         JOptionPane.showMessageDialog(frame, "Tarefa excluída!");
                     } else {

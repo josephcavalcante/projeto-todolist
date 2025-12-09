@@ -19,7 +19,7 @@ public class FiltroPorDataStrategy implements IFiltroStrategy {
     @Override
     public List<Tarefa> filtrar(List<Tarefa> tarefas) {
         if (dataAlvo == null) {
-            return tarefas; // Se data é null, retorna tudo (ou podia retornar vazio, dependendo da regra)
+            return tarefas; // Se data é null, retorna tudo (ou podia retornar vazio)
         }
         return tarefas.stream()
                 .filter(t -> t.getDeadline().equals(dataAlvo))

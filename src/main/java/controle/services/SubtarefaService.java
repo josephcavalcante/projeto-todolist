@@ -2,6 +2,7 @@ package controle.services;
 
 import modelo.Tarefa;
 import modelo.Subtarefa;
+import modelo.Usuario;
 import interfaces.services.ISubtarefaService;
 import interfaces.services.ITarefaService;
 import validadores.ValidadorTarefa;
@@ -29,11 +30,13 @@ public class SubtarefaService implements ISubtarefaService {
     }
 
     // inclusão de subtarefa nova
-    public boolean adicionar(String tituloTarefa, String tituloSub, String descricaoSub, double percentual) {
+    public boolean adicionar(String tituloTarefa, String tituloSub, String descricaoSub, double percentual,
+            Usuario usuario) {
         if (tituloSub == null || tituloSub.trim().equals(""))
             return false;
         try {
-            Tarefa tarefaPai = servicoTarefas.buscarPorTitulo(tituloTarefa);
+            // Validação de Segurança: Passa usuário para garantir acesso
+            Tarefa tarefaPai = servicoTarefas.buscarPorTitulo(tituloTarefa, usuario);
             if (tarefaPai == null) {
                 return false;
             }
@@ -49,9 +52,10 @@ public class SubtarefaService implements ISubtarefaService {
     }
 
     // exclusão de subtarefa
-    public boolean remover(String tituloTarefa, String tituloSub) {
+    public boolean remover(String tituloTarefa, String tituloSub, Usuario usuario) {
         try {
-            Tarefa tarefa = servicoTarefas.buscarPorTitulo(tituloTarefa);
+            // Validação de Segurança
+            Tarefa tarefa = servicoTarefas.buscarPorTitulo(tituloTarefa, usuario);
             if (tarefa == null) {
                 return false;
             }
@@ -70,10 +74,10 @@ public class SubtarefaService implements ISubtarefaService {
 
     // modificação de subtarefa (remoção + criação)
     public boolean editar(String tituloTarefa, String tituloSubAntigo, String novoTituloSub, String novaDescricaoSub,
-            double novoPercentual) {
+            double novoPercentual, Usuario usuario) {
         try {
-            if (remover(tituloTarefa, tituloSubAntigo)) {
-                return adicionar(tituloTarefa, novoTituloSub, novaDescricaoSub, novoPercentual);
+            if (remover(tituloTarefa, tituloSubAntigo, usuario)) {
+                return adicionar(tituloTarefa, novoTituloSub, novaDescricaoSub, novoPercentual, usuario);
             }
             return false;
         } catch (Exception e) {
@@ -83,8 +87,8 @@ public class SubtarefaService implements ISubtarefaService {
 
     // listagem de subtarefas
     @Override
-    public List<Subtarefa> listar(String tituloTarefa) {
-        Tarefa tarefa = servicoTarefas.buscarPorTitulo(tituloTarefa);
+    public List<Subtarefa> listar(String tituloTarefa, Usuario usuario) {
+        Tarefa tarefa = servicoTarefas.buscarPorTitulo(tituloTarefa, usuario);
         if (tarefa != null) {
             return repositorio.listarPorTarefaId(tarefa.getId());
         }

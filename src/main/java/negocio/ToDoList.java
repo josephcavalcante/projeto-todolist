@@ -11,14 +11,17 @@ import comunicacao.Mensageiro;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Collections;
+import java.util.Collections;
 import strategies.OrdenacaoPorDataStrategy;
 import strategies.OrdenacaoPorPrioridadeStrategy;
+import strategies.FiltroPorDataStrategy;
+import strategies.FiltroCriticasStrategy;
 
 public class ToDoList {
     private ITarefaService serviceTarefas;
     private ISubtarefaService serviceSubs;
     private IRelatorioService relatorioService;
-    private IUsuarioController usuarioController; // Agora usa Controller
+    private IUsuarioController usuarioController;
     private IEventoService eventoService;
     private ITarefaController tarefaController;
     private ISubtarefaController subtarefaController;
@@ -62,28 +65,27 @@ public class ToDoList {
         usuarioController.alterarNome(novoNome);
     }
 
-    // --- MÉTODOS DE TAREFAS (CORRIGIDOS COM FILTRO DE USUÁRIO) ---
+    // --- MÉTODOS DE TAREFAS ---
 
     public boolean adicionarTarefa(String titulo, String descricao, LocalDate deadline, int prioridade) {
         Usuario usuario = usuarioController.obterUsuario();
         if (usuario == null)
             return false;
-        // Chama o controller/service passando o usuário dono da tarefa
         return tarefaController.adicionarTarefa(titulo, descricao, deadline, prioridade, usuario);
     }
 
     public boolean removerTarefa(String titulo) {
-        // Idealmente, verificar se a tarefa pertence ao usuário antes de remover
-        return tarefaController.removerTarefa(titulo);
+        Usuario usuario = usuarioController.obterUsuario();
+        return usuario != null && tarefaController.removerTarefa(titulo, usuario);
     }
 
     public boolean editarTarefa(String tituloAntigo, String novoTitulo, String novaDescricao,
             LocalDate novoDeadline, int novaPrioridade, double novoPercentual) {
-        return tarefaController.editarTarefa(tituloAntigo, novoTitulo, novaDescricao,
-                novoDeadline, novaPrioridade, novoPercentual);
+        Usuario usuario = usuarioController.obterUsuario();
+        return usuario != null && tarefaController.editarTarefa(tituloAntigo, novoTitulo, novaDescricao,
+                novoDeadline, novaPrioridade, novoPercentual, usuario);
     }
 
-    // LISTAR: Agora filtra pelo usuário logado (via Controller)
     public List<Tarefa> listarTodasTarefas() {
         Usuario usuario = usuarioController.obterUsuario();
         if (usuario != null) {
@@ -95,7 +97,7 @@ public class ToDoList {
     public List<Tarefa> listarTarefasPorData(LocalDate data) {
         Usuario usuario = usuarioController.obterUsuario();
         if (usuario != null) {
-            return tarefaController.listarPorData(data, usuario);
+            return tarefaController.listar(new FiltroPorDataStrategy(data), usuario);
         }
         return Collections.emptyList();
     }
@@ -103,7 +105,7 @@ public class ToDoList {
     public List<Tarefa> listarTarefasCriticas() {
         Usuario usuario = usuarioController.obterUsuario();
         if (usuario != null) {
-            return tarefaController.listarCriticas(usuario);
+            return tarefaController.listar(new FiltroCriticasStrategy(), usuario);
         }
         return Collections.emptyList();
     }
@@ -125,7 +127,10 @@ public class ToDoList {
     }
 
     public Tarefa buscarTarefaPorTitulo(String titulo) {
-        return tarefaController.buscarTarefa(titulo);
+        Usuario usuario = usuarioController.obterUsuario();
+        if (usuario == null)
+            return null;
+        return tarefaController.buscarTarefa(titulo, usuario);
     }
 
     public ITarefaService getTarefaService() {
@@ -134,21 +139,29 @@ public class ToDoList {
 
     // --- SUBTAREFAS ---
     public boolean adicionarSubtarefa(String tituloTarefa, String titulo, String descricao, double percentual) {
-        return subtarefaController.adicionarSubtarefa(tituloTarefa, titulo, descricao, percentual);
+        Usuario usuario = usuarioController.obterUsuario();
+        return usuario != null
+                && subtarefaController.adicionarSubtarefa(tituloTarefa, titulo, descricao, percentual, usuario);
     }
 
     public boolean removerSubtarefa(String tituloTarefa, String titulo) {
-        return subtarefaController.removerSubtarefa(tituloTarefa, titulo);
+        Usuario usuario = usuarioController.obterUsuario();
+        return usuario != null && subtarefaController.removerSubtarefa(tituloTarefa, titulo, usuario);
     }
 
     public boolean editarSubtarefa(String tituloTarefa, String tituloAntigo, String novoTitulo, String novaDescricao,
             double novoPercentual) {
-        return subtarefaController.editarSubtarefa(tituloTarefa, tituloAntigo, novoTitulo, novaDescricao,
-                novoPercentual);
+        Usuario usuario = usuarioController.obterUsuario();
+        return usuario != null
+                && subtarefaController.editarSubtarefa(tituloTarefa, tituloAntigo, novoTitulo, novaDescricao,
+                        novoPercentual, usuario);
     }
 
     public List<Subtarefa> listarSubtarefas(String tituloTarefa) {
-        return subtarefaController.listarSubtarefas(tituloTarefa);
+        Usuario usuario = usuarioController.obterUsuario();
+        if (usuario == null)
+            return Collections.emptyList();
+        return subtarefaController.listarSubtarefas(tituloTarefa, usuario);
     }
 
     public List<Subtarefa> listarSubtarefas(Tarefa tarefa) {
@@ -170,7 +183,6 @@ public class ToDoList {
     }
 
     public boolean gerarRelatorioExcel(int mes, int ano) {
-        // Gera Excel apenas das tarefas do usuário logado
         return relatorioController.gerarRelatorioExcel(listarTodasTarefas(), mes, ano);
     }
 

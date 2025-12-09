@@ -75,12 +75,13 @@ public class TarefaService implements ITarefaService {
 
     @Override
     public boolean editar(String tituloAntigo, String novoTitulo, String novaDescricao, LocalDate novoDeadline,
-            int novaPrioridade, double novoPercentual) {
+            int novaPrioridade, double novoPercentual, Usuario usuario) {
         if (!validador.validarTitulo(novoTitulo)) {
             return false;
         }
         try {
-            Tarefa tarefaOriginal = buscarPorTitulo(tituloAntigo);
+            // Agora garantimos que só busca se for do usuário
+            Tarefa tarefaOriginal = buscarPorTitulo(tituloAntigo, usuario);
             if (tarefaOriginal == null)
                 return false;
 
@@ -111,9 +112,10 @@ public class TarefaService implements ITarefaService {
     }
 
     @Override
-    public boolean excluir(String titulo) {
+    public boolean excluir(String titulo, Usuario usuario) {
         try {
-            Tarefa tarefa = buscarPorTitulo(titulo);
+            // Busca segura
+            Tarefa tarefa = buscarPorTitulo(titulo, usuario);
             if (tarefa != null) {
                 // O Proxy intercepta, remove do SQL e invalida o cache
                 repositorio.remover(tarefa);
@@ -151,16 +153,6 @@ public class TarefaService implements ITarefaService {
     public List<Tarefa> listarPorUsuario(Usuario usuario) {
         // Usa uma estratégia "dummy" que retorna tudo, reaproveitando a lógica acima
         return listar(t -> t, usuario);
-    }
-
-    @Override
-    public List<Tarefa> listarPorDataEUsuario(LocalDate data, Usuario usuario) {
-        return listar(new FiltroPorDataStrategy(data), usuario);
-    }
-
-    @Override
-    public List<Tarefa> listarCriticasPorUsuario(Usuario usuario) {
-        return listar(new FiltroCriticasStrategy(), usuario);
     }
 
     @Override
@@ -206,7 +198,15 @@ public class TarefaService implements ITarefaService {
     }
 
     @Override
-    public Tarefa buscarPorTitulo(String titulo) {
-        return repositorio.buscarPorTitulo(titulo);
+    public Tarefa buscarPorTitulo(String titulo, Usuario usuario) {
+        Tarefa t = repositorio.buscarPorTitulo(titulo);
+        // Validação de Segurança: Se a tarefa não for do usuário, retorna null
+        // (fingimos que não existe)
+        if (t != null && t.getUsuario() != null && usuario != null) {
+            if (!t.getUsuario().getEmail().equals(usuario.getEmail())) {
+                return null;
+            }
+        }
+        return t;
     }
 }

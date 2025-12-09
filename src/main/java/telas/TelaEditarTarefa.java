@@ -88,7 +88,7 @@ public class TelaEditarTarefa extends JPanel {
         int novaPrioridade = (Integer) spnPrioridade.getValue();
         double novoPercentual = (Double) spnPercentual.getValue();
 
-        if (sistema.getTarefaService().editar(tarefaOriginal.getTitulo(), novoTitulo, novaDescricao, novoDeadline,
+        if (sistema.editarTarefa(tarefaOriginal.getTitulo(), novoTitulo, novaDescricao, novoDeadline,
                 novaPrioridade, novoPercentual)) {
             JOptionPane.showMessageDialog(frame, "Tarefa editada com sucesso!");
             voltarParaLista();

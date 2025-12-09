@@ -19,17 +19,12 @@ public class GeradorDeRelatorios implements IRelatorioService {
 
     @Override
     public boolean gerarPDF(List<Tarefa> tarefas, LocalDate data) {
-        // Instancia o template específico para PDF
         RelatorioTemplate relatorio = new RelatorioPDF(data);
         return relatorio.gerarRelatorio(tarefas, "relatorio.pdf");
     }
 
     @Override
     public boolean gerarExcel(List<Tarefa> tarefas, int mes, int ano) {
-        // Instancia o template específico para CSV
-        // (Nota: mes e ano atualmente não são usados no nome do arquivo ou cabeçalho do
-        // CSV simples,
-        // mas o padrão facilita adicionar se necessário)
         RelatorioTemplate relatorio = new RelatorioCSV();
         return relatorio.gerarRelatorio(tarefas, "relatorio_mensal.csv");
     }

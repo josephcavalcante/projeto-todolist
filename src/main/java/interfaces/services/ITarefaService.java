@@ -19,19 +19,15 @@ public interface ITarefaService extends ISubject {
     boolean cadastrar(String titulo, String descricao, LocalDate deadline, int prioridade, Usuario usuario);
 
     boolean editar(String tituloAntigo, String novoTitulo, String novaDescricao,
-            LocalDate novoDeadline, int novaPrioridade, double novoPercentual);
+            LocalDate novoDeadline, int novaPrioridade, double novoPercentual, Usuario usuario);
 
-    boolean excluir(String titulo);
+    boolean excluir(String titulo, Usuario usuario);
 
-    Tarefa buscarPorTitulo(String titulo);
+    Tarefa buscarPorTitulo(String titulo, Usuario usuario);
 
     // --- MÉTODOS DE LEITURA (Agora exigem Usuario para segurança) ---
 
     List<Tarefa> listarPorUsuario(Usuario usuario);
-
-    List<Tarefa> listarPorDataEUsuario(LocalDate data, Usuario usuario);
-
-    List<Tarefa> listarCriticasPorUsuario(Usuario usuario);
 
     // Strategy Pattern Seguro
     List<Tarefa> listar(interfaces.strategies.IFiltroStrategy filtro, Usuario usuario);

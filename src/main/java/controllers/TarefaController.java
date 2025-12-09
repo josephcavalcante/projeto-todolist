@@ -26,18 +26,19 @@ public class TarefaController implements ITarefaController {
     }
 
     @Override
-    public boolean editarTarefa(String ant, String nov, String desc, LocalDate dead, int prio, double perc) {
-        return service.editar(ant, nov, desc, dead, prio, perc);
+    public boolean editarTarefa(String ant, String nov, String desc, LocalDate dead, int prio, double perc,
+            Usuario usuario) {
+        return service.editar(ant, nov, desc, dead, prio, perc, usuario);
     }
 
     @Override
-    public boolean removerTarefa(String t) {
-        return service.excluir(t);
+    public boolean removerTarefa(String t, Usuario usuario) {
+        return service.excluir(t, usuario);
     }
 
     @Override
-    public Tarefa buscarTarefa(String t) {
-        return service.buscarPorTitulo(t);
+    public Tarefa buscarTarefa(String t, Usuario usuario) {
+        return service.buscarPorTitulo(t, usuario);
     }
 
     @Override
@@ -46,17 +47,12 @@ public class TarefaController implements ITarefaController {
     }
 
     @Override
-    public List<Tarefa> listarPorData(LocalDate data, Usuario usuario) {
-        return service.listarPorDataEUsuario(data, usuario);
-    }
-
-    @Override
-    public List<Tarefa> listarCriticas(Usuario usuario) {
-        return service.listarCriticasPorUsuario(usuario);
-    }
-
-    @Override
     public List<Tarefa> listarOrdenado(interfaces.strategies.IOrdenacaoStrategy estrategia, Usuario usuario) {
         return service.listarOrdenado(estrategia, usuario);
+    }
+
+    @Override
+    public List<Tarefa> listar(interfaces.strategies.IFiltroStrategy estrategia, Usuario usuario) {
+        return service.listar(estrategia, usuario);
     }
 }
