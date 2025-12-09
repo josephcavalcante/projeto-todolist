@@ -62,7 +62,8 @@ public class TarefaService implements ITarefaService {
                 return false;
             }
 
-            // 4. Persistência (Proxy)
+            // 4. Persistência (Proxy) O Proxy intercepta isso, salva no SQL e invalida o
+            // cache do usuário automaticamente
             repositorio.salvar(novaTarefa);
 
             return true;
@@ -99,7 +100,7 @@ public class TarefaService implements ITarefaService {
             if (!validador.validarTarefa(tarefaAtualizada)) {
                 return false;
             }
-
+            // Chama o repositório. O Proxy vai atualizar o SQL e limpar o Cache.
             repositorio.atualizar(tarefaOriginal, tarefaAtualizada);
 
             return true;

@@ -85,10 +85,11 @@ classDiagram
     %% Relacionamentos
     ToDoList ..> ServiceFactory : Usa
     ToDoList --> TarefaService : Delega
-    ServiceFactory ..> DatabaseManager : Obtém Conexão
     ServiceFactory ..> TarefaRepositoryProxy : Cria
     ServiceFactory ..> TarefaService : Cria
     
+    TarefaRepository ..> DatabaseManager : Usa (Singleton)
+
     TarefaService --> IFiltroStrategy : Usa
     TarefaService ..> TarefaBuilder : Usa
     TarefaService --> IObserver : Notifica
