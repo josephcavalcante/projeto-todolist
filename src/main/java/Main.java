@@ -18,7 +18,7 @@ public class Main {
                 }
             }
         } catch (Exception e) {
-            // Se falhar, usa o padrão do Java
+
         }
 
         // Inicia a aplicação na Thread de Eventos do Swing

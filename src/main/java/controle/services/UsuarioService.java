@@ -40,32 +40,7 @@ public class UsuarioService implements IUsuarioService {
 
         if (user != null && user.getSenha() != null && BCrypt.checkpw(senha, user.getSenha())) {
             this.usuarioLogado = user;
-            System.out.println("✅ Senha correta. Carregando tarefas...");
-
-            long inicio = System.currentTimeMillis();
-
-            // 1. Tenta Redis
-            List<Tarefa> tarefas = cacheRepository.buscarCache(user.getId());
-
-            if (tarefas == null) {
-                // 2. Se falhar, busca SQL
-                System.out.println("⚠️ Cache MISS - Buscando do SQL...");
-                tarefas = tarefaRepository.listarPorUsuario(user);
-
-                // 3. Salva no Redis se tiver dados
-                if (tarefas != null && !tarefas.isEmpty()) {
-                    cacheRepository.salvarCache(user.getId(), tarefas);
-                }
-            } else {
-                System.out.println("✅ Cache HIT - Tarefas do Redis");
-            }
-
-            long fim = System.currentTimeMillis();
-            System.out.println("⏱️ Tempo total de carregamento: " + (fim - inicio) + "ms");
-
-            // 4. Injeta na memória
-            user.setTarefas(tarefas != null ? tarefas : new ArrayList<>());
-
+            System.out.println("✅ Senha correta. Login verificado.");
             return true;
         }
 
