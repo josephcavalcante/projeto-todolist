@@ -15,14 +15,21 @@ import relatorios.GeradorDeRelatorios;
 
 public class ServiceFactory {
 
-    public static ITarefaService criarTarefaService() {
-        ITarefaRepository repositorio = new TarefaRepository();
-        IValidadorTarefa validador = new ValidadorTarefa();
-        // Cria e injeta o CacheRepository
-        repositorios.TarefaCacheRepository cacheRepository = new repositorios.TarefaCacheRepository();
-        return new TarefaService(repositorio, validador, cacheRepository);
-    }
+    
+	public static ITarefaService criarTarefaService() {
+	    // 1. Cria os componentes crus
+	    ITarefaRepository sqlRepo = new TarefaRepository();
+	    TarefaCacheRepository redisRepo = new TarefaCacheRepository();
+	    
+	    // 2. Envolve o SQL com o Proxy de Cache
+	    ITarefaRepository repoComCache = new TarefaRepositoryProxy(sqlRepo, redisRepo);
+	    
+	    IValidadorTarefa validador = new ValidadorTarefa();
 
+	    // 3. Entrega o Proxy para o Service (O Service nem sabe que existe cache!)
+	    return new TarefaService(repoComCache, validador);
+	}
+	
     public static IRelatorioService criarRelatorioService() {
         return new GeradorDeRelatorios();
     }
