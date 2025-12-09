@@ -23,6 +23,7 @@ public class ToDoList {
     private ITarefaController tarefaController;
     private ISubtarefaController subtarefaController;
     private IEventoController eventoController;
+    private IRelatorioController relatorioController;
 
     public ToDoList() {
         this.usuarioService = ServiceFactory.criarUsuarioService();
@@ -33,6 +34,7 @@ public class ToDoList {
         this.tarefaController = ServiceFactory.criarTarefaController();
         this.subtarefaController = ServiceFactory.criarSubtarefaController(serviceTarefas);
         this.eventoController = ServiceFactory.criarEventoController();
+        this.relatorioController = ServiceFactory.criarRelatorioController();
     }
 
     // Login e Usuário
@@ -163,22 +165,16 @@ public class ToDoList {
 
     // --- RELATÓRIOS ---
     public boolean gerarRelatorioPDF(LocalDate data) {
-        return relatorioService.gerarPDF(listarTarefasPorData(data), data);
+        return relatorioController.gerarRelatorioPDF(listarTarefasPorData(data), data);
     }
 
     public boolean enviarRelatorioEmail(LocalDate data) {
-        try {
-            relatorioService.gerarPDF(listarTarefasPorData(data), data);
-            Mensageiro.enviarEmail(usuarioService.obterEmail(), "Relatório do dia " + data);
-            return true;
-        } catch (Exception ex) {
-            return false;
-        }
+        return relatorioController.enviarRelatorioEmail(listarTarefasPorData(data), usuarioService.obterEmail(), data);
     }
 
     public boolean gerarRelatorioExcel(int mes, int ano) {
         // Gera Excel apenas das tarefas do usuário logado
-        return relatorioService.gerarExcel(listarTodasTarefas(), mes, ano);
+        return relatorioController.gerarRelatorioExcel(listarTodasTarefas(), mes, ano);
     }
 
     // --- EVENTOS ---

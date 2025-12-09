@@ -17,16 +17,17 @@ import java.util.ArrayList;
  * Service responsável pela lógica de negócio das tarefas.
  * <p>
  * Refatorado para usar o padrão Proxy: Não gerencia mais cache explicitamente.
- * Apenas delega ao repositório e aplica regras de negócio (validação e filtros).
+ * Apenas delega ao repositório e aplica regras de negócio (validação e
+ * filtros).
  * </p>
  */
 public class TarefaService implements ITarefaService {
-    
+
     // O Repositório aqui será, em tempo de execução, o TarefaRepositoryProxy
-    private ITarefaRepository repositorio; 
+    private ITarefaRepository repositorio;
     private IValidadorTarefa validador;
 
-    // Removido: private TarefaCacheRepository cacheRepository; 
+    // Removido: private TarefaCacheRepository cacheRepository;
     // O Service não precisa mais conhecer o cache!
 
     private List<interfaces.observer.IObserver> observadores = new ArrayList<>();
@@ -41,10 +42,12 @@ public class TarefaService implements ITarefaService {
 
     @Override
     public boolean cadastrar(String titulo, String descricao, LocalDate deadline, int prioridade, Usuario usuario) {
+        // 1. Validação preliminar
         if (!validador.validarTitulo(titulo)) {
             return false;
         }
         try {
+            // 2. Construção do Objeto
             Tarefa novaTarefa = new TarefaBuilder()
                     .comTitulo(titulo)
                     .comDescricao(descricao)
@@ -54,7 +57,12 @@ public class TarefaService implements ITarefaService {
 
             novaTarefa.setUsuario(usuario);
 
-            // O Proxy intercepta isso, salva no SQL e invalida o cache do usuário automaticamente
+            // 3. Validação Completa (Regras de Negócio)
+            if (!validador.validarTarefa(novaTarefa)) {
+                return false;
+            }
+
+            // 4. Persistência (Proxy)
             repositorio.salvar(novaTarefa);
 
             return true;
@@ -72,7 +80,8 @@ public class TarefaService implements ITarefaService {
         }
         try {
             Tarefa tarefaOriginal = buscarPorTitulo(tituloAntigo);
-            if (tarefaOriginal == null) return false;
+            if (tarefaOriginal == null)
+                return false;
 
             Tarefa tarefaAtualizada = new TarefaBuilder()
                     .comTitulo(novoTitulo)
@@ -86,7 +95,11 @@ public class TarefaService implements ITarefaService {
             tarefaAtualizada.setId(tarefaOriginal.getId());
             tarefaAtualizada.setUsuario(tarefaOriginal.getUsuario());
 
-            // Chama o repositório. O Proxy vai atualizar o SQL e limpar o Cache.
+            // Validação Completa antes de atualizar
+            if (!validador.validarTarefa(tarefaAtualizada)) {
+                return false;
+            }
+
             repositorio.atualizar(tarefaOriginal, tarefaAtualizada);
 
             return true;
@@ -116,7 +129,8 @@ public class TarefaService implements ITarefaService {
 
     @Override
     public List<Tarefa> listar(interfaces.strategies.IFiltroStrategy filtro, Usuario usuario) {
-        if (usuario == null) return new ArrayList<>();
+        if (usuario == null)
+            return new ArrayList<>();
 
         // 1. Delega a busca de dados ao Repositório (que é o Proxy)
         // O Proxy decide transparente se retorna a lista do Redis (rápido) ou do SQL
@@ -127,7 +141,8 @@ public class TarefaService implements ITarefaService {
         }
 
         // 2. Aplica o filtro (Strategy) em memória sobre os dados retornados
-        // Isso mantém a lógica de negócio (filtragem) no Service, e a infra (cache) no Proxy
+        // Isso mantém a lógica de negócio (filtragem) no Service, e a infra (cache) no
+        // Proxy
         return filtro.filtrar(todasTarefas);
     }
 

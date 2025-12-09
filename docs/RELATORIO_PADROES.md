@@ -1,7 +1,104 @@
 # 🧠 Relatório de Padrões de Projeto (Design Patterns)
 > "A arquitetura é sobre as decisões importantes que são difíceis de mudar depois."
 
-Este documento detalha os **7 Padrões de Projeto** implementados no ToDoList, comparando a abordagem ingênua (Antes) com a solução arquitetural (Depois).
+Este documento detalha os **8 Padrões de Projeto** implementados no ToDoList, comparando a abordagem ingênua (Antes) com a solução arquitetural (Depois).
+
+---
+
+## 🗺️ Mapa Visual dos Padrões (Diagrama de Classes)
+
+```mermaid
+classDiagram
+    %% Padrão Facade
+    class ToDoList {
+        <<Facade>>
+        +adicionarTarefa()
+        +listarTarefas()
+        +gerarRelatorio()
+    }
+
+    %% Padrão Factory Method
+    class ServiceFactory {
+        <<Factory>>
+        +criarTarefaService()
+        +criarUsuarioService()
+        +criarRelatorioController()
+    }
+
+    %% Padrão Observer
+    class IObserver {
+        <<Observer>>
+        +atualizar()
+    }
+    class TelaListarTarefas {
+        <<ConcreteObserver>>
+    }
+    class TarefaService {
+        <<Subject>>
+        +notificarObservadores()
+    }
+
+    %% Padrão Strategy
+    class IFiltroStrategy {
+        <<Strategy>>
+        +filtrar()
+    }
+    class FiltroPorDataStrategy {
+        <<ConcreteStrategy>>
+    }
+
+    %% Padrão Proxy
+    class TarefaRepositoryProxy {
+        <<Proxy>>
+        +buscarPorUsuario()
+    }
+    class TarefaRepository {
+        <<RealSubject>>
+    }
+
+    %% Padrão Builder
+    class TarefaBuilder {
+        <<Builder>>
+        +comTitulo()
+        +comPrazo()
+        +construir()
+    }
+
+    %% Padrão Singleton
+    class DatabaseManager {
+        <<Singleton>>
+        -instance
+        +getInstance()
+    }
+
+    %% Padrão Template Method
+    class RelatorioTemplate {
+        <<AbstractClass>>
+        +gerar()
+        #gerarCabecalho()*
+        #gerarCorpo()*
+    }
+    class RelatorioPDF {
+        <<ConcreteClass>>
+    }
+
+    %% Relacionamentos
+    ToDoList ..> ServiceFactory : Usa
+    ToDoList --> TarefaService : Delega
+    ServiceFactory ..> DatabaseManager : Obtém Conexão
+    ServiceFactory ..> TarefaRepositoryProxy : Cria
+    ServiceFactory ..> TarefaService : Cria
+    
+    TarefaService --> IFiltroStrategy : Usa
+    TarefaService ..> TarefaBuilder : Usa
+    TarefaService --> IObserver : Notifica
+    TelaListarTarefas ..|> IObserver : Implementa
+    FiltroPorDataStrategy ..|> IFiltroStrategy : Implementa
+
+    TarefaRepositoryProxy --> TarefaRepository : Protege/Cache
+
+    RelatorioPDF --|> RelatorioTemplate : Herda
+```
 
 ---
 
