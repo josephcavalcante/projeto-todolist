@@ -62,7 +62,7 @@ public class TarefaService implements ITarefaService {
             }
 
             // 3. Invalida Redis (Remote)
-            cacheRepository.invalidarCache(usuario.getEmail());
+            cacheRepository.invalidarCache(usuario.getId());
             System.out.println("[SYNC] Tarefa criada. Redis invalidado e memória atualizada.");
 
             return true;
@@ -112,7 +112,7 @@ public class TarefaService implements ITarefaService {
                     }
                 }
                 // 3. Invalida Redis
-                cacheRepository.invalidarCache(usuario.getEmail());
+                cacheRepository.invalidarCache(usuario.getId());
             }
 
             return true;
@@ -135,7 +135,7 @@ public class TarefaService implements ITarefaService {
                 if (usuario != null && usuario.getTarefas() != null) {
                     usuario.getTarefas().removeIf(t -> t.getId().equals(tarefa.getId()));
                     // 3. Invalida Redis
-                    cacheRepository.invalidarCache(usuario.getEmail());
+                    cacheRepository.invalidarCache(usuario.getId());
                 }
 
                 return true;
@@ -178,7 +178,7 @@ public class TarefaService implements ITarefaService {
 
                 // Atualiza cache se possível
                 if (tarefa.getUsuario() != null) {
-                    cacheRepository.invalidarCache(tarefa.getUsuario().getEmail());
+                    cacheRepository.invalidarCache(tarefa.getUsuario().getId());
                 }
             }
         } catch (Exception e) {
@@ -224,7 +224,7 @@ public class TarefaService implements ITarefaService {
 
         // 1. Tenta buscar do Cache (Redis)
         System.out.println("[CACHE] Buscando tarefas no Redis para: " + usuario.getEmail());
-        fonteDados = cacheRepository.buscarCache(usuario.getEmail());
+        fonteDados = cacheRepository.buscarCache(usuario.getId());
 
         if (fonteDados == null) {
             // 2. Cache Miss -> Busca do Banco SQL
@@ -233,7 +233,7 @@ public class TarefaService implements ITarefaService {
 
             // 3. Atualiza o Cache para próxima vez (Cache-Aside)
             if (fonteDados != null) {
-                cacheRepository.salvarCache(usuario.getEmail(), fonteDados);
+                cacheRepository.salvarCache(usuario.getId(), fonteDados);
                 // Opcional: Manter referencia no objeto para uso pontual
                 usuario.setTarefas(fonteDados);
             }

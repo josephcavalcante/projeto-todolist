@@ -125,6 +125,12 @@ public class ToDoList {
         return subtarefaController.removerSubtarefa(tituloTarefa, titulo);
     }
 
+    public boolean editarSubtarefa(String tituloTarefa, String tituloAntigo, String novoTitulo, String novaDescricao,
+            double novoPercentual) {
+        return subtarefaController.editarSubtarefa(tituloTarefa, tituloAntigo, novoTitulo, novaDescricao,
+                novoPercentual);
+    }
+
     public List<Subtarefa> listarSubtarefas(String tituloTarefa) {
         return subtarefaController.listarSubtarefas(tituloTarefa);
     }

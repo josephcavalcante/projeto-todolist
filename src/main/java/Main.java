@@ -8,7 +8,8 @@ import telas.TelaLogin;
  */
 public class Main {
     public static void main(String[] args) {
-        // Tenta deixar a interface com a cara do sistema operacional (Windows/Mac/Linux)
+        // Tenta deixar a interface com a cara do sistema operacional
+        // (Windows/Mac/Linux)
         try {
             for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -20,7 +21,7 @@ public class Main {
             // Se falhar, usa o padrão do Java
         }
 
-        // Inicia a aplicação na Thread de Eventos do Swing (Safe Thread)
+        // Inicia a aplicação na Thread de Eventos do Swing
         SwingUtilities.invokeLater(() -> {
             new TelaLogin().setVisible(true);
         });

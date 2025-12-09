@@ -190,16 +190,16 @@ public class TarefaServiceTest {
 
     private static class MockCache extends TarefaCacheRepository {
         @Override
-        public void salvarCache(String email, List<Tarefa> t) {
+        public void salvarCache(Long id, List<Tarefa> t) {
         }
 
         @Override
-        public List<Tarefa> buscarCache(String email) {
+        public List<Tarefa> buscarCache(Long id) {
             return null;
         }
 
         @Override
-        public void invalidarCache(String email) {
+        public void invalidarCache(Long id) {
         }
     }
 }

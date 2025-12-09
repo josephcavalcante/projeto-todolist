@@ -19,28 +19,30 @@ public class TarefaCacheRepository {
         this.xstream.allowTypesByWildcard(new String[] { "modelo.**", "java.util.**" });
     }
 
-    public void salvarCache(String emailUsuario, List<Tarefa> tarefas) {
+    public void salvarCache(Long idUsuario, List<Tarefa> tarefas) {
         try (Jedis jedis = RedisManager.getInstance().getJedis()) {
-            if (jedis == null) return;
+            if (jedis == null)
+                return;
 
-            String chave = "tarefas:" + emailUsuario;
+            String chave = "tarefas:uid:" + idUsuario;
             String xml = xstream.toXML(tarefas);
-            
+
             jedis.setex(chave, TTL_SECONDS, xml);
-            System.out.println("[REDIS] CACHE SAVE -> Dados salvos para: " + emailUsuario);
+            System.out.println("[REDIS] CACHE SAVE -> Dados salvos para UID: " + idUsuario);
         } catch (Exception e) {
             System.out.println("[REDIS] Erro ao salvar: " + e.getMessage());
         }
     }
 
     @SuppressWarnings("unchecked")
-    public List<Tarefa> buscarCache(String emailUsuario) {
+    public List<Tarefa> buscarCache(Long idUsuario) {
         try (Jedis jedis = RedisManager.getInstance().getJedis()) {
-            if (jedis == null) return null;
+            if (jedis == null)
+                return null;
 
-            String chave = "tarefas:" + emailUsuario;
+            String chave = "tarefas:uid:" + idUsuario;
             System.out.println("[REDIS] Buscando chave: " + chave);
-            
+
             String xml = jedis.get(chave);
 
             if (xml != null && !xml.isEmpty()) {
@@ -55,11 +57,12 @@ public class TarefaCacheRepository {
         return null;
     }
 
-    public void invalidarCache(String emailUsuario) {
+    public void invalidarCache(Long idUsuario) {
         try (Jedis jedis = RedisManager.getInstance().getJedis()) {
-            if (jedis == null) return;
-            
-            jedis.del("tarefas:" + emailUsuario);
+            if (jedis == null)
+                return;
+
+            jedis.del("tarefas:uid:" + idUsuario);
             System.out.println("[REDIS] INVALIDATE -> Cache limpo para atualização.");
         }
     }

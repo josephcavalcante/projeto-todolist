@@ -116,7 +116,7 @@ public class TelaSubtarefas extends JPanel {
             double perc = (Double) ((JSpinner) form.getComponent(5)).getValue();
 
             // tenta adicionar
-            if (app.obterSubtarefaService().adicionar(tarefaPrincipal.getTitulo(), tit, desc, perc)) {
+            if (app.adicionarSubtarefa(tarefaPrincipal.getTitulo(), tit, desc, perc)) {
                 carregarSubtarefas(); // atualiza a tabela
                 JOptionPane.showMessageDialog(janelaPai, "Subtarefa adicionada!");
             } else {
@@ -145,7 +145,7 @@ public class TelaSubtarefas extends JPanel {
             String novaDescricao = ((JTextField) painel.getComponent(3)).getText().trim();
             double novoPercentual = (Double) ((JSpinner) painel.getComponent(5)).getValue();
 
-            if (app.obterSubtarefaService().editar(tarefaPrincipal.getTitulo(), tituloOriginal, novoTitulo,
+            if (app.editarSubtarefa(tarefaPrincipal.getTitulo(), tituloOriginal, novoTitulo,
                     novaDescricao, novoPercentual)) {
                 carregarSubtarefas();
                 JOptionPane.showMessageDialog(janelaPai, "Subtarefa editada!");
@@ -183,7 +183,7 @@ public class TelaSubtarefas extends JPanel {
     }
 
     private void excluirSubtarefa(String titulo) {
-        if (app.obterSubtarefaService().remover(tarefaPrincipal.getTitulo(), titulo)) {
+        if (app.removerSubtarefa(tarefaPrincipal.getTitulo(), titulo)) {
             carregarSubtarefas();
             JOptionPane.showMessageDialog(janelaPai, "Subtarefa excluída!");
         } else {

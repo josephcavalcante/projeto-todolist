@@ -19,12 +19,13 @@ public class UsuarioService implements IUsuarioService {
     public UsuarioService(UsuarioRepository uRepo, TarefaRepository tRepo) {
         this.usuarioRepository = uRepo;
         this.tarefaRepository = tRepo;
-        this.cacheRepository = new TarefaCacheRepository(); 
+        this.cacheRepository = new TarefaCacheRepository();
     }
 
     public boolean cadastrar(String nome, String email, String senhaAberta) {
-        if (usuarioRepository.buscarPorEmail(email) != null) return false;
-        
+        if (usuarioRepository.buscarPorEmail(email) != null)
+            return false;
+
         String senhaHash = BCrypt.hashpw(senhaAberta, BCrypt.gensalt());
         Usuario novo = new Usuario(nome, email, senhaHash);
         usuarioRepository.salvar(novo);
@@ -34,7 +35,7 @@ public class UsuarioService implements IUsuarioService {
     @Override
     public boolean login(String email, String senha) {
         System.out.println("\n=== INICIANDO LOGIN: " + email + " ===");
-        
+
         Usuario user = usuarioRepository.buscarPorEmail(email);
 
         if (user != null && user.getSenha() != null && BCrypt.checkpw(senha, user.getSenha())) {
@@ -42,42 +43,71 @@ public class UsuarioService implements IUsuarioService {
             System.out.println("✅ Senha correta. Carregando tarefas...");
 
             long inicio = System.currentTimeMillis();
-            
+
             // 1. Tenta Redis
-            List<Tarefa> tarefas = cacheRepository.buscarCache(email);
-            
+            List<Tarefa> tarefas = cacheRepository.buscarCache(user.getId());
+
             if (tarefas == null) {
                 // 2. Se falhar, busca SQL
                 System.out.println("⚠️ Cache MISS - Buscando do SQL...");
                 tarefas = tarefaRepository.listarPorUsuario(user);
-                
+
                 // 3. Salva no Redis se tiver dados
                 if (tarefas != null && !tarefas.isEmpty()) {
-                    cacheRepository.salvarCache(email, tarefas);
+                    cacheRepository.salvarCache(user.getId(), tarefas);
                 }
             } else {
                 System.out.println("✅ Cache HIT - Tarefas do Redis");
             }
-            
+
             long fim = System.currentTimeMillis();
             System.out.println("⏱️ Tempo total de carregamento: " + (fim - inicio) + "ms");
 
             // 4. Injeta na memória
             user.setTarefas(tarefas != null ? tarefas : new ArrayList<>());
-            
+
             return true;
         }
-        
+
         System.out.println("❌ Falha no login.");
         return false;
     }
 
     // ... getters e setters padrão ...
-    @Override public Usuario obterUsuario() { return usuarioLogado; }
-    @Override public void alterarNome(String n) { if(usuarioLogado!=null) { usuarioLogado.setNome(n); usuarioRepository.salvar(usuarioLogado); }}
-    @Override public String obterEmail() { return usuarioLogado != null ? usuarioLogado.getEmail() : null; }
-    @Override public void definirSenha(String s) {} 
-    @Override public boolean temSenha() { return true; }
-    @Override public void logout() { usuarioLogado = null; }
-    @Override public boolean isLogado() { return usuarioLogado != null; }
+    @Override
+    public Usuario obterUsuario() {
+        return usuarioLogado;
+    }
+
+    @Override
+    public void alterarNome(String n) {
+        if (usuarioLogado != null) {
+            usuarioLogado.setNome(n);
+            usuarioRepository.salvar(usuarioLogado);
+        }
+    }
+
+    @Override
+    public String obterEmail() {
+        return usuarioLogado != null ? usuarioLogado.getEmail() : null;
+    }
+
+    @Override
+    public void definirSenha(String s) {
+    }
+
+    @Override
+    public boolean temSenha() {
+        return true;
+    }
+
+    @Override
+    public void logout() {
+        usuarioLogado = null;
+    }
+
+    @Override
+    public boolean isLogado() {
+        return usuarioLogado != null;
+    }
 }

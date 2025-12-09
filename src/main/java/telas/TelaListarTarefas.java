@@ -11,7 +11,9 @@ import negocio.ToDoList;
 
 import java.util.List;
 
-public class TelaListarTarefas extends JPanel {
+import interfaces.observer.IObserver;
+
+public class TelaListarTarefas extends JPanel implements IObserver {
     private final TelaPrincipal frame;
     private final ToDoList sistema;
     private final String tituloTela;
@@ -26,6 +28,11 @@ public class TelaListarTarefas extends JPanel {
         this.frame = frame;
         this.sistema = sistema;
         this.tituloTela = tituloTela;
+        this.dataFiltro = dataStr; // Inicializa filtro para refresh
+
+        // Registra para receber atualizações do Backend
+        this.sistema.getTarefaService().adicionarObservador(this);
+
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 255));
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -170,4 +177,19 @@ public class TelaListarTarefas extends JPanel {
     public DefaultTableModel getModelo() {
         return modelo;
     }
+
+    @Override
+    public void removeNotify() {
+        sistema.getTarefaService().removerObservador(this);
+        super.removeNotify();
+    }
+
+    @Override
+    public void atualizar(Object mensagem) {
+        SwingUtilities.invokeLater(() -> {
+            carregarTarefas(this.dataFiltro);
+        });
+    }
+
+    private final String dataFiltro;
 }

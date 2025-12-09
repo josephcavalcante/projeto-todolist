@@ -102,7 +102,7 @@ public class TelaGerenciadorTarefas extends JPanel {
                         "Tem certeza que deseja excluir a tarefa '" + tituloExcluir + "'?",
                         "Confirmar Exclusão", JOptionPane.YES_NO_OPTION);
                 if (confirmacao == JOptionPane.YES_OPTION) {
-                    if (sistema.getTarefaService().excluir(tituloExcluir)) {
+                    if (sistema.removerTarefa(tituloExcluir)) {
                         JOptionPane.showMessageDialog(frame, "Tarefa excluída com sucesso!");
                     } else {
                         JOptionPane.showMessageDialog(frame, "Tarefa não encontrada!");

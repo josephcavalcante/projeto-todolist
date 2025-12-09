@@ -12,73 +12,60 @@ public class TelaLogin extends JFrame {
     public TelaLogin() {
         // Inicializa o Facade (que carrega Services, Repositories e Redis)
         this.sistema = new ToDoList();
-        
+
         setTitle("Login - ToDo List");
         setSize(400, 350);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
 
-        JPanel painel = new JPanel(new GridBagLayout());
-        painel.setBackground(new Color(245, 245, 255));
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        setLayout(new BorderLayout());
 
         // --- Título ---
         JLabel lblTitulo = new JLabel("Acesso ao Sistema", JLabel.CENTER);
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 24));
         lblTitulo.setForeground(new Color(60, 90, 170));
-        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
-        painel.add(lblTitulo, gbc);
+        lblTitulo.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
+        add(lblTitulo, BorderLayout.NORTH);
 
         // --- Campos ---
-        gbc.gridwidth = 1; 
-        
-        // E-mail
-        gbc.gridy = 1;
+        JPanel painelCampos = new JPanel(new GridLayout(4, 1, 5, 5));
+        painelCampos.setBorder(BorderFactory.createEmptyBorder(0, 40, 0, 40));
+        painelCampos.setBackground(new Color(245, 245, 255));
+
         JLabel lblEmail = new JLabel("E-mail:");
         lblEmail.setFont(new Font("Arial", Font.BOLD, 14));
-        painel.add(lblEmail, gbc);
-        
-        gbc.gridy = 2;
-        txtEmail = new JTextField(20);
+        txtEmail = new JTextField();
         txtEmail.setFont(new Font("Arial", Font.PLAIN, 14));
-        // txtEmail.setText("admin@email.com"); // Descomente para agilizar testes
-        painel.add(txtEmail, gbc);
 
-        // Senha
-        gbc.gridy = 3;
         JLabel lblSenha = new JLabel("Senha:");
         lblSenha.setFont(new Font("Arial", Font.BOLD, 14));
-        painel.add(lblSenha, gbc);
-        
-        gbc.gridy = 4;
-        txtSenha = new JPasswordField(20);
+        txtSenha = new JPasswordField();
         txtSenha.setFont(new Font("Arial", Font.PLAIN, 14));
-        painel.add(txtSenha, gbc);
+
+        painelCampos.add(lblEmail);
+        painelCampos.add(txtEmail);
+        painelCampos.add(lblSenha);
+        painelCampos.add(txtSenha);
+
+        add(painelCampos, BorderLayout.CENTER);
 
         // --- Botões ---
-        JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
+        JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
         painelBotoes.setBackground(new Color(245, 245, 255));
-        
+
         JButton btnLogin = new JButton("Entrar");
         JButton btnCadastrar = new JButton("Criar Conta");
-        
+
         btnLogin.setFont(new Font("Arial", Font.BOLD, 14));
         btnCadastrar.setFont(new Font("Arial", Font.PLAIN, 14));
-        
+
         painelBotoes.add(btnLogin);
         painelBotoes.add(btnCadastrar);
-        
-        gbc.gridy = 5;
-        gbc.gridwidth = 2;
-        painel.add(painelBotoes, gbc);
 
-        add(painel);
+        add(painelBotoes, BorderLayout.SOUTH);
 
         // --- Ações ---
-        
         btnLogin.addActionListener(e -> {
             String email = txtEmail.getText().trim();
             String senha = new String(txtSenha.getPassword());
@@ -88,9 +75,7 @@ public class TelaLogin extends JFrame {
                 return;
             }
 
-            // Tenta logar (Busca no SQL -> Valida Senha -> Carrega Cache Redis)
             if (sistema.login(email, senha)) {
-                // SUCESSO: Passa o sistema JÁ LOGADO para a próxima tela
                 new TelaPrincipal(sistema).setVisible(true);
                 this.dispose();
             } else {
@@ -101,13 +86,12 @@ public class TelaLogin extends JFrame {
         btnCadastrar.addActionListener(e -> {
             String email = txtEmail.getText().trim();
             String senha = new String(txtSenha.getPassword());
-            
+
             if (email.isEmpty() || senha.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Para cadastrar, preencha E-mail e Senha.");
                 return;
             }
 
-            // Cadastra com Hash
             if (sistema.cadastrarUsuario("Novo Usuário", email, senha)) {
                 JOptionPane.showMessageDialog(this, "Conta criada com sucesso! Faça login.");
             } else {
