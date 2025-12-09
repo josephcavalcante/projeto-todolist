@@ -3,23 +3,15 @@ package controle.services;
 import interfaces.services.IUsuarioService;
 import repositorios.UsuarioRepository;
 import repositorios.TarefaRepository;
-import repositorios.TarefaCacheRepository;
 import modelo.Usuario;
-import modelo.Tarefa;
 import org.mindrot.jbcrypt.BCrypt;
-import java.util.List;
-import java.util.ArrayList;
 
 public class UsuarioService implements IUsuarioService {
     private Usuario usuarioLogado;
     private UsuarioRepository usuarioRepository;
-    private TarefaRepository tarefaRepository;
-    private TarefaCacheRepository cacheRepository;
 
     public UsuarioService(UsuarioRepository uRepo, TarefaRepository tRepo) {
         this.usuarioRepository = uRepo;
-        this.tarefaRepository = tRepo;
-        this.cacheRepository = new TarefaCacheRepository();
     }
 
     public boolean cadastrar(String nome, String email, String senhaAberta) {

@@ -157,3 +157,37 @@ Garante que a conexão com o JPA/Hibernate seja reaproveitada globalmente.
 public static DatabaseManager getInstance() { ... }
 ```
 **🏆 Ganho:** **Performance e Gestão de Recursos**.
+
+---
+
+## 8. Proxy Pattern (Estrutural)
+**Onde:** `repositorios.TarefaRepositoryProxy`
+
+### ❌ Antes (Service Poluído)
+O `TarefaService` misturava regra de negócio (validações) com infraestrutura de cache (Redis). Ele tinha que saber "se não achar no Redis, busca no SQL e salva no Redis".
+```java
+// TarefaService.java (Antes)
+public List<Tarefa> listar(...) {
+    // Lógica suja de infraestrutura no meio do negócio
+    if (redis.temCache()) return redis.get();
+    var dados = sql.get();
+    redis.save(dados);
+    return dados;
+}
+```
+
+### ✅ Depois (Intermediário Transparente)
+O Proxy envolve o repositório real e intercepta as chamadas. O Service nem sabe que existe cache, ele acha que está falando direto com o banco.
+```java
+// ServiceFactory.java
+ITarefaRepository repo = new TarefaRepositoryProxy(new TarefaRepository(), new RedisCache());
+new TarefaService(repo); // O Service recebe o Proxy
+
+// TarefaRepositoryProxy.java
+public List<Tarefa> listar(...) {
+    // O Proxy decide transparentemente de onde pegar
+    if (cache.existe()) return cache.pegar();
+    return real.pegar();
+}
+```
+**🏆 Ganho:** **Separação de Responsabilidades (SRP)**. O Service foca em regras de negócio, e o Proxy cuida da estratégia de "Cache-Aside".

@@ -75,11 +75,18 @@ public class TelaLogin extends JFrame {
                 return;
             }
 
-            if (sistema.login(email, senha)) {
-                new TelaPrincipal(sistema).setVisible(true);
-                this.dispose();
-            } else {
-                JOptionPane.showMessageDialog(this, "E-mail ou senha inválidos!", "Erro", JOptionPane.ERROR_MESSAGE);
+            try {
+                if (sistema.login(email, senha)) {
+                    new TelaPrincipal(sistema).setVisible(true);
+                    this.dispose();
+                } else {
+                    JOptionPane.showMessageDialog(this, "E-mail ou senha inválidos!", "Erro",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Erro ao conectar ao banco de dados: " + ex.getMessage(),
+                        "Erro de Sistema", JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
             }
         });
 

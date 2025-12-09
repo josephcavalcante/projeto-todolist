@@ -1,4 +1,5 @@
 package telas;
+
 import javax.swing.*;
 
 import negocio.ToDoList;
@@ -64,14 +65,15 @@ public class TelaRelatorios extends JPanel {
         if (textoData != null && !textoData.trim().isEmpty()) {
             try {
                 // formatador para conversão da data
-                java.time.format.DateTimeFormatter formatador = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                java.time.format.DateTimeFormatter formatador = java.time.format.DateTimeFormatter
+                        .ofPattern("dd/MM/yyyy");
                 java.time.LocalDate dataEscolhida = java.time.LocalDate.parse(textoData.trim(), formatador);
-                
+
                 // tentativa de geração do PDF
                 if (sistemaApp.gerarRelatorioPDF(dataEscolhida)) {
-                    JOptionPane.showMessageDialog(janelaPai, 
-                        "Relatório PDF das tarefas do dia " + textoData + " gerado com sucesso!\n" +
-                        "Arquivo salvo em: relatorio_" + textoData.replace("/", "") + ".pdf");
+                    JOptionPane.showMessageDialog(janelaPai,
+                            "Relatório PDF das tarefas do dia " + textoData + " gerado com sucesso!\n" +
+                                    "Arquivo salvo em: relatorio_" + textoData.replace("/", "") + ".pdf");
                 } else {
                     JOptionPane.showMessageDialog(janelaPai, "Erro ao gerar relatório PDF!");
                 }
@@ -87,17 +89,26 @@ public class TelaRelatorios extends JPanel {
         if (inputData != null && !inputData.trim().isEmpty()) {
             try {
                 // processamento da data informada
-                java.time.format.DateTimeFormatter formatador = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                java.time.format.DateTimeFormatter formatador = java.time.format.DateTimeFormatter
+                        .ofPattern("dd/MM/yyyy");
                 java.time.LocalDate dataRelatorio = java.time.LocalDate.parse(inputData.trim(), formatador);
-                
-                // tentativa de envio do email
-                if (sistemaApp.enviarRelatorioEmail(dataRelatorio)) {
-                    JOptionPane.showMessageDialog(janelaPai, 
-                        "Relatório das tarefas do dia " + inputData + " enviado por e-mail!\n" +
-                        "Enviado para: " + sistemaApp.obterUsuario().getEmail());
-                } else {
-                    JOptionPane.showMessageDialog(janelaPai, "Erro ao enviar e-mail!");
-                }
+
+                JOptionPane.showMessageDialog(janelaPai,
+                        "O envio foi iniciado em segundo plano!\nVocê pode continuar usando o sistema.");
+
+                new Thread(() -> {
+                    boolean sucesso = sistemaApp.enviarRelatorioEmail(dataRelatorio);
+                    SwingUtilities.invokeLater(() -> {
+                        if (sucesso) {
+                            JOptionPane.showMessageDialog(janelaPai,
+                                    "Relatório das tarefas do dia " + inputData + " enviado por e-mail!\n" +
+                                            "Enviado para: " + sistemaApp.obterUsuario().getEmail());
+                        } else {
+                            JOptionPane.showMessageDialog(janelaPai, "Erro ao enviar e-mail!");
+                        }
+                    });
+                }).start();
+
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(janelaPai, "Data inválida! Use o formato dd/MM/yyyy");
             }
@@ -111,19 +122,21 @@ public class TelaRelatorios extends JPanel {
             try {
                 // separação do mês e ano
                 String[] componentesPeriodo = periodoStr.trim().split("/");
-                if (componentesPeriodo.length != 2) throw new Exception("Formato inválido");
-                
+                if (componentesPeriodo.length != 2)
+                    throw new Exception("Formato inválido");
+
                 int mesEscolhido = Integer.parseInt(componentesPeriodo[0]);
                 int anoEscolhido = Integer.parseInt(componentesPeriodo[1]);
-                
+
                 // validação do mês
-                if (mesEscolhido < 1 || mesEscolhido > 12) throw new Exception("Mês inválido");
-                
+                if (mesEscolhido < 1 || mesEscolhido > 12)
+                    throw new Exception("Mês inválido");
+
                 // processamento da geração
                 if (sistemaApp.gerarRelatorioExcel(mesEscolhido, anoEscolhido)) {
-                    JOptionPane.showMessageDialog(janelaPai, 
-                        "Relatório Excel das tarefas do mês " + periodoStr + " gerado com sucesso!\n" +
-                        "Arquivo salvo em: relatorio_" + periodoStr.replace("/", "") + ".csv");
+                    JOptionPane.showMessageDialog(janelaPai,
+                            "Relatório Excel das tarefas do mês " + periodoStr + " gerado com sucesso!\n" +
+                                    "Arquivo salvo em: relatorio_" + periodoStr.replace("/", "") + ".csv");
                 } else {
                     JOptionPane.showMessageDialog(janelaPai, "Erro ao gerar relatório Excel!");
                 }

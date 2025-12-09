@@ -20,7 +20,7 @@ public class SubtarefaRepositoryMongo implements ISubtarefaRepository {
 
     public SubtarefaRepositoryMongo() {
         try {
-            mongoClient = MongoClients.create("mongodb://admin:password123@localhost:27017");
+            mongoClient = MongoClients.create("mongodb://localhost:27017");
             database = mongoClient.getDatabase("todolist_db");
             collection = database.getCollection("subtarefas");
         } catch (Exception e) {

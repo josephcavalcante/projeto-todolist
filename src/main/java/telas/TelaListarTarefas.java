@@ -19,6 +19,7 @@ public class TelaListarTarefas extends JPanel implements IObserver {
     private final String tituloTela;
     private final JTable tabela;
     private final DefaultTableModel modelo;
+    private final JComboBox<String> comboOrdenacao;
 
     public TelaListarTarefas(TelaPrincipal frame, ToDoList sistema, String tituloTela) {
         this(frame, sistema, tituloTela, null);
@@ -41,6 +42,27 @@ public class TelaListarTarefas extends JPanel implements IObserver {
         titulo.setFont(new Font("Arial", Font.BOLD, 28));
         titulo.setForeground(new Color(60, 90, 170));
         add(titulo, BorderLayout.NORTH);
+
+        // Painel Superior (Título + Ordenação)
+        JPanel painelSuperior = new JPanel(new BorderLayout());
+        painelSuperior.setBackground(new Color(245, 245, 255));
+        painelSuperior.add(titulo, BorderLayout.CENTER);
+
+        // Combo de Ordenação
+        if (tituloTela.equals("Todas as Tarefas")) {
+            String[] opcoes = { "Padrão", "Por Data", "Por Prioridade" };
+            comboOrdenacao = new JComboBox<>(opcoes);
+            comboOrdenacao.setFont(new Font("Arial", Font.PLAIN, 14));
+            comboOrdenacao.addActionListener(e -> carregarTarefas(dataFiltro));
+            JPanel painelCombo = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+            painelCombo.setBackground(new Color(245, 245, 255));
+            painelCombo.add(new JLabel("Ordenar por: "));
+            painelCombo.add(comboOrdenacao);
+            painelSuperior.add(painelCombo, BorderLayout.SOUTH);
+        } else {
+            comboOrdenacao = null;
+        }
+        add(painelSuperior, BorderLayout.NORTH);
 
         // Tabela
         String[] colunas = { "Título", "Descrição", "Deadline", "Prioridade", "Percentual" };
@@ -156,7 +178,19 @@ public class TelaListarTarefas extends JPanel implements IObserver {
         } else if (tituloTela.equals("Tarefas Críticas")) {
             tarefas = sistema.listarTarefasCriticas();
         } else {
-            tarefas = sistema.listarTodasTarefas();
+            // Verifica ordenação se estiver na tela "Todas as Tarefas"
+            if (comboOrdenacao != null) {
+                String opcao = (String) comboOrdenacao.getSelectedItem();
+                if ("Por Data".equals(opcao)) {
+                    tarefas = sistema.listarTarefasOrdenadasPorData();
+                } else if ("Por Prioridade".equals(opcao)) {
+                    tarefas = sistema.listarTarefasOrdenadasPorPrioridade();
+                } else {
+                    tarefas = sistema.listarTodasTarefas();
+                }
+            } else {
+                tarefas = sistema.listarTodasTarefas();
+            }
         }
 
         // Limpar tabela

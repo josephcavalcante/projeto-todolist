@@ -54,4 +54,9 @@ public class TarefaController implements ITarefaController {
     public List<Tarefa> listarCriticas(Usuario usuario) {
         return service.listarCriticasPorUsuario(usuario);
     }
+
+    @Override
+    public List<Tarefa> listarOrdenado(interfaces.strategies.IOrdenacaoStrategy estrategia, Usuario usuario) {
+        return service.listarOrdenado(estrategia, usuario);
+    }
 }

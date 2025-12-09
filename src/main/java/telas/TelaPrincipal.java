@@ -1,4 +1,5 @@
 package telas;
+
 import javax.swing.*;
 import negocio.ToDoList;
 import java.awt.*;
@@ -9,7 +10,7 @@ public class TelaPrincipal extends JFrame {
     // Construtor principal usado pelo Login (RECEBE A SESSÃO)
     public TelaPrincipal(ToDoList sistemaLogado) {
         this.sistema = sistemaLogado;
-        
+
         if (!sistema.isUsuarioLogado()) {
             JOptionPane.showMessageDialog(null, "Erro de sessão. Faça login novamente.");
             dispose();
@@ -28,7 +29,7 @@ public class TelaPrincipal extends JFrame {
 
     private void inicializarComponentes() {
         setTitle("ToDo List - Sistema de Tarefas");
-        setSize(800,600);
+        setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
@@ -66,6 +67,17 @@ public class TelaPrincipal extends JFrame {
         configurarBotao(botaoSair, fonteBot, tamanhoBotao);
 
         painelBotoes.add(botaoGerenciar);
+        painelBotoes.add(new JButton("Gerenciador de Eventos") {
+            {
+                setFont(fonteBot);
+                setPreferredSize(tamanhoBotao);
+                addActionListener(e -> {
+                    setContentPane(new TelaGerenciadorEventos(TelaPrincipal.this, sistema));
+                    revalidate();
+                    repaint();
+                });
+            }
+        });
         painelBotoes.add(botaoRelatorios);
         painelBotoes.add(botaoConfig);
         painelBotoes.add(botaoSair);
@@ -75,19 +87,22 @@ public class TelaPrincipal extends JFrame {
         // Ações
         botaoGerenciar.addActionListener(e -> {
             setContentPane(new TelaGerenciadorTarefas(this, sistema));
-            revalidate(); repaint();
+            revalidate();
+            repaint();
         });
 
         botaoRelatorios.addActionListener(e -> {
             setContentPane(new TelaRelatorios(this, sistema));
-            revalidate(); repaint();
+            revalidate();
+            repaint();
         });
 
         botaoConfig.addActionListener(e -> {
             setContentPane(new TelaConfiguracoes(this, sistema));
-            revalidate(); repaint();
+            revalidate();
+            repaint();
         });
-        
+
         botaoSair.addActionListener(e -> {
             sistema.logout();
             new TelaLogin().setVisible(true);
@@ -96,7 +111,7 @@ public class TelaPrincipal extends JFrame {
 
         return painel;
     }
-    
+
     private void configurarBotao(JButton btn, Font font, Dimension dim) {
         btn.setFont(font);
         btn.setPreferredSize(dim);

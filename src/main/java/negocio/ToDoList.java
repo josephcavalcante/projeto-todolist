@@ -11,6 +11,8 @@ import comunicacao.Mensageiro;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Collections;
+import strategies.OrdenacaoPorDataStrategy;
+import strategies.OrdenacaoPorPrioridadeStrategy;
 
 public class ToDoList {
     private ITarefaService serviceTarefas;
@@ -104,6 +106,22 @@ public class ToDoList {
         Usuario usuario = usuarioService.obterUsuario();
         if (usuario != null) {
             return tarefaController.listarCriticas(usuario);
+        }
+        return Collections.emptyList();
+    }
+
+    public List<Tarefa> listarTarefasOrdenadasPorData() {
+        Usuario usuario = usuarioService.obterUsuario();
+        if (usuario != null) {
+            return tarefaController.listarOrdenado(new OrdenacaoPorDataStrategy(), usuario);
+        }
+        return Collections.emptyList();
+    }
+
+    public List<Tarefa> listarTarefasOrdenadasPorPrioridade() {
+        Usuario usuario = usuarioService.obterUsuario();
+        if (usuario != null) {
+            return tarefaController.listarOrdenado(new OrdenacaoPorPrioridadeStrategy(), usuario);
         }
         return Collections.emptyList();
     }

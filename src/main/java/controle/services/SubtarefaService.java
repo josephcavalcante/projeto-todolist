@@ -41,6 +41,7 @@ public class SubtarefaService implements ISubtarefaService {
             Subtarefa novaSub = new Subtarefa(tituloSub.trim(), descricaoSub.trim(), percentual);
             novaSub.setTarefa(tarefaPai);
             repositorio.salvar(novaSub);
+            recalcularMedia(tarefaPai); // Atualiza progresso
             return true;
         } catch (Exception erro) {
             return false;
@@ -58,6 +59,7 @@ public class SubtarefaService implements ISubtarefaService {
             Subtarefa subtarefa = repositorio.buscarPorTitulo(tituloSub, tarefa.getId());
             if (subtarefa != null) {
                 repositorio.remover(subtarefa);
+                recalcularMedia(tarefa); // Atualiza progresso
                 return true;
             }
             return false;
@@ -89,24 +91,21 @@ public class SubtarefaService implements ISubtarefaService {
         return List.of();
     }
 
+    /**
+     * Recalcula a média de conclusão das subtarefas e atualiza a tarefa pai.
+     */
+    private void recalcularMedia(Tarefa tarefa) {
+        List<Subtarefa> subs = repositorio.listarPorTarefaId(tarefa.getId());
+        if (subs.isEmpty()) {
+            servicoTarefas.atualizarPercentual(tarefa.getId(), 0.0);
+            return;
+        }
+        double soma = 0;
+        for (Subtarefa s : subs) {
+            soma += s.getPercentual();
+        }
+        double media = soma / subs.size();
+        servicoTarefas.atualizarPercentual(tarefa.getId(), media);
+    }
+
 }
-
-    
-
-    
-        
-            
-
-        
-        
-
-        
-            
-            
-                
-            
-            
-        
-
-        
-    

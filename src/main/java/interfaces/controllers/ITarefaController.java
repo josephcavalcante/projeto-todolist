@@ -15,8 +15,10 @@ public interface ITarefaController {
     Tarefa buscarTarefa(String titulo);
 
     List<Tarefa> listarTodas(Usuario usuario);
-    
+
     List<Tarefa> listarPorData(LocalDate data, Usuario usuario);
 
     List<Tarefa> listarCriticas(Usuario usuario);
+
+    List<Tarefa> listarOrdenado(interfaces.strategies.IOrdenacaoStrategy estrategia, Usuario usuario);
 }
