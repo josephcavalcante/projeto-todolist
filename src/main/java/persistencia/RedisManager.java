@@ -9,8 +9,6 @@ public class RedisManager {
 
     private RedisManager() {
         try {
-            // Conecta no Redis do Docker na porta padrão 6379
-            // Se der erro aqui, verifique se o container está rodando (docker ps)
             this.pool = new JedisPool("localhost", 6379);
             System.out.println("[REDIS] Conexão iniciada com sucesso!");
         } catch (Exception e) {

@@ -21,9 +21,6 @@ public class Usuario implements Serializable {
     @Column(length = 255)
     private String senha;
 
-    @Transient
-    private List<Tarefa> tarefas; // Cache em memória
-
     public Usuario() {
     }
 
@@ -67,15 +64,5 @@ public class Usuario implements Serializable {
 
     public boolean verificarSenha(String s) {
         return senha != null && senha.equals(s);
-    }
-
-    public List<Tarefa> getTarefas() {
-        if (tarefas == null)
-            tarefas = new ArrayList<>();
-        return tarefas;
-    }
-
-    public void setTarefas(List<Tarefa> tarefas) {
-        this.tarefas = tarefas;
     }
 }

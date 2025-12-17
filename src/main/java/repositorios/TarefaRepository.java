@@ -17,6 +17,7 @@ import modelo.Usuario;
  * seguindo o padrão Repository.
  * </p>
  * * @author Projeto ToDoList
+ * 
  * @version 2.2
  * @since 1.1
  */
@@ -55,7 +56,6 @@ public class TarefaRepository implements ITarefaRepository {
         EntityManager em = getEntityManager();
         try {
             em.getTransaction().begin();
-            // Garante que a tarefa está gerenciada antes de remover
             Tarefa t = em.find(Tarefa.class, tarefa.getId());
             if (t != null) {
                 em.remove(t);
@@ -73,7 +73,7 @@ public class TarefaRepository implements ITarefaRepository {
 
     @Override
     public void atualizar(Tarefa antiga, Tarefa nova) {
-        salvar(nova); // Em JPA, merge resolve a atualização se o ID estiver setado
+        salvar(nova);
     }
 
     @Override
@@ -112,13 +112,10 @@ public class TarefaRepository implements ITarefaRepository {
         }
     }
 
-    // --- CORREÇÃO: Implementação dos métodos que estavam faltando ---
-
     @Override
     public List<Tarefa> listarPorUsuario(Usuario usuario) {
         EntityManager em = getEntityManager();
         try {
-            // Retorna lista vazia se a query não achar nada, em vez de null
             List<Tarefa> lista = em.createQuery("SELECT t FROM Tarefa t WHERE t.usuario = :usuario", Tarefa.class)
                     .setParameter("usuario", usuario)
                     .getResultList();
@@ -134,7 +131,9 @@ public class TarefaRepository implements ITarefaRepository {
     public List<Tarefa> listarPorDataEUsuario(LocalDate data, Usuario usuario) {
         EntityManager em = getEntityManager();
         try {
-            return em.createQuery("SELECT t FROM Tarefa t WHERE t.deadline = :data AND t.usuario = :usuario", Tarefa.class)
+            return em
+                    .createQuery("SELECT t FROM Tarefa t WHERE t.deadline = :data AND t.usuario = :usuario",
+                            Tarefa.class)
                     .setParameter("data", data)
                     .setParameter("usuario", usuario)
                     .getResultList();

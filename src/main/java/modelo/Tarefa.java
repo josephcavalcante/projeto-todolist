@@ -48,9 +48,6 @@ public class Tarefa implements Serializable {
     @Column(name = "prioridade", nullable = false)
     private int prioridade;
 
-    @Transient
-    private List<Subtarefa> subtarefas;
-
     @ManyToOne
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
@@ -59,7 +56,6 @@ public class Tarefa implements Serializable {
      * Construtor padrão para JPA.
      */
     public Tarefa() {
-        this.subtarefas = new ArrayList<>();
     }
 
     /**
@@ -118,13 +114,6 @@ public class Tarefa implements Serializable {
     }
 
     public double getPercentual() {
-        if (!subtarefas.isEmpty()) {
-            double soma = 0;
-            for (Subtarefa s : subtarefas) {
-                soma += s.getPercentual();
-            }
-            return soma / subtarefas.size();
-        }
         return percentual;
     }
 
@@ -146,18 +135,6 @@ public class Tarefa implements Serializable {
 
     public void setPrioridade(int prioridade) {
         this.prioridade = prioridade;
-    }
-
-    public List<Subtarefa> getSubtarefas() {
-        return subtarefas;
-    }
-
-    public void adicionarSubtarefa(Subtarefa subtarefa) {
-        this.subtarefas.add(subtarefa);
-    }
-
-    public void removerSubtarefa(Subtarefa subtarefa) {
-        this.subtarefas.remove(subtarefa);
     }
 
     public Usuario getUsuario() {

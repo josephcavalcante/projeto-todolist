@@ -33,15 +33,14 @@ public class SubtarefaRepositoryMongo implements ISubtarefaRepository {
         Document doc = new Document("titulo", subtarefa.getTitulo())
                 .append("descricao", subtarefa.getDescricao())
                 .append("percentual", subtarefa.getPercentual())
-                .append("tarefaId", subtarefa.getTarefa().getId());
+                .append("tarefaId", subtarefa.getTarefaId());
 
-        // Se já existe (por título e tarefaId), atualiza
-        Document existing = collection.find(Filters.and(
+        Document existe = collection.find(Filters.and(
                 Filters.eq("titulo", subtarefa.getTitulo()),
-                Filters.eq("tarefaId", subtarefa.getTarefa().getId()))).first();
+                Filters.eq("tarefaId", subtarefa.getTarefaId()))).first();
 
-        if (existing != null) {
-            collection.replaceOne(Filters.eq("_id", existing.get("_id")), doc);
+        if (existe != null) {
+            collection.replaceOne(Filters.eq("_id", existe.get("_id")), doc);
         } else {
             collection.insertOne(doc);
         }
@@ -51,7 +50,7 @@ public class SubtarefaRepositoryMongo implements ISubtarefaRepository {
     public void remover(Subtarefa subtarefa) {
         collection.deleteOne(Filters.and(
                 Filters.eq("titulo", subtarefa.getTitulo()),
-                Filters.eq("tarefaId", subtarefa.getTarefa().getId())));
+                Filters.eq("tarefaId", subtarefa.getTarefaId())));
     }
 
     @Override
@@ -62,11 +61,7 @@ public class SubtarefaRepositoryMongo implements ISubtarefaRepository {
                     doc.getString("titulo"),
                     doc.getString("descricao"),
                     doc.getDouble("percentual"));
-            // Precisamos setar a tarefa aqui? Talvez só o ID bastasse
-            // Por enquanto, cria uma Tarefa dummy só com ID para manter a referência
-            Tarefa t = new Tarefa();
-            t.setId(tarefaId);
-            s.setTarefa(t);
+            s.setTarefaId(tarefaId);
             lista.add(s);
         }
         return lista;
@@ -83,9 +78,7 @@ public class SubtarefaRepositoryMongo implements ISubtarefaRepository {
                     doc.getString("titulo"),
                     doc.getString("descricao"),
                     doc.getDouble("percentual"));
-            Tarefa t = new Tarefa();
-            t.setId(tarefaId);
-            s.setTarefa(t);
+            s.setTarefaId(tarefaId);
             return s;
         }
         return null;

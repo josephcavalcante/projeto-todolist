@@ -42,7 +42,7 @@ public class SubtarefaService implements ISubtarefaService {
             }
 
             Subtarefa novaSub = new Subtarefa(tituloSub.trim(), descricaoSub.trim(), percentual);
-            novaSub.setTarefa(tarefaPai);
+            novaSub.setTarefaId(tarefaPai.getId());
             repositorio.salvar(novaSub);
             recalcularMedia(tarefaPai); // Atualiza progresso
             return true;

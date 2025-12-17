@@ -6,12 +6,12 @@ import interfaces.validators.IValidadorTarefa;
 import interfaces.repositories.ITarefaRepository;
 import interfaces.services.ITarefaService;
 import builders.TarefaBuilder;
-import strategies.FiltroPorDataStrategy;
-import strategies.FiltroCriticasStrategy;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.ArrayList;
+
+import interfaces.observer.ISubject;
 
 /**
  * Service responsável pela lógica de negócio das tarefas.
@@ -21,7 +21,7 @@ import java.util.ArrayList;
  * filtros).
  * </p>
  */
-public class TarefaService implements ITarefaService {
+public class TarefaService implements ITarefaService, ISubject {
 
     // O Repositório aqui será, em tempo de execução, o TarefaRepositoryProxy
     private ITarefaRepository repositorio;

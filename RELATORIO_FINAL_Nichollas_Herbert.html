@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório Final - Projeto ToDoList 2.0</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap');
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px;
+            background-color: #fff;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5 {
+            color: #2c3e50;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+
+        h1 {
+            font-size: 2.2em;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 1.8em;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+            margin-top: 2em;
+        }
+
+        h3 {
+            font-size: 1.4em;
+            color: #34495e;
+            margin-top: 1.5em;
+        }
+
+        h4 {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #555;
+            margin-top: 1.2em;
+        }
+
+        h5 {
+            font-size: 1em;
+            font-weight: bold;
+            color: #666;
+            font-style: italic;
+        }
+
+        p {
+            margin-bottom: 1em;
+            text-align: justify;
+        }
+
+        ul {
+            margin-bottom: 1em;
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 0.5em;
+        }
+
+        code {
+            font-family: 'Fira Code', monospace;
+            background-color: #f1f3f5;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #c7254e;
+        }
+
+        pre {
+            background-color: #f6f8fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border: 1px solid #e1e4e8;
+            margin-bottom: 1.5em;
+        }
+
+        pre code {
+            background-color: transparent;
+            color: #24292e;
+            padding: 0;
+            font-size: 0.85em;
+            color: #333;
+        }
+
+        hr {
+            border: 0;
+            height: 1px;
+            background: #eee;
+            margin: 2em 0;
+        }
+
+        strong {
+            font-weight: 600;
+        }
+
+        .header-info {
+            margin-bottom: 2em;
+        }
+
+        .header-info p {
+            margin: 0.2em 0;
+        }
+
+        @media print {
+            body {
+                padding: 0;
+                max-width: 100%;
+            }
+
+            h1 {
+                break-before: page;
+            }
+
+            h1:first-of-type {
+                break-before: auto;
+            }
+
+            pre {
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                break-inside: avoid;
+            }
+
+            h2,
+            h3 {
+                break-after: avoid;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>📄 Relatório Final de Arquitetura e Desenvolvimento: ToDoList 2.0</h1>
+
+    <div class="header-info">
+        <p><strong>Disciplina:</strong> Padrões de Projeto</p>
+        <p><strong>Projeto:</strong> Sistema de Gerenciamento de Tarefas (ToDoList)</p>
+        <p><strong>Data:</strong> 10/12/2025</p>
+        <p><strong>Equipe:</strong> Joseph Nichollas Abreu Cavalcante, Herbert Carvalho dos Santos</p>
+    </div>
+
+    <hr>
+
+    <h2>1. Introdução</h2>
+
+    <p>Este relatório documenta a evolução arquitetural do projeto ToDoList, detalhando a transição de sua versão legada
+        (v1.0) para a atual (v2.0). A análise baseia-se na comparação direta entre o código original (commit
+        <code>fc7ce99</code>) e o estado atual, focando nas decisões de design iniciais, suas consequências negativas e
+        as refatorações aplicadas para garantir escalabilidade e qualidade.
+    </p>
+
+    <hr>
+
+    <h2>2. Decisões de Design "Questionáveis" (Análise do Legado v1.0)</h2>
+
+    <p>Ao revisar o código-fonte da primeira versão entregue (<code>fc7ce99</code>), identificamos padrões que limitavam
+        severamente a evolução do software.</p>
+
+    <h3>❌ 2.1. A Serialização Monolítica (<code>controle.ManipuladorDeTarefas</code>)</h3>
+    <ul>
+        <li><strong>A Decisão:</strong> A classe <code>ManipuladorDeTarefas</code> implementava
+            <code>Serializable</code> e guardava todas as tarefas em uma <code>ArrayList</code> em memória. Para
+            persistir, gravávamos o objeto inteiro.
+        </li>
+        <li><strong>O Código Legado (v1.0):</strong></li>
+    </ul>
+
+    <pre><code>// controle/ManipuladorDeTarefas.java
+public class ManipuladorDeTarefas implements Serializable {
+    private List&lt;Tarefa&gt; listaTarefas;
+
+    public void cadastrarTarefa(String titulo, String descricao, String deadlineStr, int prioridade) throws Exception {
+            try {
+                // conversão DD/MM/AAAA para LocalDate
+                String[] partesData = deadlineStr.split("/");
+                int dia = Integer.parseInt(partesData[0]);
+                int mes = Integer.parseInt(partesData[1]);
+                int ano = Integer.parseInt(partesData[2]);
+                
+                LocalDate prazoFinal = LocalDate.of(ano, mes, dia);
+                LocalDate dataAtual = LocalDate.now();
+                
+                Tarefa novaTarefa = new Tarefa(titulo, descricao, dataAtual, prazoFinal, prioridade);
+                adicionarTarefa(novaTarefa);
+            } catch (Exception erro) {
+                throw new Exception("Data inválida. Use o formato DD/MM/AAAA");
+            }
+        }
+    
+    public List&lt;Tarefa&gt; listarTarefasCriticas() {
+        LocalDate dataAtual = LocalDate.now();
+        return listaTarefas.stream()
+            .filter(tarefa -&gt; tarefa.getDeadline().minusDays(tarefa.getPrioridade()).isBefore(dataAtual))
+            .collect(Collectors.toList());
+    }
+}</code></pre>
+
+    <ul>
+        <li><strong>Por que foi ruim:</strong>
+            <ul>
+                <li><strong>Monólito de Dados:</strong> Se tivéssemos 1 milhão de tarefas, precisávamos carregar 1
+                    milhão de objetos na RAM para editar um único título.</li>
+                <li><strong>Violação de SRP:</strong> A classe sabia gerenciar a lista, filtrar dados e até fazer
+                    parsing de String para Data (<code>DD/MM/AAAA</code>).</li>
+                <li><strong>Fragilidade de Versão:</strong> Como a classe implementava <code>Serializable</code>,
+                    qualquer mudança no código (ex: mudar nome de variável) impedia a leitura dos arquivos salvos
+                    anteriormente.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h3>❌ 2.2. A "God Class" (<code>controle.ToDoList</code>) com Estado Global</h3>
+    <ul>
+        <li><strong>A Decisão:</strong> A classe <code>ToDoList</code> acumulava responsabilidades de Controller, Facade
+            e Persistência. Pior ainda, ela mantinha o estado da aplicação (<code>usuarioAtual</code> e
+            <code>gerenciadorTarefas</code>) em memória.
+        </li>
+        <li><strong>O Código Legado (v1.0):</strong></li>
+    </ul>
+
+    <pre><code>public class ToDoList {
+    private ManipuladorDeTarefas gerenciadorTarefas;
+    private Persistencia salvaDados;
+    private Usuario usuarioAtual;
+    private TarefaService serviceTarefas;
+    private SubtarefaService serviceSubs;
+    private static final String ARQUIVO_DADOS = "todolist.dat"; // arquivo onde salva
+
+    // construtor - inicializa tudo
+    public ToDoList() {
+        this.gerenciadorTarefas = new ManipuladorDeTarefas();
+        this.salvaDados = new Persistencia();
+        this.usuarioAtual = new Usuario("Usuário", "projetopoo00@gmail.com"); // email fixo
+        
+        // tenta carregar dados salvos
+        carregarDados();
+        
+        // cria os services
+        this.serviceTarefas = new TarefaService(gerenciadorTarefas);
+        this.serviceSubs = new SubtarefaService(gerenciadorTarefas, serviceTarefas);
+    }
+
+    // carrega os dados do arquivo
+    private void carregarDados() {
+        try {
+            ManipuladorDeTarefas dadosCarregados = salvaDados.carregarManipulador(ARQUIVO_DADOS);
+            if (dadosCarregados != null) {
+                this.gerenciadorTarefas = dadosCarregados; // substitui o vazio
+                // se tem usuario salvo, usa ele
+                if (dadosCarregados.getUsuario() != null) {
+                    this.usuarioAtual = dadosCarregados.getUsuario();
+                }
+            }
+        } catch (Exception erro) {
+            System.out.println("Arquivo de dados não encontrado. Iniciando com dados vazios.");
+        }
+}</code></pre>
+
+    <ul>
+        <li><strong>Por que foi ruim:</strong>
+            <ul>
+                <li><strong>Acoplamento Temporal e de Sessão:</strong> A instância de<code>ToDoList</code> "sabia" quem
+                    estava
+                    logado. Passar essa instância de uma tela para outra significava carregar todo o estado da sessão
+                    junto. Se o sistema reiniciasse, o login era perdido instantaneamente.</li>
+                <li><strong>Acoplamento por Instanciação Concreta:</strong> A classe violava o princípio de Inversão de
+                    Dependência (DIP) ao instanciar manualmente suas dependências com <code>new</code> (ex: <code>this.salvaDados = new
+                    Persistencia()</code>). Isso impedia a troca de implementações (como substituir a persistência em
+                    arquivo
+                    por banco de dados) sem reescrever a classe principal.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h3>❌ 2.3. Persistência Binária Frágil (<code>persistencia.Persistencia</code>)</h3>
+    <ul>
+        <li><strong>A Decisão:</strong> A classe <code>Persistencia</code> encapsulava a escrita direta de objetos Java
+            em disco.</li>
+        <li><strong>O Código Legado (v1.0):</strong></li>
+    </ul>
+
+    <pre><code>public class Persistencia {
+
+    // gravação do manipulador em arquivo
+    public void salvarManipulador(ManipuladorDeTarefas manipulador, String nomeArquivo) {
+        try (ObjectOutputStream gravador = new ObjectOutputStream(new FileOutputStream(nomeArquivo))) {
+            gravador.writeObject(manipulador);
+        } catch (IOException erro) {
+            erro.printStackTrace();
+        }
+    }
+
+    // carregamento do manipulador do arquivo
+    public ManipuladorDeTarefas carregarManipulador(String nomeArquivo) {
+        try (ObjectInputStream leitor = new ObjectInputStream(new FileInputStream(nomeArquivo))) {
+            return (ManipuladorDeTarefas) leitor.readObject();
+        } catch (IOException | ClassNotFoundException ex) {
+            return null; // arquivo inexistente ou corrompido
+        }
+    }
+} </code></pre>
+
+    <ul>
+        <li><strong>Por que foi ruim:</strong>
+            <ul>
+                <li><strong>Fragilidade Extrema:</strong> Qualquer alteração simples nas classes <code>Tarefa</code> ou
+                    <code>Usuario</code> (como adicionar um campo novo) alterava o <code>serialVersionUID</code>,
+                    causando <code>InvalidClassException</code>. Isso obrigava a limpar o banco de dados a cada deploy.
+                </li>
+                <li><strong>Escalabilidade Zero:</strong> Ler e gravar o arquivo inteiro a cada
+                    <code>adicionarTarefa()</code> causava lentidão exponencial.
+                </li>
+            </ul>
+        </li>
+    </ul>
+
+    <hr>
+
+    <h2>3. Refatorações e Bons Princípios (Clean Core & SOLID)</h2>
+
+    <p>A versão 2.0 foi reescrita focando em desacoplamento e estabilidade.</p>
+
+    <h3>✅ 3.1. Inversão de Controle e Persistência Poliglota</h3>
+    <p>Abandonamos o arquivo binário e adotamos JPA (Hibernate).</p>
+
+    <ul>
+        <li><strong>Refatoração:</strong> Substituímos o método <code>salvarDados()</code> direto na
+            <code>ToDoList</code> por Repositórios injetados.
+        </li>
+        <li><strong>Impacto Positivo:</strong>
+            <ul>
+                <li><strong>Independência de Dados:</strong> O <code>TarefaService</code> agora apenas chama
+                    <code>repositorio.salvar(tarefa)</code>. Ele não sabe se está salvando no Postgres ou no MongoDB
+                    (Subtarefas).
+                </li>
+                <li><strong>Segurança de Dados:</strong> Alterar a classe <code>Tarefa</code> não corrompe o banco, pois
+                    o Hibernate gerencia a migração do Schema.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h4>Código Antes (Legado):</h4>
+    <pre><code>// ToDoList.java v1.0
+public void removerTarefa(Tarefa tarefa) {
+    gerenciadorTarefas.removerTarefa(tarefa);
+    salvarDados(); // Gravação em arquivo forçada
+}</code></pre>
+
+    <h4>Código Depois (v2.0):</h4>
+    <pre><code>// TarefaService.java v2.0
+public boolean excluir(String titulo, Usuario usuario) {
+    Tarefa tarefa = buscarPorTitulo(titulo, usuario);
+    if (tarefa != null) {
+        repositorio.remover(tarefa); // Delega para o banco SQL
+        return true;
+    }
+    return false;
+}</code></pre>
+
+    <h3>✅ 3.2. Segregação de Validação (SRP)</h3>
+    <p>Retiramos regras como "Título não pode ser vazio" de dentro do Controller/View e criamos classes especialistas.
+    </p>
+    <ul>
+        <li><strong>O que fizemos:</strong> Criamos o pacote <code>validadores</code> (<code>ValidadorTarefa</code>,
+            <code>ValidadorEvento</code>).
+        </li>
+        <li><strong>Benefício:</strong> Se a regra de validação mudar (ex: título agora precisa de 5 caracteres),
+            alteramos apenas o <code>Validador</code>, sem risco de quebrar a persistência ou a tela.</li>
+    </ul>
+
+    <h3>✅ 3.3. Centralização da Criação (Simple Factory)</h3>
+    <p>Utilizamos uma Factory para isolar a complexidade de instanciar objetos e suas dependências.</p>
+    <ul>
+        <li><strong>Motivação:</strong> Criar um <code>TarefaService</code> exige instanciar um <code>Validador</code>,
+            um <code>Repository</code> SQL, um <code>Repository</code> Redis (Cache) e um <code>Proxy</code>. Espalhar
+            essa lógica pelo sistema violaria DRY e aumentaria o acoplamento.</li>
+        <li><strong>O Código:</strong></li>
+    </ul>
+    <pre><code>public static ITarefaService criarTarefaService() {
+    // 1. Cria os componentes crus
+    ITarefaRepository sqlRepo = new TarefaRepository();
+    TarefaCacheRepository redisRepo = new TarefaCacheRepository();
+
+    // 2. Envolve o SQL com o Proxy de Cache
+    ITarefaRepository repoComCache = new TarefaRepositoryProxy(sqlRepo, redisRepo);
+
+    IValidadorTarefa validador = new ValidadorTarefa();
+
+    // 3. Entrega o Proxy para o Service (O Service nem sabe que existe cache!)
+    return new TarefaService(repoComCache, validador);
+}</code></pre>
+
+    <h3>✅ 3.4. Segregação de Interface (ISP)</h3>
+    <p>Dividimos interfaces gigantes em menores e específicas.</p>
+    <ul>
+        <li><strong>Exemplo:</strong> Em vez de uma interface <code>ISistema</code> com 50 métodos, temos
+            <code>ITarefaService</code>, <code>ISubtarefaService</code>, <code>IUsuarioService</code>.
+        </li>
+        <li><strong>Ganho:</strong> A classe <code>SubtarefaController</code> só precisa conhecer
+            <code>ISubtarefaService</code>. Ela não tem acesso a métodos de Login ou Eventos, respeitando o princípio do
+            menor privilégio.
+        </li>
+    </ul>
+
+    <hr>
+
+    <h2>4. Aplicação de Padrões de Projeto (GoF)</h2>
+
+    <p>Design Patterns foram aplicados onde havia dor real no desenvolvimento.</p>
+
+    <h3>🧩 4.1. Template Method (Relatórios)</h3>
+
+    <ul>
+        <li><strong>Motivação:</strong> No commit <code>947d12e</code>, o <code>GeradorDeRelatorios</code> duplicava a
+            lógica de abrir/fechar streams para PDF e CSV.</li>
+        <li><strong>Solução:</strong> <code>RelatorioTemplate</code> define o fluxo <code>final gerarRelatorio()</code>.
+        </li>
+    </ul>
+
+    <h4>Código Antes (1.0):</h4>
+    <pre><code>public class GeradorDeRelatorios {
+    
+    // geração de relatório PDF diário
+    public static void gerarRelatorioPDF(List&lt;Tarefa&gt; tarefas, LocalDate data) {
+        Document documentoPDF = new Document();
+        try {
+            // configuração do arquivo PDF
+            PdfWriter.getInstance(documentoPDF, new FileOutputStream("relatorio.pdf"));
+            documentoPDF.open();
+            documentoPDF.add(new Paragraph("Relatório de Tarefas do dia: " + data));
+            documentoPDF.add(new Paragraph(" "));
+
+            // verificação de existência de tarefas
+            if (tarefas.isEmpty()) {
+                documentoPDF.add(new Paragraph("Nenhuma tarefa encontrada para este dia."));
+            } else {
+                // iteração sobre as tarefas
+                for (Tarefa item : tarefas) {
+                    documentoPDF.add(new Paragraph("Título: " + item.getTitulo()));
+                    documentoPDF.add(new Paragraph("Descrição: " + item.getDescricao()));
+                    documentoPDF.add(new Paragraph("Deadline: " + item.getDeadline()));
+                    documentoPDF.add(new Paragraph("Prioridade: " + item.getPrioridade()));
+                    documentoPDF.add(new Paragraph("Percentual: " + item.getPercentual() + "%"));
+                    documentoPDF.add(new Paragraph(" "));
+                }
+            }
+        } catch (DocumentException | IOException erro) {
+            erro.printStackTrace();
+        } finally {
+            documentoPDF.close();
+        }
+    }
+
+    // criação de planilha Excel (formato CSV)
+    public static void gerarRelatorioExcel(List&lt;Tarefa&gt; tarefas, int mes, int ano) {
+        // implementação simples usando CSV
+        try (FileOutputStream arquivoSaida = new FileOutputStream("relatorio_mensal.csv")) {
+            StringBuilder conteudoCSV = new StringBuilder();
+            conteudoCSV.append("Título,Descrição,Deadline,Prioridade,Percentual,Status\n");
+            
+            // processamento de cada tarefa
+            for (Tarefa itemTarefa : tarefas) {
+                String situacao = itemTarefa.getPercentual() >= 100.0 ? "CONCLUÍDA" : "PENDENTE"; // 100.0 explicito
+                conteudoCSV.append(String.format("\"%s\",\"%s\",%s,%d,%.1f,%s\n",
+                    itemTarefa.getTitulo(),
+                    itemTarefa.getDescricao(),
+                    itemTarefa.getDeadline(),
+                    itemTarefa.getPrioridade(),
+                    itemTarefa.getPercentual(),
+                    situacao));
+            }
+            
+            // gravação do conteúdo
+            arquivoSaida.write(conteudoCSV.toString().getBytes("UTF-8"));
+        } catch (IOException erro) {
+            erro.printStackTrace();
+        }
+    }
+} </code></pre>
+
+    <h4>Código Depois (Padrão Aplicado):</h4>
+    <h5>Gerador De Relatorios</h5>
+    <pre><code>public class GeradorDeRelatorios implements IRelatorioService {
+
+    @Override
+    public boolean gerarPDF(List&lt;Tarefa&gt; tarefas, LocalDate data) {
+        RelatorioTemplate relatorio = new RelatorioPDF(data);
+        return relatorio.gerarRelatorio(tarefas, "relatorio.pdf");
+    }</code></pre>
+    <h5>Relatorio Template</h5>
+    <pre><code>public abstract class RelatorioTemplate {
+    public final boolean gerarRelatorio(List&lt;Tarefa&gt; tarefas, String caminhoArquivo) {
+        try {
+            abrirArquivo(caminhoArquivo);
+            escreverCabecalho();
+            if (tarefas.isEmpty()) {
+                escreverCorpoVazio();
+            } else {
+                for (Tarefa tarefa : tarefas) {
+                    escreverTarefa(tarefa);
+                }
+            }
+            escreverRodape();
+            fecharArquivo();
+            System.out.println("Relatório gerado em: " + caminhoArquivo);
+            return true;
+        } catch (Exception e) {
+            System.err.println("Erro ao gerar relatório: " + e.getMessage());
+            tratarErro(e);
+            return false;
+        }
+    }
+
+    // Hooks 
+    protected abstract void abrirArquivo(String caminho) throws Exception;
+
+    protected abstract void escreverCabecalho() throws Exception;
+
+    protected abstract void escreverTarefa(Tarefa tarefa) throws Exception;
+
+    protected abstract void fecharArquivo() throws Exception;
+}</code></pre>
+    <h5>Relatorio PDF</h5>
+    <pre><code>public class RelatorioPDF extends RelatorioTemplate {
+    private Document documentoPDF;
+    private LocalDate dataRelatorio;
+
+    public RelatorioPDF(LocalDate data) {
+        this.dataRelatorio = data;
+    }
+
+    protected void abrirArquivo(String caminho) throws Exception {
+        documentoPDF = new Document();
+        PdfWriter.getInstance(documentoPDF, new FileOutputStream(caminho));
+        documentoPDF.open();
+    }
+
+    protected void escreverCabecalho() throws Exception {
+        documentoPDF.add(new Paragraph("Relatório de Tarefas do dia: " + dataRelatorio));
+        documentoPDF.add(new Paragraph(" ")); // Linha em branco
+    }
+
+    protected void escreverTarefa(Tarefa tarefa) throws Exception {
+        documentoPDF.add(new Paragraph("Título: " + tarefa.getTitulo()));
+        documentoPDF.add(new Paragraph("Descrição: " + tarefa.getDescricao()));
+        documentoPDF.add(new Paragraph("Deadline: " + tarefa.getDeadline()));
+        documentoPDF.add(new Paragraph("Prioridade: " + tarefa.getPrioridade()));
+        documentoPDF.add(new Paragraph("Percentual: " + tarefa.getPercentual() + "%"));
+        documentoPDF.add(new Paragraph("--------------------------------------------------"));
+    }
+
+    protected void fecharArquivo() throws Exception {
+        if (documentoPDF != null) {
+            documentoPDF.close();
+        }
+    }
+}
+</code></pre>
+
+    <hr>
+
+    <h3>🚦 4.2. Strategy (Estratégias de Filtro e Ordenação)</h3>
+
+    <ul>
+        <li><strong>Motivação:</strong> O <code>ManipuladorDeTarefas</code> (v1.0) tinha métodos rígidos como
+            <code>listarTarefasPorData</code> e <code>listarTarefasCriticas</code>. Se quiséssemos um novo filtro,
+            teríamos que modificar a classe principal.
+        </li>
+        <li><strong>Solução:</strong> Interface <code>IFiltroStrategy</code>.</li>
+    </ul>
+
+    <h4>Código Antes (Legado):</h4>
+    <pre><code>public class ManipuladorDeTarefas implements Serializable {
+    // filtragem de tarefas por data específica
+    public List&lt;Tarefa&gt; listarTarefasPorData(LocalDate data) {
+        return listaTarefas.stream()
+                .filter(tarefa -&gt; tarefa.getDeadline().equals(data))
+                .collect(Collectors.toList());
+    }
+}    </code></pre>
+
+    <h4>Código Depois (Strategy):</h4>
+
+    <h5>Interface Filtro :</h5>
+    <pre><code>public interface IFiltroStrategy {
+    List&lt;Tarefa&gt; filtrar(List&lt;Tarefa&gt; tarefas);
+}</code></pre>
+
+    <h5>Filtro por Data :</h5>
+    <pre><code>public class FiltroPorDataStrategy implements IFiltroStrategy {
+    private final LocalDate dataAlvo;
+
+    public FiltroPorDataStrategy(LocalDate dataAlvo) {
+        this.dataAlvo = dataAlvo;
+    }
+
+    public List&lt;Tarefa&gt; filtrar(List&lt;Tarefa&gt; tarefas) {
+        if (dataAlvo == null) {
+            return tarefas; // Se data é null, retorna tudo (ou podia retornar vazio)
+        }
+        return tarefas.stream()
+                .filter(t -&gt; t.getDeadline().equals(dataAlvo))
+                .collect(Collectors.toList());
+    }
+}</code></pre>
+
+    <h5>Facade :</h5>
+    <pre><code>public class ToDoList {
+    public List&lt;Tarefa&gt; listarTarefasPorData(LocalDate data) {
+        Usuario usuario = usuarioController.obterUsuario();
+        if (usuario != null) {
+            return tarefaController.listar(new FiltroPorDataStrategy(data), usuario);
+        }
+        return Collections.emptyList();
+    }
+}</code></pre>
+
+    <h5>Tarefa Service :</h5>
+    <pre><code>public class TarefaService implements ITarefaService {
+    public List&lt;Tarefa&gt; listar(interfaces.strategies.IFiltroStrategy filtro, Usuario usuario) {
+        if (usuario == null) return new ArrayList<>();
+
+        List&lt;Tarefa&gt; todasTarefas = repositorio.listarPorUsuario(usuario);
+
+        if (todasTarefas == null) {
+            todasTarefas = new ArrayList<>();
+        }
+
+        // Aplica o filtro (Strategy) em memória sobre os dados retornados
+        return filtro.filtrar(todasTarefas);
+    }
+}</code></pre>
+
+    <ul>
+        <li><strong>Consequência:</strong> Adicionar um filtro "Por Nome" agora envolve apenas criar uma nova classe,
+            sem risco de quebrar os filtros existentes (OCP).</li>
+    </ul>
+
+    <hr>
+
+    <h3>🏯 4.3. Facade (<code>ToDoList</code> Refatorado)</h3>
+    <ul>
+        <li><strong>Problema:</strong> A classe <code>ToDoList</code>era uma "God Class" clássica: ela fazia tudo
+            (Carregava arquivo, gerenciava usuário, criava objetos, tratava exceções).</li>
+        <li><strong>Solução:</strong> A classe <code>ToDoList</code> agora é uma Fachada Real. Ela não tem regra de
+            negócio, nem estado global, nem persistência direta. Ela apenas delega e organiza o acesso aos subsistemas.
+        </li>
+    </ul>
+
+    <h4>v1.0 (God Class) :</h4>
+    <pre><code>    public class ToDoList {
+        private ManipuladorDeTarefas gerenciadorTarefas;
+        private Persistencia salvaDados;
+        private Usuario usuarioAtual;
+        private TarefaService serviceTarefas;
+        private SubtarefaService serviceSubs;
+        private static final String ARQUIVO_DADOS = "todolist.dat"; // arquivo onde salva
+
+        // construtor - inicializa tudo
+        public ToDoList() {
+            this.gerenciadorTarefas = new ManipuladorDeTarefas();
+            this.salvaDados = new Persistencia();
+            this.usuarioAtual = new Usuario("Usuário", "projetopoo00@gmail.com"); // email fixo
+            
+            // tenta carregar dados salvos
+            carregarDados();
+            
+            // cria os services
+            this.serviceTarefas = new TarefaService(gerenciadorTarefas);
+            this.serviceSubs = new SubtarefaService(gerenciadorTarefas, serviceTarefas);
+        }
+
+        // carrega os dados do arquivo
+        private void carregarDados() {
+            try {
+                ManipuladorDeTarefas dadosCarregados = salvaDados.carregarManipulador(ARQUIVO_DADOS);
+                if (dadosCarregados != null) {
+                    this.gerenciadorTarefas = dadosCarregados; // substitui o vazio
+                    // se tem usuario salvo, usa ele
+                    if (dadosCarregados.getUsuario() != null) {
+                        this.usuarioAtual = dadosCarregados.getUsuario();
+                    }
+                }
+            } catch (Exception erro) {
+                System.out.println("Arquivo de dados não encontrado. Iniciando com dados vazios.");
+            }
+    }
+ </code></pre>
+
+    <h4>v2.0 Facade :</h4>
+    <p>Não tem estado. Apenas encaminha pro <code>controller</code></p>
+    <pre><code>public class ToDoList {
+    public boolean login(String email, String senha) {
+        return usuarioController.login(email, senha);
+    }
+
+    public boolean cadastrarUsuario(String nome, String email, String senha) {
+        return usuarioController.cadastrar(nome, email, senha);
+    }
+
+    public void logout() {
+        usuarioController.logout();
+    }
+
+    public boolean isUsuarioLogado() {
+        return usuarioController.isLogado();
+    }
+
+    public Usuario obterUsuario() {
+        return usuarioController.obterUsuario();
+    }
+ </code></pre>
+
+    <hr>
+
+    <h3>📡 4.4. Observer (Notificações)</h3>
+
+    <ul>
+        <li><strong>Problema:</strong> Para beneficiar a escalabilidade, tarefa como ponto mais importante do app,
+            precisava de uma maneira padronizada e fácil de avisar aos interessados quando uma tarefa é alterada.</li>
+        <li><strong>Solução:</strong> O <code>TarefaService</code> notifica observadores registrados.</li>
+    </ul>
+
+    <h4>Código:</h4>
+    <h5>Interface Observer:</h5>
+    <pre><code>public interface IObserver {
+    void atualizar(Object mensagem);
+}
+</code></pre>
+    <h5>Interface Subject:</h5>
+    <pre><code>public interface ISubject {
+    void adicionarObservador(IObserver observer);
+    void removerObservador(IObserver observer);
+    void notificarObservadores(Object mensagem);
+}
+</code></pre>
+    <h5>Subject Concreto (Tarefa Serice):</h5>
+    <pre><code>public class TarefaService implements ITarefaService, ISubject {
+    private List&lt;interfaces.observer.IObserver&gt; observadores = new ArrayList&lt;&gt;();
+
+    public void adicionarObservador(interfaces.observer.IObserver observer) {
+        observadores.add(observer);
+    }
+    public void removerObservador(interfaces.observer.IObserver observer) {
+        observadores.remove(observer);
+    }
+    public void notificarObservadores(Object mensagem) {
+        for (interfaces.observer.IObserver observer : observadores) {
+            observer.atualizar(mensagem);
+        }
+    }
+    public void atualizarPercentual(Long idTarefa, double novoPercentual) {
+        try {
+            Tarefa tarefa = repositorio.buscarPorId(idTarefa);
+            if (tarefa != null) {
+                tarefa.setPercentual(novoPercentual);
+                repositorio.salvar(tarefa);
+                notificarObservadores("Tarefa atualizada: " + tarefa.getTitulo());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }    
+}
+</code></pre>
+    <h5>Observer Concreto (TelaListarTarefas):</h5>
+    <pre><code>public class TelaListarTarefas extends JPanel implements IObserver {
+    public void removeNotify() {
+        sistema.getTarefaService().removerObservador(this);
+        super.removeNotify();
+    }
+    public void atualizar(Object mensagem) {
+        SwingUtilities.invokeLater(() -&gt; {
+            carregarTarefas(this.dataFiltro);
+        });
+    }
+</code></pre>
+
+    <hr>
+
+    <h3>🛡️ 4.5. Proxy (Cache Transparente)</h3>
+
+    <ul>
+        <li><strong>Problema:</strong> Adicionar cache no Service sujava a regra de negócio com lógica de infraestrutura
+            (Redis).</li>
+        <li><strong>Solução:</strong> O <code>TarefaRepositoryProxy</code> finge ser um repositório comum, mas gerencia
+            o cache, pois envolve o repositório real e intercepta as chamadas. Service nem sabe que existe cache, ele
+            acredita que está falando com o banco de dados.</li>
+    </ul>
+
+    <h4>Código antigo:</h4>
+    <pre><code>public class TarefaService implements ITarefaService {
+    private ITarefaRepository repositorio;
+    private IValidadorTarefa validador;
+    private TarefaCacheRepository cacheRepository;
+
+    public boolean cadastrar(String titulo, String descricao, LocalDate deadline, int prioridade, Usuario usuario) {
+        if (!validador.validarTitulo(titulo)) return false;
+        try {
+            Tarefa novaTarefa = new Tarefa(titulo.trim(), descricao.trim(), LocalDate.now(), deadline, prioridade);
+            novaTarefa.setUsuario(usuario);
+            
+            // 1. Persistência Real (SQL)
+            repositorio.salvar(novaTarefa);
+            
+            // 2. Atualiza Memória RAM (para a tela ver imediatamente)
+            usuario.getTarefas().add(novaTarefa);
+            
+            // 3. Invalida Redis (para forçar recarregamento no próximo login)
+            cacheRepository.invalidarCache(usuario.getEmail());
+            System.out.println("[SYNC] Tarefa criada. Redis invalidado e memória atualizada.");
+            
+            return true;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return false;
+        }
+    }
+}
+</code></pre>
+
+    <h4>Código novo:</h4>
+    <h5>Service Factory:</h5>
+    <pre><code>public class ServiceFactory {
+    public static ITarefaService criarTarefaService() {
+        // 1. Cria os componentes crus
+        ITarefaRepository sqlRepo = new TarefaRepository();
+        TarefaCacheRepository redisRepo = new TarefaCacheRepository();
+
+        // 2. Envolve o SQL com o Proxy de Cache
+        ITarefaRepository repoComCache = new TarefaRepositoryProxy(sqlRepo, redisRepo);
+
+        IValidadorTarefa validador = new ValidadorTarefa();
+
+        // 3. Entrega o Proxy para o Service (O Service nem sabe que existe cache!)
+        return new TarefaService(repoComCache, validador);
+</code></pre>
+    <h5>Tarefa Repository Proxy:</h5>
+    <pre><code>public class TarefaRepositoryProxy implements ITarefaRepository {
+
+    private final ITarefaRepository repositorioReal; // O Banco SQL (TarefaRepository)
+    private final TarefaCacheRepository cache;       // O Cache Redis
+
+    // Injetamos as duas dependências via construtor
+    public TarefaRepositoryProxy(ITarefaRepository real, TarefaCacheRepository cache) {
+        this.repositorioReal = real;
+        this.cache = cache;
+    }
+
+    public List&lt;Tarefa&gt; listarPorUsuario(Usuario usuario) {
+        // 1. Tenta pegar do Cache (Rápido)
+        List&lt;Tarefa&gt; tarefasCache = cache.buscarCache(usuario.getId());
+        
+        if (tarefasCache != null) {
+            System.out.println("[PROXY] Cache HIT - Retornando do Redis.");
+            return tarefasCache;
+        }
+        // 2. Se não achar, pega do Banco Real (Lento)
+        System.out.println("[PROXY] Cache MISS - Buscando no SQL...");
+        List&lt;Tarefa&gt; tarefasSQL = repositorioReal.listarPorUsuario(usuario);
+
+        // 3. Salva no Cache para a próxima vez
+        if (tarefasSQL != null) {
+            cache.salvarCache(usuario.getId(), tarefasSQL);
+        }
+        return tarefasSQL;
+    }
+    public void salvar(Tarefa tarefa) {
+        // Salva no banco real
+        repositorioReal.salvar(tarefa);
+        // Invalida o cache do usuário, pois a lista mudou
+        cache.invalidarCache(tarefa.getUsuario().getId());
+    }
+    public void remover(Tarefa tarefa) {
+        repositorioReal.remover(tarefa);
+        cache.invalidarCache(tarefa.getUsuario().getId());
+    }
+    public void atualizar(Tarefa antiga, Tarefa nova) {
+        repositorioReal.atualizar(antiga, nova);
+        cache.invalidarCache(antiga.getUsuario().getId());
+    }
+}
+</code></pre>
+
+    <h5>Tarefa Service:</h5>
+    <pre><code>public class TarefaService implements ITarefaService, ISubject {
+
+    // O Repositório aqui será, em tempo de execução, o TarefaRepositoryProxy
+    private ITarefaRepository repositorio;
+    private IValidadorTarefa validador;
+
+    public boolean excluir(String titulo, Usuario usuario) {
+        try {
+            // Busca segura
+            Tarefa tarefa = buscarPorTitulo(titulo, usuario);
+            if (tarefa != null) {
+                // O Proxy intercepta, remove do SQL e invalida o cache
+                repositorio.remover(tarefa);
+                return true;
+            }
+            return false;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return false;
+        }
+    }    
+}
+</code></pre>
+
+    <hr>
+
+    <h3>🏗️ 4.6. Builder (Construção Fluente)</h3>
+
+    <ul>
+        <li><strong>Problema:</strong> A entidade <code>Tarefa</code> tinha muitos atributos opcionais, levando a
+            construtores confusos com muitos parâmetros nulos opcionais.</li>
+        <li><strong>Solução:</strong> <code>TarefaBuilder</code> permite criação passo-a-passo, além de construções
+            personalizadas.</li>
+    </ul>
+
+    <h4>Código antigo :</h4>
+    <pre><code>public class TarefaService {
+    // criação de tarefa nova
+    public boolean cadastrar(String titulo, String descricao, LocalDate deadline, int prioridade) {
+        // validação da existência do título
+        if(titulo == null || titulo.trim().equals("")) { // sem espaço no if
+            return false; // título obrigatório
+        }
+        try {
+            // instanciação da tarefa com data atual
+            Tarefa novaTarefa = new Tarefa(titulo.trim(), descricao.trim(), LocalDate.now(), deadline, prioridade);
+        ...}
+    }
+}       
+</code></pre>
+
+    <h4>Código novo:</h4>
+    <h5>Builder:</h5>
+    <pre><code>public class TarefaBuilder {
+    private String titulo;
+    private String descricao;
+    private LocalDate dataCadastro;
+    private LocalDate deadline;
+    private int prioridade;
+    private double percentual;
+
+    public TarefaBuilder() {
+        // Valores padrão
+        this.dataCadastro = LocalDate.now();
+        this.percentual = 0.0;
+        this.prioridade = 1; // Prioridade mínima padrão
+        this.descricao = "";
+    }
+
+    public TarefaBuilder comTitulo(String titulo) {
+        this.titulo = titulo != null ? titulo.trim() : null;
+        return this;
+    }
+
+    public TarefaBuilder comDescricao(String descricao) {
+        this.descricao = descricao != null ? descricao.trim() : "";
+        return this;
+    }
+    ...
+
+    public Tarefa construir() {
+        if (titulo == null || titulo.isEmpty()) {
+            throw new IllegalStateException("Título da tarefa é obrigatório.");
+        }
+        if (deadline == null) {
+            throw new IllegalStateException("Data limite (Deadline) é obrigatória.");
+        }
+        Tarefa tarefa = new Tarefa(titulo, descricao, dataCadastro, deadline, prioridade);
+        tarefa.setPercentual(percentual);
+        return tarefa;
+    }
+}
+</code></pre>
+
+    <h5>Tarefa Service:</h5>
+    <pre><code>public class TarefaService implements ITarefaService, ISubject {
+   public boolean cadastrar(String titulo, String descricao, LocalDate deadline, int prioridade, Usuario usuario) {
+        // 1. Validação preliminar
+        if (!validador.validarTitulo(titulo)) {
+            return false;
+        }
+        try {
+            // 2. Construção do Objeto
+            Tarefa novaTarefa = new TarefaBuilder()
+                    .comTitulo(titulo)
+                    .comDescricao(descricao)
+                    .comPrazo(deadline)
+                    .comPrioridade(prioridade)
+                    .construir();
+             ...
+        }
+   }
+}            
+</code></pre>
+
+    <h3>👑 4.7. Singleton (Instância Única)</h3>
+
+    <ul>
+        <li><strong>Problema:</strong> Criar múltiplas instâncias da <code>EntityManagerFactory</code> do Hibernate
+            consome muita memória e pools de conexão.</li>
+        <li><strong>Solução:</strong> O <code>DatabaseManager</code> garante uma única instância global sendo
+            reaproveitada durante todo o ciclo de vida do app.</li>
+        <li><strong>Código:</strong></li>
+    </ul>
+
+    <pre><code>public class DatabaseManager {
+    private static DatabaseManager instance;
+    private EntityManagerFactory emf;
+
+    private DatabaseManager() {
+        try {
+            this.emf = Persistence.createEntityManagerFactory("todoListPU");
+        } catch (Exception e) {
+            System.err.println("FATAL: Erro ao conectar no Banco SQL (Porta 5433, 5432).");
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static synchronized DatabaseManager getInstance() {
+        if (instance == null)
+            instance = new DatabaseManager();
+        return instance;
+    }
+
+    public EntityManager getEntityManager() {
+        return emf.createEntityManager();
+    }
+
+    public void close() {
+        if (emf != null)
+            emf.close();
+    }
+}
+</code></pre>
+
+    <hr>
+
+    <h2>5. Conclusão</h2>
+
+    <h3>5.1. A Curva de Aprendizado</h3>
+    <p>O projeto foi uma jornada de transformação no nosso entendimento sobre desenvolvimento de software.</p>
+    <p>A análise do código legado (<code>fc7ce99</code>) revela como decisões iniciais e amadoras focadas em "fazer
+        funcionar" criaram um grande débito. A persistência binária, por exemplo, impedia mudanças no modelo, a classe
+        <code>ManipuladorDeTarefas</code> e <code>ToDoList</code> centralizava regras de negócio, persistência e até
+        parsing de strings, tornando impossível a escalabilidade/extensibilidade e testes isolados.
+    </p>
+    <p>A arquitetura final v2.0, com a quebra dessas classes monolíticas em Services e Repositories, transformou o
+        projeto em uma base sólida, testável e pronta para escalar.</p>
+
+    <h3>5.2. O Desafio da Refatoração</h3>
+    <p>Refatorar o sistema foi consideravelmente mais difícil do que escrevê-lo do zero. Desacoplar a persistência
+        binária para injetar o JPA foi um processo doloroso, pois a lógica de UI estava misturada com regras de negócio.
+        Tivemos que "trocar o motor com o carro andando". A maior lição foi: <strong>código mal projetado cobra juros
+            altos</strong>. Cada atalho que foi tomado na v1.0 nos custou horas de depuração na v2.0.</p>
+
+    <h3>5.3. O Resultado</h3>
+    <p>Hoje, temos orgulho do código que produzimos. O sistema não apenas funciona, mas é elegante. A aplicação de
+        padrões não foram apenas para cumprir requisistos, mas resolveu problemas reais que o código tinha, além de
+        permitir a extensibilidade.</p>
+    <p>O aprendizado e o uso de estruturas na prática como <code>Simple Factory</code>, <code>Repository</code> ,
+        <code>Controller</code> e <code>Services</code> podem ser replicadas em qualquer aplicação futura, acredito que
+        demos um passo importante na carreira de programadores, nos tornamos mais capazes de criar sistemas que
+        sobrevivam ao tempo.
+    </p>
+
+</body>
+
+</html>

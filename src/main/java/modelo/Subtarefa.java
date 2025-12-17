@@ -23,7 +23,7 @@ public class Subtarefa implements Serializable {
 
     private double percentualConclusao;
 
-    private Tarefa tarefa;
+    private Long tarefaId;
 
     /**
      * Construtor padrão para JPA.
@@ -74,11 +74,11 @@ public class Subtarefa implements Serializable {
         this.percentualConclusao = percentual;
     }
 
-    public Tarefa getTarefa() {
-        return tarefa;
+    public Long getTarefaId() {
+        return tarefaId;
     }
 
-    public void setTarefa(Tarefa tarefa) {
-        this.tarefa = tarefa;
+    public void setTarefaId(Long tarefaId) {
+        this.tarefaId = tarefaId;
     }
 }

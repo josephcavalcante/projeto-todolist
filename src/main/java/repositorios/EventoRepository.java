@@ -43,7 +43,9 @@ public class EventoRepository implements IEventoRepository {
             }
             em.getTransaction().commit();
         } catch (Exception e) {
-            em.getTransaction().rollback();
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             throw e;
         } finally {
             em.close();
@@ -61,7 +63,9 @@ public class EventoRepository implements IEventoRepository {
             }
             em.getTransaction().commit();
         } catch (Exception e) {
-            em.getTransaction().rollback();
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             throw e;
         } finally {
             em.close();

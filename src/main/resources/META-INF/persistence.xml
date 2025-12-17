@@ -10,18 +10,14 @@
         <class>modelo.Tarefa</class>
         <class>modelo.Usuario</class>
         <class>modelo.Evento</class>
-        <!-- Subtarefa será migrada para Mongo, removida daqui em breve -->
         
         <properties>
-            <!-- Configuração PostgreSQL -->
             <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>
             <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://localhost:5433/todolist_db"/>
             <property name="jakarta.persistence.jdbc.user" value="admin"/>
             <property name="jakarta.persistence.jdbc.password" value="password123"/>
-            
-            <!-- Configurações Hibernate -->
             <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
-            <property name="hibernate.hbm2ddl.auto" value="update"/> <!-- Cria/Atualiza tabelas automaticamente -->
+            <property name="hibernate.hbm2ddl.auto" value="update"/> 
             <property name="hibernate.show_sql" value="true"/>
             <property name="hibernate.format_sql" value="true"/>
         </properties>
